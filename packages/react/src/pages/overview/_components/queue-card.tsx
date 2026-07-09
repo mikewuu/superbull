@@ -9,9 +9,7 @@ interface QueueCardProps {
 
 export function QueueCard(props: QueueCardProps) {
   const { queue } = props;
-  const jobStatuses = queue.statuses.filter(
-    (status): status is JobStatus => status !== 'latest',
-  );
+  const jobStatuses = queue.statuses.filter((status): status is JobStatus => status !== 'latest');
 
   return (
     <Link
@@ -28,9 +26,7 @@ export function QueueCard(props: QueueCardProps) {
           </StatusBadge>
         )}
       </div>
-      {queue.description && (
-        <p className="text-sm text-content-subtle">{queue.description}</p>
-      )}
+      {queue.description && <p className="text-sm text-content-subtle">{queue.description}</p>}
       <div className="flex flex-wrap gap-x-6 gap-y-3">
         {jobStatuses.map((status) => (
           <div key={status} className="flex flex-col gap-0.5">

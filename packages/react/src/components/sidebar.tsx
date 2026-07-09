@@ -43,9 +43,7 @@ export function Sidebar() {
           >
             <ListTodo className="size-4 shrink-0" />
             <span className="min-w-0 flex-1 truncate">{queue.display_name || queue.name}</span>
-            <span className="font-mono text-xs text-content-muted">
-              {sumCounts(queue.counts)}
-            </span>
+            <span className="font-mono text-xs text-content-muted">{sumCounts(queue.counts)}</span>
           </NavLink>
         ))}
       </nav>

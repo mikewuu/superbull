@@ -108,7 +108,9 @@ export async function promoteQueueJobs(queueName: string): Promise<void> {
 
 export async function retryJob(args: { queueName: string; jobId: string }): Promise<void> {
   const { queueName, jobId } = args;
-  await client.put(`api/queues/${encodeURIComponent(queueName)}/${encodeURIComponent(jobId)}/retry`);
+  await client.put(
+    `api/queues/${encodeURIComponent(queueName)}/${encodeURIComponent(jobId)}/retry`,
+  );
 }
 
 export async function promoteJob(args: { queueName: string; jobId: string }): Promise<void> {
@@ -120,7 +122,9 @@ export async function promoteJob(args: { queueName: string; jobId: string }): Pr
 
 export async function removeJob(args: { queueName: string; jobId: string }): Promise<void> {
   const { queueName, jobId } = args;
-  await client.put(`api/queues/${encodeURIComponent(queueName)}/${encodeURIComponent(jobId)}/clean`);
+  await client.put(
+    `api/queues/${encodeURIComponent(queueName)}/${encodeURIComponent(jobId)}/clean`,
+  );
 }
 
 export async function updateJobData(args: {
