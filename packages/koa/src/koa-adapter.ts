@@ -103,8 +103,8 @@ export class KoaAdapter implements IServerAdapter {
     return composeMiddlewares([
       bodyParser(),
       serveUnder(`${mountPath}${statics.route}`, statics.path),
-      router.routes(),
-      router.allowedMethods(),
+      router.routes() as Middleware,
+      router.allowedMethods() as Middleware,
     ]);
   }
 
@@ -121,7 +121,7 @@ export class KoaAdapter implements IServerAdapter {
           uiConfig: this.uiConfig,
           query: ctx.query,
           params: ctx.params ?? {},
-          body: ctx.request.body ?? {},
+          body: (ctx.request.body ?? {}) as Record<string, unknown>,
           headers: ctx.request.headers as Record<string, string | undefined>,
         });
 
