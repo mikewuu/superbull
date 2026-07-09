@@ -1,0 +1,71 @@
+{
+  "name": "@bullwatch/nestjs",
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "NestJS module for the bullwatch BullMQ dashboard",
+  "keywords": [
+    "bullmq",
+    "dashboard",
+    "monitoring",
+    "queue",
+    "redis",
+    "nestjs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikewu/bullwatch.git",
+    "directory": "packages/nestjs"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "@bullwatch/api": "workspace:*",
+    "@nestjs/common": "^10.0.0 || ^11.0.0",
+    "@nestjs/core": "^10.0.0 || ^11.0.0",
+    "reflect-metadata": "^0.1.13 || ^0.2.0",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@bullwatch/test-utils": "workspace:*",
+    "@bullwatch/tsconfig": "workspace:*",
+    "@types/node": "^22.10.2",
+    "bullmq": "^5.34.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "@bullwatch/api": "workspace:*",
+    "@bullwatch/express": "workspace:*",
+    "@nestjs/bullmq": "^11.0.0",
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/platform-express": "^11.0.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  }
+}

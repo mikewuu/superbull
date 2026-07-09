@@ -1,0 +1,11 @@
+{
+  "extends": "@bullwatch/tsconfig/node-library.json",
+  "compilerOptions": {
+    "types": ["node", "bun-types"]
+  },
+  "include": [
+    "src",
+    "tests",
+    "tsup.config.ts"
+  ]
+}

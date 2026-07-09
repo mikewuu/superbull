@@ -1,0 +1,66 @@
+{
+  "name": "@bullwatch/hapi",
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "hapi server adapter for the bullwatch BullMQ dashboard",
+  "keywords": [
+    "bullmq",
+    "dashboard",
+    "monitoring",
+    "queue",
+    "redis",
+    "hapi"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikewu/bullwatch.git",
+    "directory": "packages/hapi"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@bullwatch/api": "workspace:*",
+    "@hapi/inert": "^7.1.0",
+    "@hapi/vision": "^7.0.3",
+    "ejs": "^6.0.1"
+  },
+  "peerDependencies": {
+    "@hapi/hapi": "^21.0.0"
+  },
+  "devDependencies": {
+    "@bullwatch/test-utils": "workspace:*",
+    "@bullwatch/tsconfig": "workspace:*",
+    "@types/node": "^22.10.2",
+    "bullmq": "^5.34.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "@types/ejs": "^3.1.5",
+    "@hapi/hapi": "^21.3.0"
+  }
+}

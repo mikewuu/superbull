@@ -1,0 +1,70 @@
+{
+  "name": "@bullwatch/koa",
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Koa server adapter for the bullwatch BullMQ dashboard",
+  "keywords": [
+    "bullmq",
+    "dashboard",
+    "monitoring",
+    "queue",
+    "redis",
+    "koa"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikewu/bullwatch.git",
+    "directory": "packages/koa"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@bullwatch/api": "workspace:*",
+    "@koa/bodyparser": "^6.1.0",
+    "@koa/router": "^13.1.0",
+    "ejs": "^6.0.1",
+    "koa-static": "^5.0.0"
+  },
+  "peerDependencies": {
+    "koa": "^2.15.0 || ^3.0.0"
+  },
+  "devDependencies": {
+    "@bullwatch/test-utils": "workspace:*",
+    "@bullwatch/tsconfig": "workspace:*",
+    "@types/node": "^22.10.2",
+    "bullmq": "^5.34.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "@types/ejs": "^3.1.5",
+    "@types/koa": "^2.15.0",
+    "@types/koa-static": "^4.0.4",
+    "@types/koa__router": "^12.0.4",
+    "koa": "^2.15.3"
+  }
+}

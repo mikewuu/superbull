@@ -1,0 +1,9 @@
+{
+  "extends": "@bullwatch/tsconfig/node-library.json",
+  "include": [
+    "src",
+    "tests",
+    "tsup.config.ts",
+    "vitest.config.ts"
+  ]
+}
