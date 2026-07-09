@@ -1,0 +1,50 @@
+{
+  "name": "bullwatch",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A restyled, feature-rich dashboard for BullMQ",
+  "packageManager": "pnpm@10.30.3",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "release": "release-it"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@release-it-plugins/workspaces": "^4.2.0",
+    "release-it": "^17.10.0",
+    "tsup": "^8.3.5",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "release-it": {
+    "plugins": {
+      "@release-it-plugins/workspaces": {
+        "skipChecks": true,
+        "publish": false
+      }
+    },
+    "npm": false,
+    "git": {
+      "commit": true,
+      "commitMessage": "release: v${version}",
+      "tag": true,
+      "tagName": "v${version}"
+    },
+    "github": {
+      "release": false
+    },
+    "hooks": {
+      "before:init": ["pnpm lint", "pnpm typecheck"],
+      "after:bump": ["pnpm build", "pnpm test"]
+    }
+  }
+}
