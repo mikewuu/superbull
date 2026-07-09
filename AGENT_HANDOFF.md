@@ -275,14 +275,17 @@ entry (relative assets + injected `basePath`).
 ## Current status (update as you go)
 - [x] Monorepo foundation: root package.json, pnpm-workspace, turbo.json, biome, gitignore,
       LICENSE (MIT+attribution), README, `@bullwatch/tsconfig` presets. **Committed** `29bc21b`.
-- [ ] `@bullwatch/api`: types (port app.d.ts/responses.d.ts, restructured), `BaseAdapter` +
+- [x] `@bullwatch/api`: types (port app.d.ts/responses.d.ts, restructured), `BaseAdapter` +
       `BullMQAdapter`, route table, one handler per file, `createBoard` bootstrap, `formatJob`
-      normalizer. tsup + package.json (bullmq peerDep).
+      normalizer. tsup + package.json (bullmq peerDep). **Committed** `bbe2dc8`.
 - [ ] `@bullwatch/react`: Vite SPA scaffold, base-path-agnostic entry, query client + API client,
       queue list, job list + detail, status pills, filters, metrics charts (dub-styled). Light theme.
-- [ ] `@bullwatch/test-utils`: redis fixtures + contract battery + ui fixture.
-- [ ] `@bullwatch/express` (first adapter) + `tests/contract.spec.ts`.
-- [ ] Port all api handler tests (`packages/api/tests/`).
+- [x] `@bullwatch/test-utils`: redis fixtures + contract battery + ui fixture. **Committed** `b5696b1`.
+      (Ships as TS source; consumed by adapter packages. `@bullwatch/api` tests use a local
+      node:http test adapter instead to keep the workspace graph acyclic.)
+- [x] `@bullwatch/express` (first adapter) + `tests/contract.spec.ts`. **Committed** `40f327a`.
+- [x] Port all api handler tests (`packages/api/tests/`). 13 spec files / 52 tests against real
+      Redis. **Committed** `1397559`.
 - [ ] Remaining adapters: fastify, hono, koa, h3, hapi, elysia, bun, nestjs (+ contract test each).
       These are mechanical — copy the bull-board adapter, adapt to our route registration.
 - [ ] CI workflows: `.github/workflows/{ci.yml,release.yml}` (Redis service, node matrix, bun job,
