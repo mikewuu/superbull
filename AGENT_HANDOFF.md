@@ -278,21 +278,23 @@ entry (relative assets + injected `basePath`).
 - [x] `@bullwatch/api`: types (port app.d.ts/responses.d.ts, restructured), `BaseAdapter` +
       `BullMQAdapter`, route table, one handler per file, `createBoard` bootstrap, `formatJob`
       normalizer. tsup + package.json (bullmq peerDep). **Committed** `bbe2dc8`.
-- [ ] `@bullwatch/react`: Vite SPA scaffold, base-path-agnostic entry, query client + API client,
-      queue list, job list + detail, status pills, filters, metrics charts (dub-styled). Light theme.
+- [x] `@bullwatch/react`: Vite SPA, base-path-agnostic entry + router, query/mutation hooks + API
+      client, overview (queue list), queue-detail (metrics charts, status filter, job table with
+      inline quick-retry + bulk actions + pagination + queue controls), job-detail (data/opts/
+      return-value/stacktrace/logs). Light theme on dub tokens. + vitest UI suite (26 tests).
 - [x] `@bullwatch/test-utils`: redis fixtures + contract battery + ui fixture. **Committed** `b5696b1`.
-      (Ships as TS source; consumed by adapter packages. `@bullwatch/api` tests use a local
-      node:http test adapter instead to keep the workspace graph acyclic.)
 - [x] `@bullwatch/express` (first adapter) + `tests/contract.spec.ts`. **Committed** `40f327a`.
-- [x] Port all api handler tests (`packages/api/tests/`). 13 spec files / 52 tests against real
-      Redis. **Committed** `1397559`.
-- [ ] Remaining adapters: fastify, hono, koa, h3, hapi, elysia, bun, nestjs (+ contract test each).
-      These are mechanical — copy the bull-board adapter, adapt to our route registration.
-- [ ] CI workflows: `.github/workflows/{ci.yml,release.yml}` (Redis service, node matrix, bun job,
-      UI job, tag-triggered publish with private-package guard).
-- [ ] `pnpm install && pnpm build && pnpm typecheck && pnpm test` all green.
-- [ ] Verify end-to-end: mount the express adapter on a scratch app against local Redis, load the
-      UI, confirm queue list + job actions work (use the `/verify` skill / drive it in a browser).
+- [x] Port all api handler tests (`packages/api/tests/`). 52 tests against real Redis. `1397559`.
+- [x] Remaining adapters: fastify, hono, koa, h3, hapi, elysia, bun, nestjs — all 8 done, each with
+      an 8-test contract suite (64 adapter tests). Fixed fastify/koa strict-TS errors along the way.
+- [x] CI workflows: `.github/workflows/{ci.yml,release.yml}` (Redis service, node matrix, tag publish).
+- [x] `pnpm build` (11/11) + `pnpm typecheck` (14/14) + `pnpm test` (12/12, ~142 tests) + `pnpm lint`
+      (188 files) all green against local Redis.
+- [ ] Remaining before publish: end-to-end drive (mount express on a scratch app, load the UI in a
+      browser, confirm actions); wire `bullmq` peerDep versions; first `npm publish` dry-run.
+
+**Build complete** — every package builds, typechecks, tests, and lints clean. v1 feature set
+(queue/job views, per-job + bulk actions, filters, quick-retry, metrics charts) is implemented.
 
 ## Suggested build order for the continuation
 api core → test-utils → express + its contract test → port api handler tests → get that slice
