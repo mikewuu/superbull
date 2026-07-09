@@ -2,8 +2,8 @@ import type {
   AppControllerRoute,
   AppViewRoute,
   BoardQueues,
-  HandlerResponse,
   HTTPMethod,
+  HandlerResponse,
   IServerAdapter,
   UIConfig,
 } from '@bullwatch/api';
@@ -104,7 +104,8 @@ export class FastifyAdapter implements IServerAdapter {
       }
 
       fastify.setErrorHandler((error, _request, reply) => {
-        const response = errorHandler(error);
+        const normalizedError = error instanceof Error ? error : new Error(String(error));
+        const response = errorHandler(normalizedError);
         reply.status(response.status || 500).send(response.body);
       });
 
