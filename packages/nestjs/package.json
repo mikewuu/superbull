@@ -18,21 +18,12 @@
       }
     }
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "publishConfig": {
     "access": "public"
   },
   "description": "NestJS module for the bullwatch BullMQ dashboard",
-  "keywords": [
-    "bullmq",
-    "dashboard",
-    "monitoring",
-    "queue",
-    "redis",
-    "nestjs"
-  ],
+  "keywords": ["bullmq", "dashboard", "monitoring", "queue", "redis", "nestjs"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mikewu/bullwatch.git",
@@ -46,10 +37,16 @@
   "dependencies": {},
   "peerDependencies": {
     "@bullwatch/api": "workspace:*",
+    "@nestjs/bullmq": "^10.0.0 || ^11.0.0",
     "@nestjs/common": "^10.0.0 || ^11.0.0",
     "@nestjs/core": "^10.0.0 || ^11.0.0",
     "reflect-metadata": "^0.1.13 || ^0.2.0",
     "rxjs": "^7.8.1"
+  },
+  "peerDependenciesMeta": {
+    "@nestjs/bullmq": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@bullwatch/test-utils": "workspace:*",
