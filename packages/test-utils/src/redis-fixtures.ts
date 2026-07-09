@@ -1,0 +1,33 @@
+import { BullMQAdapter } from '@bullwatch/api';
+import { Queue } from 'bullmq';
+
+export const connection = {
+  host: process.env.REDIS_HOST || 'localhost',
+  port: Number(process.env.REDIS_PORT || 6379),
+};
+
+export interface SeededQueue {
+  name: string;
+  queue: Queue;
+  adapter: BullMQAdapter;
+  close: () => Promise<void>;
+}
+
+let counter = 0;
+
+export async function seedQueue(prefix = 'contract'): Promise<SeededQueue> {
+  const name = `${prefix}-${process.pid}-${counter++}`;
+  const queue = new Queue(name, { connection });
+  await queue.waitUntilReady();
+  await queue.add('seed-job', { hello: 'world' });
+
+  return {
+    name,
+    queue,
+    adapter: new BullMQAdapter(queue),
+    close: async () => {
+      await queue.obliterate({ force: true }).catch(() => undefined);
+      await queue.close();
+    },
+  };
+}

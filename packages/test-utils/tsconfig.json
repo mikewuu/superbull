@@ -1,0 +1,4 @@
+{
+  "extends": "@bullwatch/tsconfig/node-library.json",
+  "include": ["src"]
+}
