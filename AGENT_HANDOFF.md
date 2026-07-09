@@ -188,14 +188,87 @@ Filters map to `Queue.getJobs(statuses, start, end)` + client/server search on j
 
 ---
 
-## UI / light theme spec (from dub study)
-> **PLACEHOLDER — being filled by the dub study agent.** If this still says PLACEHOLDER when you
-> reach the UI, run an Explore agent over `/Users/mike/Code/dub` for: `@dub/ui/charts` config
-> (chart lib, colors, gradients, axes, tooltips), `packages/tailwind-config` (light palette,
-> gray scale, radius, shadows, font), a representative analytics dashboard page (layout shell,
-> card styling), and the data-table pattern (@tanstack/react-table? row actions, pagination).
-> Then: light theme, white/neutral surfaces, subtle borders + soft shadows, dub's chart aesthetic
-> for the completed/failed throughput charts, status pills color-coded per job state.
+## UI / light theme spec (from dub study — `/Users/mike/Code/dub`)
+
+**Light theme, copy dub's system.** Study these files directly when building the UI.
+
+### Design tokens — copy dub's semantic system verbatim
+Source: `dub/packages/tailwind-config/{themes.css,tailwind.config.ts}` (Tailwind **v3.4**, not v4 —
+use v3 for the UI package to reuse this directly). `themes.css` defines RGB-triplet CSS vars toggled
+by `.light`/`.dark`, consumed as `rgb(var(--token) / <alpha-value>)`. Copy the token block; it maps
+1:1 onto job states. Light values:
+- Surfaces: `--bg-default:255 255 255` (white), `--bg-muted:250 250 250`, `--bg-subtle:245 245 245`,
+  `--bg-emphasis:229 229 229`, `--bg-inverted:23 23 23`.
+- State bg: `--bg-info:219 234 254`(blue-100), `--bg-success:220 252 231`(green-100),
+  `--bg-attention:255 237 213`(orange-100), `--bg-warning:254 249 195`(yellow-100),
+  `--bg-error:254 226 226`(red-100).
+- Borders: `--border-subtle:229 229 229`, `--border-default:212 212 212`, `--border-emphasis:163…`.
+- Content: `--content-default:64 64 64`, `--content-emphasis:23 23 23`, `--content-subtle:115…`,
+  `--content-muted:163…`; state text `--content-{info:37 99 235,success:22 163 74,
+  attention:234 88 12,warning:202 138 4,error:220 38 38}`.
+- Classes produced: `bg-bg-*`, `border-border-*`, `text-content-*`. Radius: stock Tailwind
+  (`rounded-md/lg/xl`). Fonts: **Inter** body, **Geist Mono** for IDs/durations/data (skip Satoshi
+  display font — use Inter for headings too). One shadow: `drop-shadow-[0_2px_4px_#222A350d]`.
+
+### Job-state → StatusBadge mapping (copy `dub/packages/ui/src/status-badge.tsx`)
+Pill: `rounded-md px-2 py-1 text-xs font-medium gap-1.5 max-w-fit`, `bg-bg-*`+`text-content-*` so it's
+theme-correct free. Map: `completed→success`(green,CircleCheck), `failed→error`(red,CircleWarning),
+`active→new/info`(blue,CircleHalfDottedCheck), `delayed→warning`(yellow), `waiting→neutral`
+(`bg-neutral-500/[.15] text-neutral-600`) or `pending`(orange), `paused→neutral`,
+`waiting-children→neutral`, `prioritized→new`.
+
+### Data table (copy `dub/packages/ui/src/table/table.tsx` + `apps/web/ui/analytics/events/events-table.tsx`)
+Built on **@tanstack/react-table v8** (`manualPagination`/`manualSorting`). Container:
+`rounded-xl border border-border-subtle bg-bg-default`. Cells: `py-2.5 text-sm leading-6 border-l
+border-b border-border-subtle`, hover row `group-hover/row:bg-bg-muted`, selected `bg-blue-50`.
+Sticky footer pager "Viewing 1–50 of N" + secondary Prev/Next `h-7` buttons. Use `columnPinning:{right:
+["menu"]}` for a pinned row-actions column. This is the **jobs table** — sortable Created/Processed
+columns, `menu` column with Retry/Remove/Promote/View-logs.
+
+### Row action menu (copy `apps/web/ui/analytics/events/row-menu-button.tsx`)
+`cmdk` `Command`/`Command.Item` inside a Radix `Popover`, triggered by
+`Button variant="outline" size-8 rounded-lg` with a Dots icon. Reuse for per-job actions.
+
+### Faceted filters (copy `dub/packages/ui/src/filter/*`)
+`cmdk` inside a `Popover`, two-pane (pick key → pick value), `f` keyboard shortcut, applied filters as
+removable pills. **Filter state lives entirely in URL search params** (like trigger.dev) → shareable.
+Maps to `Queue.getJobs(statuses,start,end)` + name/id search.
+
+### Charts — **visx + Framer Motion** (copy `dub/packages/ui/src/charts/*`), NOT Recharts
+`@dub/ui/charts` is custom on `@visx/*`. Composition: `<TimeSeriesChart data series tooltipContent>
+<Areas/><XAxis/><YAxis showGridLines/></TimeSeriesChart>`. Key tricks:
+- Series get a Tailwind **text-color** class (`colorClassName:"text-blue-500"`); SVG paths use
+  `fill/stroke="currentColor"` → theme-free color. Use blue=active, green=completed, red=failed,
+  yellow=delayed.
+- Area = `AreaClosed` masked by a `LinearGradient` (`fromOpacity:0.2→0`) with `motion.path` animating
+  `d`; line on top `stroke=currentColor strokeWidth={2} strokeOpacity={0.8}`.
+- Axes understated: `stroke="#00000026"` (`stroke-black/15`), tick text `#00000066` (`fill-black/40`),
+  dashed gridlines `strokeDasharray={5}`. Y-axis line transparent (labels only).
+- Tooltip: `rounded-lg border border-border-default bg-bg-default px-4 py-2 shadow-sm`; legend swatch =
+  2×2 `rounded-sm bg-current opacity-50 shadow-[inset_0_0_0_1px_#0003]`.
+- Use for queue **throughput** (`getMetrics('completed'|'failed')` per-minute buckets) + stat-tile
+  sparklines (`mini-area-chart.tsx`).
+
+### Layout shell (copy `dub/apps/web/ui/layout/*`)
+`bg-white` app. Sidebar `sidebar-nav.tsx`: icon-rail (64px) + expandable panel (`rounded-xl bg-neutral-100`),
+active item `bg-blue-100/50 text-blue-600`. Page: `PageContentHeader` top bar `h-16` with bottom
+`border-border-subtle` hairline, title `text-lg font-semibold text-content-emphasis`, optional right-aligned
+`controls`. `PageWidthWrapper` = `mx-auto w-full max-w-screen-xl px-3 lg:px-6`. Cards/panels: `bg-white
+border border-neutral-200 rounded-xl` (sometimes `shadow-sm`), **`gap-5` between all dashboard cards**,
+secondary panels in `grid md:grid-cols-2 gap-5`. Chart card: white box, `border-neutral-200`, `rounded-xl`,
+generous `p-10` desktop padding, tab strip attached on top.
+
+### Buttons (copy `dub/packages/ui/src/button.tsx`)
+CVA, base `h-10 rounded-lg border px-3 text-sm gap-2`. Variants: primary(black), secondary(subtle border,
+white), outline, success(blue), danger(red), danger-outline. Props: `text,loading,icon,shortcut,right,
+disabledTooltip`.
+
+### Deps for `@bullwatch/react`
+react 19, react-dom, react-router 7 (library mode — `<BrowserRouter>`/`<Routes>`), @tanstack/react-query 5,
+@tanstack/react-table 8, @visx/* (shape,scale,axis,group,gradient,responsive,tooltip), motion (framer),
+cmdk, @radix-ui/react-{popover,tooltip,dialog}, class-variance-authority, clsx, tailwind-merge (→ `cn()`),
+lucide-react, date-fns, axios, tailwindcss@3.4 + @tailwindcss/forms. Build with **Vite**. Base-path agnostic
+entry (relative assets + injected `basePath`).
 
 ---
 
