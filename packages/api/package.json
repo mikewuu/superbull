@@ -38,7 +38,13 @@
     "zod": "^3.24.1"
   },
   "peerDependencies": {
+    "@bullwatch/react": "workspace:*",
     "bullmq": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@bullwatch/react": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@bullwatch/tsconfig": "workspace:*",
