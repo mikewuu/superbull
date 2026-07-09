@@ -18,21 +18,12 @@
       }
     }
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "publishConfig": {
     "access": "public"
   },
   "description": "Bun server adapter for the bullwatch BullMQ dashboard",
-  "keywords": [
-    "bullmq",
-    "dashboard",
-    "monitoring",
-    "queue",
-    "redis",
-    "bun"
-  ],
+  "keywords": ["bullmq", "dashboard", "monitoring", "queue", "redis", "bun"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mikewu/bullwatch.git",

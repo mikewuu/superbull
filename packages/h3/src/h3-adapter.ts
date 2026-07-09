@@ -10,13 +10,13 @@ import type {
 } from '@bullwatch/api';
 import ejs from 'ejs';
 import {
+  type Router,
   createRouter,
   eventHandler,
   getHeaders,
   getQuery,
   getRouterParams,
   readBody,
-  type Router,
   sendNoContent,
   serveStatic,
   setResponseStatus,

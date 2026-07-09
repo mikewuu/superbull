@@ -18,21 +18,12 @@
       }
     }
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "publishConfig": {
     "access": "public"
   },
   "description": "hapi server adapter for the bullwatch BullMQ dashboard",
-  "keywords": [
-    "bullmq",
-    "dashboard",
-    "monitoring",
-    "queue",
-    "redis",
-    "hapi"
-  ],
+  "keywords": ["bullmq", "dashboard", "monitoring", "queue", "redis", "hapi"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mikewu/bullwatch.git",

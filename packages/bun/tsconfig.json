@@ -3,9 +3,5 @@
   "compilerOptions": {
     "types": ["node", "bun-types"]
   },
-  "include": [
-    "src",
-    "tests",
-    "tsup.config.ts"
-  ]
+  "include": ["src", "tests", "tsup.config.ts"]
 }

@@ -18,21 +18,12 @@
       }
     }
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "publishConfig": {
     "access": "public"
   },
   "description": "Elysia server adapter for the bullwatch BullMQ dashboard",
-  "keywords": [
-    "bullmq",
-    "dashboard",
-    "monitoring",
-    "queue",
-    "redis",
-    "elysia"
-  ],
+  "keywords": ["bullmq", "dashboard", "monitoring", "queue", "redis", "elysia"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mikewu/bullwatch.git",

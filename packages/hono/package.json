@@ -18,21 +18,12 @@
       }
     }
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "publishConfig": {
     "access": "public"
   },
   "description": "Hono server adapter for the bullwatch BullMQ dashboard",
-  "keywords": [
-    "bullmq",
-    "dashboard",
-    "monitoring",
-    "queue",
-    "redis",
-    "hono"
-  ],
+  "keywords": ["bullmq", "dashboard", "monitoring", "queue", "redis", "hono"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mikewu/bullwatch.git",

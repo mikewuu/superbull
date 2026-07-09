@@ -133,7 +133,9 @@ export class HapiAdapter implements IServerAdapter {
                 }
                 return h.response(response.body).code(response.status || 200);
               } catch (error) {
-                const response = errorHandler(error instanceof Error ? error : new Error(String(error)));
+                const response = errorHandler(
+                  error instanceof Error ? error : new Error(String(error)),
+                );
                 return h.response(response.body).code(response.status || 500);
               }
             },
