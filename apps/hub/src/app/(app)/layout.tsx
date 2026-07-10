@@ -2,6 +2,7 @@ import { Activity } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { NavLinks } from './_components/nav-links';
+import { SidebarFooter } from './_components/sidebar-footer';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -22,6 +23,7 @@ export default function AppLayout(props: AppLayoutProps) {
           </span>
         </Link>
         <NavLinks />
+        <SidebarFooter />
       </aside>
       <main className="min-w-0 flex-1 overflow-y-auto bg-bg-default">{children}</main>
     </div>
