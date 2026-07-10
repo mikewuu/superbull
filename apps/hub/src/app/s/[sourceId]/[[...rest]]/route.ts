@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { renderSpaEntry } from '../../../../lib/forwarding/render-spa-entry';
 import { findSourceById } from '../../../../lib/sources/find-source-by-id';
 
-const CONTENT_TYPES: Record<string, string> = {
+const contentTypes: Record<string, string> = {
   '.js': 'application/javascript',
   '.css': 'text/css',
   '.svg': 'image/svg+xml',
@@ -70,7 +70,7 @@ async function serveStaticAsset(distDir: string, segments: string[]): Promise<Ne
     return NextResponse.json({ error: 'not found' }, { status: 404 });
   }
 
-  const contentType = CONTENT_TYPES[path.extname(resolved)] ?? 'application/octet-stream';
+  const contentType = contentTypes[path.extname(resolved)] ?? 'application/octet-stream';
   return new NextResponse(new Uint8Array(file), {
     status: 200,
     headers: {

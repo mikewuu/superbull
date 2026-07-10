@@ -16,8 +16,8 @@ function guardSourceId(ctx: QueryCtx, rawSourceId: string): Id<'proxySources'> {
   return sourceId;
 }
 
-const MAX_EVENTS_PER_QUERY = 10000;
-const MAX_BUCKETS = 3000;
+const maxEventsPerQuery = 10000;
+const maxBuckets = 3000;
 
 async function queryEvents(
   ctx: QueryCtx,
@@ -32,18 +32,18 @@ async function queryEvents(
       .withIndex('by_source_queue_ts', (q) =>
         q.eq('sourceId', sourceId).eq('queueName', queueName).gte('ts', fromTs).lte('ts', toTs),
       )
-      .take(MAX_EVENTS_PER_QUERY);
+      .take(maxEventsPerQuery);
   }
   return await ctx.db
     .query('ingestEvents')
     .withIndex('by_source_ts', (q) => q.eq('sourceId', sourceId).gte('ts', fromTs).lte('ts', toTs))
-    .take(MAX_EVENTS_PER_QUERY);
+    .take(maxEventsPerQuery);
 }
 
 function guardBucketMs(fromTs: number, toTs: number, bucketMinutes: number): number {
   const bucketMs = bucketMinutes * 60_000;
   const bucketCount = Math.floor((toTs - fromTs) / bucketMs) + 1;
-  if (bucketCount > MAX_BUCKETS) {
+  if (bucketCount > maxBuckets) {
     throw new Error('bucketMinutes too small for the requested range');
   }
   return bucketMs;
