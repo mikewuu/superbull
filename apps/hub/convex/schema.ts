@@ -73,7 +73,6 @@ export default defineSchema({
     state: v.union(v.literal('firing'), v.literal('resolved')),
     lastFiredTs: v.optional(v.number()),
     lastNotifiedTs: v.optional(v.number()),
-    dedupeKey: v.optional(v.string()),
   }).index('by_rule', ['ruleId']),
 
   savedDashboards: defineTable({
