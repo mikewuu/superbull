@@ -7,12 +7,22 @@ interface InsightsStatsProps {
 
 export function InsightsStats(props: InsightsStatsProps) {
   const { queueName } = props;
-  const { data: stats } = useQueueStats(queueName);
+  const { data: stats, isPending } = useQueueStats(queueName);
+
+  if (isPending) {
+    return (
+      <div className="px-4 py-3" data-testid="insights-stats">
+        <h3 className="mb-2 text-xs font-medium text-content-subtle">Stats</h3>
+        <Skeleton className="h-16" />
+      </div>
+    );
+  }
 
   if (!stats) {
     return (
-      <div className="px-4 py-3">
-        <Skeleton className="h-16" />
+      <div className="px-4 py-3" data-testid="insights-stats">
+        <h3 className="mb-2 text-xs font-medium text-content-subtle">Stats</h3>
+        <p className="text-xs text-content-muted">No stats data yet.</p>
       </div>
     );
   }

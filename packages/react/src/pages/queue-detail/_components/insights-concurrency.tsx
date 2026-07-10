@@ -1,4 +1,4 @@
-import { Button } from '@superbull/ui';
+import { Button, Skeleton } from '@superbull/ui';
 import { useState } from 'react';
 import { useQueueConcurrency } from '../../../hooks/use-queue-concurrency';
 import { useSetConcurrency } from '../../../hooks/use-set-concurrency';
@@ -9,7 +9,7 @@ interface InsightsConcurrencyProps {
 
 export function InsightsConcurrency(props: InsightsConcurrencyProps) {
   const { queueName } = props;
-  const { data: concurrency } = useQueueConcurrency(queueName);
+  const { data: concurrency, isPending } = useQueueConcurrency(queueName);
   const setConcurrency = useSetConcurrency();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
@@ -29,6 +29,15 @@ export function InsightsConcurrency(props: InsightsConcurrencyProps) {
       { onSuccess: () => setEditing(false) },
     );
   };
+
+  if (isPending) {
+    return (
+      <div className="px-4 py-3" data-testid="insights-concurrency">
+        <h3 className="mb-2 text-xs font-medium text-content-subtle">Global concurrency</h3>
+        <Skeleton className="h-7 w-20" />
+      </div>
+    );
+  }
 
   return (
     <div

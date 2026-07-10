@@ -9,20 +9,14 @@ interface InsightsWorkersProps {
 
 export function InsightsWorkers(props: InsightsWorkersProps) {
   const { queueName } = props;
-  const { data: workers } = useQueueWorkers(queueName);
-
-  if (!workers) {
-    return (
-      <div className="px-4 py-3">
-        <Skeleton className="h-10" />
-      </div>
-    );
-  }
+  const { data: workers, isPending } = useQueueWorkers(queueName);
 
   return (
     <div className="px-4 py-3" data-testid="insights-workers">
       <h3 className="mb-2 text-xs font-medium text-content-subtle">Workers</h3>
-      {workers.length === 0 ? (
+      {isPending ? (
+        <Skeleton className="h-10" />
+      ) : !workers || workers.length === 0 ? (
         <div className="rounded-lg bg-bg-error/40">
           <EmptyState
             icon={UserX}
