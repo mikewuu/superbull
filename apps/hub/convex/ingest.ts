@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
+import { upsertErrorGroup } from './errors';
 
 function guardInternalToken(internalToken: string): void {
   if (internalToken !== process.env.CONVEX_INTERNAL_TOKEN) {
@@ -48,6 +49,17 @@ export const record = mutation({
       }
       await ctx.db.insert('ingestEvents', { sourceId, ...event });
       accepted++;
+
+      if (event.type === 'job.failed' && event.failedReason) {
+        await upsertErrorGroup(ctx, {
+          sourceId,
+          queueName: event.queueName,
+          jobName: event.jobName,
+          jobId: event.jobId,
+          message: event.failedReason,
+          ts: event.ts,
+        });
+      }
     }
 
     return { accepted, deduped };
