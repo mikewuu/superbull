@@ -10,7 +10,7 @@ export function Sidebar() {
   const { data: redisStats } = useRedisStats();
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col gap-3 bg-bg-default p-3">
+    <aside className="flex w-60 shrink-0 flex-col gap-3 border-r border-border-subtle bg-bg-default p-3">
       <div className="flex h-10 items-center gap-2.5 px-2">
         <span className="flex size-7 items-center justify-center rounded-lg bg-bg-inverted">
           <Activity className="size-4 text-content-inverted" />
@@ -20,14 +20,14 @@ export function Sidebar() {
         </span>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto rounded-lg bg-bg-muted p-2">
+      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto">
         <NavLink
           to="/"
           end
           className={({ isActive }) =>
             cn(
-              'flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-2sm text-content-subtle transition-colors duration-150 ease-snout hover:bg-bg-subtle',
-              { 'bg-white font-medium text-content-emphasis shadow-sm hover:bg-white': isActive },
+              'flex h-8 items-center gap-2.5 rounded-md px-2.5 text-2sm text-content-subtle transition-colors duration-150 ease-snout hover:bg-bg-subtle',
+              { 'bg-blue-50 font-medium text-blue-600 hover:bg-blue-50': isActive },
             )
           }
         >
@@ -76,31 +76,36 @@ function QueueLink(props: { queue: AppQueue }) {
       to={`/queue/${encodeURIComponent(queue.name)}`}
       className={({ isActive }) =>
         cn(
-          'flex h-8 items-center gap-2 rounded-lg px-2.5 text-2sm text-content-subtle transition-colors duration-150 ease-snout hover:bg-bg-subtle',
-          { 'bg-white font-medium text-content-emphasis shadow-sm hover:bg-white': isActive },
+          'flex h-8 items-center gap-2 rounded-md px-2.5 text-2sm text-content-subtle transition-colors duration-150 ease-snout hover:bg-bg-subtle',
+          { 'bg-blue-50 font-medium text-blue-600 hover:bg-blue-50': isActive },
         )
       }
     >
-      <span className="flex size-4 shrink-0 items-center justify-center">
-        <span
-          className={cn('size-1.5 rounded-full', {
-            'bg-red-500': failedCount > 0,
-            'bg-candy-green': failedCount === 0,
-          })}
-        />
-      </span>
-      <span className="min-w-0 flex-1 truncate">{queue.display_name || queue.name}</span>
-      <span
-        className={cn(
-          'flex min-w-6 items-center justify-center rounded-md px-1.5 py-0.5 font-mono text-[11px]',
-          {
-            'bg-bg-error text-content-error': failedCount > 0,
-            'bg-bg-subtle text-content-muted': failedCount === 0,
-          },
-        )}
-      >
-        {failedCount > 0 ? failedCount : backlogCount}
-      </span>
+      {({ isActive }) => (
+        <>
+          <span className="flex size-4 shrink-0 items-center justify-center">
+            <span
+              className={cn('size-1.5 rounded-full', {
+                'bg-blue-600': isActive,
+                'bg-red-500': !isActive && failedCount > 0,
+                'bg-candy-green': !isActive && failedCount === 0,
+              })}
+            />
+          </span>
+          <span className="min-w-0 flex-1 truncate">{queue.display_name || queue.name}</span>
+          <span
+            className={cn(
+              'flex min-w-6 items-center justify-center rounded-md px-1.5 py-0.5 font-mono text-[11px] tabular-nums',
+              {
+                'bg-bg-error text-content-error': failedCount > 0,
+                'bg-bg-subtle text-content-muted': failedCount === 0,
+              },
+            )}
+          >
+            {failedCount > 0 ? failedCount : backlogCount}
+          </span>
+        </>
+      )}
     </NavLink>
   );
 }

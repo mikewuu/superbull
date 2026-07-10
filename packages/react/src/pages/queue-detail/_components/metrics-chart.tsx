@@ -1,3 +1,4 @@
+import { curveMonotoneX } from '@visx/curve';
 import { LinearGradient } from '@visx/gradient';
 import { ParentSize } from '@visx/responsive';
 import { scaleLinear } from '@visx/scale';
@@ -18,10 +19,7 @@ export function MetricsChart(props: MetricsChartProps) {
   const points = [...(data?.data ?? [])].reverse();
 
   return (
-    <div
-      data-testid={`metrics-${type}`}
-      className="candy-card flex flex-col gap-1 rounded-lg px-4 py-3"
-    >
+    <div data-testid={`metrics-${type}`} className="flex flex-col gap-1 px-4 py-3">
       <div className="flex items-baseline justify-between">
         <span className="text-[12.5px] text-content-subtle">
           {type === 'completed' ? 'Completed' : 'Failed'}
@@ -59,7 +57,7 @@ export function MetricsChart(props: MetricsChartProps) {
   );
 }
 
-const margin = { top: 6, right: 2, bottom: 14, left: 2 };
+const margin = { top: 12, right: 2, bottom: 14, left: 2 };
 
 function MetricsArea(props: {
   width: number;
@@ -111,14 +109,20 @@ function MetricsArea(props: {
           className={colorClassName}
         />
 
-        <line
-          x1={margin.left}
-          x2={margin.left + innerWidth}
-          y1={yScale(maxValue)}
-          y2={yScale(maxValue)}
-          stroke="rgb(var(--border-subtle))"
-          strokeDasharray="3 5"
-        />
+        {Array.from({ length: 3 }, (_, index) => {
+          const y = margin.top + (innerHeight / 2) * index;
+          return (
+            <line
+              key={y}
+              x1={margin.left}
+              x2={margin.left + innerWidth}
+              y1={y}
+              y2={y}
+              stroke="rgb(var(--border-subtle))"
+              strokeDasharray="2 4"
+            />
+          );
+        })}
         <text
           x={margin.left + innerWidth}
           y={yScale(maxValue) - 4}
@@ -134,14 +138,16 @@ function MetricsArea(props: {
             x={(_, index) => xScale(index)}
             y={(value) => yScale(value)}
             yScale={yScale}
+            curve={curveMonotoneX}
             fill={`url(#${gradientId})`}
           />
           <LinePath
             data={points}
             x={(_, index) => xScale(index)}
             y={(value) => yScale(value)}
+            curve={curveMonotoneX}
             stroke="currentColor"
-            strokeWidth={2.5}
+            strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
           />

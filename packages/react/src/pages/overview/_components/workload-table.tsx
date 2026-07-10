@@ -21,10 +21,10 @@ export function WorkloadTable(props: WorkloadTableProps) {
         <thead>
           <tr className="border-b border-border-subtle bg-bg-muted/60 text-left text-xs text-content-subtle">
             <th className="px-5 py-2.5 font-medium">Queue</th>
-            <th className="px-4 py-2.5 text-right font-medium">Waiting</th>
-            <th className="px-4 py-2.5 text-right font-medium">Failed</th>
-            <th className="px-4 py-2.5 text-right font-medium">Workers</th>
-            <th className="px-5 py-2.5 text-right font-medium">Oldest wait</th>
+            <th className="w-28 px-4 py-2.5 text-right font-medium">Waiting</th>
+            <th className="w-28 px-4 py-2.5 text-right font-medium">Failed</th>
+            <th className="w-28 px-4 py-2.5 text-right font-medium">Workers</th>
+            <th className="w-40 px-5 py-2.5 text-right font-medium">Oldest wait</th>
           </tr>
         </thead>
         <tbody>

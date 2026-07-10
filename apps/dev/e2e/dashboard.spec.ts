@@ -186,7 +186,7 @@ test('completed job detail shows the return value', async ({ page }) => {
 test('replaying a job enqueues a fresh copy with the same payload', async ({ page }) => {
   await page.goto('/queue/process-videos?status=completed');
   const firstRow = page.getByTestId('job-row').first();
-  const jobName = (await firstRow.locator('span').first().textContent()) ?? '';
+  const jobName = (await firstRow.locator('span span').first().textContent()) ?? '';
   await firstRow.click();
 
   await expect(page.getByRole('heading', { name: /./ })).toBeVisible();
@@ -196,4 +196,29 @@ test('replaying a job enqueues a fresh copy with the same payload', async ({ pag
   await expect(
     page.getByTestId('job-row').filter({ hasText: jobName.trim() }).first(),
   ).toBeVisible();
+});
+
+test('sorting by created toggles order', async ({ page }) => {
+  await page.goto('/queue/send-emails?status=completed');
+  const firstId = await page
+    .getByTestId('job-row')
+    .first()
+    .locator('span.font-mono')
+    .first()
+    .textContent();
+
+  await page.getByTestId('sort-created').click();
+  await expect(page).toHaveURL(/sort=asc/);
+  await expect(
+    page.getByTestId('job-row').first().locator('span.font-mono').first(),
+  ).not.toHaveText(firstId ?? '');
+});
+
+test('per-page selector shows more rows', async ({ page }) => {
+  await page.goto('/queue/send-emails?status=completed');
+  await expect(page.getByTestId('job-row')).toHaveCount(10);
+
+  await page.getByLabel('Rows').selectOption('50');
+  await expect(page).toHaveURL(/per_page=50/);
+  await expect(page.getByTestId('job-row')).toHaveCount(24);
 });

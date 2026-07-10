@@ -1,4 +1,4 @@
-import { Inbox } from 'lucide-react';
+import { ArrowDown, ArrowUp, Inbox } from 'lucide-react';
 import { EmptyState } from '../../../components/empty-state';
 import type { AppQueue, QueueStatus } from '../../../lib/api-types';
 import { getJobStatus } from '../../../lib/get-job-status';
@@ -8,12 +8,15 @@ interface JobTableProps {
   queue: AppQueue;
   selectedStatus: QueueStatus;
   selectedIds: Set<string>;
+  sortOrder: 'asc' | 'desc';
   onToggle: (jobId: string) => void;
   onToggleAll: (jobIds: string[]) => void;
+  onSortChange: (order: 'asc' | 'desc') => void;
 }
 
 export function JobTable(props: JobTableProps) {
-  const { queue, selectedStatus, selectedIds, onToggle, onToggleAll } = props;
+  const { queue, selectedStatus, selectedIds, sortOrder, onToggle, onToggleAll, onSortChange } =
+    props;
   const selectableIds = queue.jobs.filter((job) => job.id != null).map((job) => String(job.id));
   const allSelected = selectableIds.length > 0 && selectedIds.size === selectableIds.length;
   const showActions = !queue.read_only_mode;
@@ -52,7 +55,21 @@ export function JobTable(props: JobTableProps) {
             )}
             <th className="px-3 py-2.5 font-medium">Job</th>
             <th className="px-3 py-2.5 font-medium">Status</th>
-            <th className="px-3 py-2.5 font-medium">Created</th>
+            <th className="px-3 py-2.5 font-medium">
+              <button
+                type="button"
+                data-testid="sort-created"
+                onClick={() => onSortChange(sortOrder === 'desc' ? 'asc' : 'desc')}
+                className="flex items-center gap-1 font-medium text-content-subtle hover:text-content-emphasis"
+              >
+                Created
+                {sortOrder === 'desc' ? (
+                  <ArrowDown className="size-3" />
+                ) : (
+                  <ArrowUp className="size-3" />
+                )}
+              </button>
+            </th>
             <th className="px-3 py-2.5 font-medium">Duration</th>
             <th className="px-3 py-2.5 font-medium">Attempts</th>
             {showActions && <th className="w-24 px-3 py-2.5" />}

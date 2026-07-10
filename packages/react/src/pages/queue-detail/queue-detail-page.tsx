@@ -1,6 +1,7 @@
 import { CirclePause } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router';
+import { Breadcrumbs } from '../../components/breadcrumbs';
 import { PageHeader } from '../../components/page-header';
 import { SearchInput } from '../../components/search-input';
 import { Skeleton } from '../../components/skeleton';
@@ -27,11 +28,15 @@ export function QueueDetailPage() {
   const status = readSelectedStatus(searchParams.get('status'));
   const search = searchParams.get('search') ?? '';
   const page = Number(searchParams.get('page') ?? '1');
+  const sort = searchParams.get('sort') === 'asc' ? 'asc' : 'desc';
+  const perPage = Number(searchParams.get('per_page') ?? '10');
 
   const { data: queues, error } = useQueues({
     activeQueue: queueName,
     status,
     page,
+    sort,
+    perPage,
     search: search || undefined,
   });
   const queue = queues?.find((candidate) => candidate.name === queueName);
@@ -71,7 +76,7 @@ export function QueueDetailPage() {
     return (
       <>
         <PageHeader title={queueName} />
-        <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-4 px-3 py-5 lg:px-6">
+        <div className="flex w-full flex-col gap-4 px-4 py-4 lg:px-6">
           <div className="grid gap-3 md:grid-cols-2">
             <Skeleton className="h-32" />
             <Skeleton className="h-32" />
@@ -87,19 +92,28 @@ export function QueueDetailPage() {
     <>
       <PageHeader
         title={
-          <>
-            <span className="truncate">{queue.display_name || queue.name}</span>
-            {queue.is_paused && (
-              <StatusBadge variant="neutral" icon={CirclePause}>
-                paused
-              </StatusBadge>
-            )}
-          </>
+          <Breadcrumbs
+            items={[
+              { label: 'Queues', to: '/' },
+              {
+                label: (
+                  <>
+                    <span className="truncate">{queue.display_name || queue.name}</span>
+                    {queue.is_paused && (
+                      <StatusBadge variant="neutral" icon={CirclePause}>
+                        paused
+                      </StatusBadge>
+                    )}
+                  </>
+                ),
+              },
+            ]}
+          />
         }
         controls={!queue.read_only_mode && <QueueActions queue={queue} />}
       />
-      <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-4 px-3 py-5 lg:px-6">
-        <div className="grid gap-3 md:grid-cols-2">
+      <div className="flex w-full flex-col gap-4 px-4 py-4 lg:px-6">
+        <div className="candy-card grid divide-y divide-border-subtle rounded-lg md:grid-cols-2 md:divide-x md:divide-y-0">
           <MetricsChart queueName={queue.name} type="completed" />
           <MetricsChart queueName={queue.name} type="failed" />
         </div>
@@ -132,6 +146,15 @@ export function QueueDetailPage() {
           queue={queue}
           selectedStatus={status}
           selectedIds={selectedIds}
+          sortOrder={sort}
+          onSortChange={(next) => {
+            clearSelection();
+            setSearchParams((params) => {
+              params.set('sort', next);
+              params.delete('page');
+              return params;
+            });
+          }}
           onToggle={(jobId) =>
             setSelectedIds((current) => {
               const next = new Set(current);
@@ -154,6 +177,15 @@ export function QueueDetailPage() {
           queue={queue}
           status={status}
           page={page}
+          perPage={perPage}
+          onPerPageChange={(next) => {
+            clearSelection();
+            setSearchParams((params) => {
+              params.set('per_page', String(next));
+              params.delete('page');
+              return params;
+            });
+          }}
           onChange={(next) => {
             clearSelection();
             setSearchParams((params) => {

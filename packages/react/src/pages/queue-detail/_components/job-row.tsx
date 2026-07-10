@@ -66,8 +66,12 @@ export function JobRow(props: JobRowProps) {
       )}
       <td className="max-w-64 px-3 py-2">
         <div className="flex flex-col">
-          <span className="truncate text-2sm font-medium text-content-emphasis">{job.name}</span>
-          <span className="font-mono text-[11px] text-content-muted">#{jobId ?? '—'}</span>
+          <span className="flex items-baseline gap-2">
+            <span className="truncate text-2sm font-medium text-content-emphasis">{job.name}</span>
+            <span className="shrink-0 font-mono text-[11px] text-content-muted">
+              #{jobId ?? '—'}
+            </span>
+          </span>
           {status === 'failed' && job.failed_reason && (
             <span className="mt-0.5 truncate text-xs text-content-error">{job.failed_reason}</span>
           )}
@@ -79,12 +83,12 @@ export function JobRow(props: JobRowProps) {
       <td className="whitespace-nowrap px-3 py-2 text-2sm text-content-subtle">
         {formatDistanceToNowStrict(job.timestamp, { addSuffix: true })}
       </td>
-      <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-content-subtle">
+      <td className="whitespace-nowrap px-3 py-2 font-mono text-xs tabular-nums text-content-subtle">
         {formatDuration(job)}
       </td>
       <td className="px-3 py-2">
         <span
-          className={cn('font-mono text-xs text-content-subtle', {
+          className={cn('font-mono text-xs tabular-nums text-content-subtle', {
             'text-content-attention': job.attempts > 1,
           })}
         >
