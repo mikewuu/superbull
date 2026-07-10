@@ -107,10 +107,10 @@ export function DocsNavLinks(props: { onNavigate?: () => void }) {
                   >
                     <span className="block">{item.label}</span>
                     {matchParts.length > 0 ? (
-                      <span className="mt-0.5 block truncate text-xs text-content-muted">
+                      <span className="mt-0.5 block text-xs text-content-muted">
                         {matchParts.map((part, index) => (
                           <span key={part}>
-                            {index > 0 ? ' — ' : null}
+                            {index > 0 ? ' · ' : null}
                             {highlightMatch(part, normalizedQuery)}
                           </span>
                         ))}
