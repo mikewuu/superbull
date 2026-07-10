@@ -1,4 +1,4 @@
-import { type Job, MetricsTime, Queue, Worker } from 'bullmq';
+import { type Job, Queue, Worker } from 'bullmq';
 
 const host = process.env.REDIS_HOST ?? '127.0.0.1';
 const port = Number(process.env.REDIS_PORT ?? 6379);
@@ -114,7 +114,7 @@ function makeEmailWorker(): Worker {
       await job.log('delivered via smtp relay');
       return { delivered: true, to: job.data.to };
     },
-    { connection, concurrency: 8, metrics: { maxDataPoints: MetricsTime.ONE_WEEK } },
+    { connection, concurrency: 8 },
   );
 }
 
@@ -133,7 +133,7 @@ function makeVideoWorker(): Worker {
       await job.updateProgress(100);
       return { output: `s3://videos/${job.data.video_id}.mp4` };
     },
-    { connection, concurrency: 4, metrics: { maxDataPoints: MetricsTime.ONE_WEEK } },
+    { connection, concurrency: 4 },
   );
 }
 
