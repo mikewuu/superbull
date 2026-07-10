@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { AlertTranscript } from './_components/alert-transcript';
 import { BoardMockShell } from './_components/board-mock-shell';
 import { ChargeLoopVideo } from './_components/charge-loop-video';
+import { DiyRealityCard } from './_components/diy-reality-card';
 import { FeatureLedger } from './_components/feature-ledger';
 import { FinalCta } from './_components/final-cta';
 import { InstallCommand } from './_components/install-command';
@@ -94,22 +95,27 @@ export default function LandingPage(): React.ReactElement {
 
       {/* problem */}
       <section className="px-4 py-24 sm:px-6 sm:py-28">
-        <Reveal>
-          <div className="mx-auto max-w-2xl">
-            <p className="font-mono text-2sm text-content-subtle">01 — the problem</p>
-            <h2 className="mt-3 text-4xl leading-[1.08] font-semibold tracking-tight text-content-emphasis sm:text-5xl">
-              BullMQ ships the queue.
-              <br />
-              <span className="text-content-muted">Not the dashboard.</span>
-            </h2>
-            <p className="mt-5 max-w-xl text-lg leading-8 text-content-default">
-              You get getJobs() and a Redis key nobody&apos;s supposed to touch by hand. Every team
-              writes the same page: a table, a retry button, a chart if someone has time. bull-board
-              covers the basics and stalls at a job list. SuperBull is the rest of that dashboard,
-              already built.
-            </p>
-          </div>
-        </Reveal>
+        <div className="mx-auto grid max-w-5xl items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
+          <Reveal>
+            <div>
+              <p className="font-mono text-2sm text-content-subtle">01 — the problem</p>
+              <h2 className="mt-3 text-4xl leading-[1.08] font-semibold tracking-tight text-content-emphasis sm:text-5xl">
+                BullMQ ships the queue.
+                <br />
+                <span className="text-content-muted">Not the dashboard.</span>
+              </h2>
+              <p className="mt-5 max-w-xl text-lg leading-8 text-content-default">
+                You get getJobs() and a Redis key nobody&apos;s supposed to touch by hand. Every
+                team writes the same page: a table, a retry button, a chart if someone has time.
+                bull-board covers the basics and stalls at a job list. SuperBull is the rest of that
+                dashboard, already built.
+              </p>
+            </div>
+          </Reveal>
+          <Reveal delay={140}>
+            <DiyRealityCard />
+          </Reveal>
+        </div>
       </section>
 
       {/* stat flood */}
