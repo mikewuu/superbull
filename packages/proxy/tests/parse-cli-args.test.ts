@@ -103,7 +103,7 @@ describe('parseCliArgs', () => {
     expect(config.queueNames).toEqual(['alpha', 'beta:custom-prefix', 'gamma']);
   });
 
-  it('supports customprefix:name syntax in --queues', () => {
+  it('passes queue names containing colons through the comma split verbatim', () => {
     const config = parseCliArgs(
       ['--token', 'secret', '--queues', 'default-name,custom:renamed'],
       {},

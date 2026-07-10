@@ -42,7 +42,7 @@
     "ioredis": "^5.10.1"
   },
   "peerDependencies": {
-    "bullmq": ">=5.0.0"
+    "bullmq": "^5.0.0"
   },
   "devDependencies": {
     "@bullwatch/tsconfig": "workspace:*",
