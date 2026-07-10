@@ -1,9 +1,9 @@
-import { mutationGeneric as mutation, queryGeneric as query } from 'convex/server';
 import { v } from 'convex/values';
+import { mutation, query } from './_generated/server';
 
 function guardInternalToken(internalToken: string): void {
   if (internalToken !== process.env.CONVEX_INTERNAL_TOKEN) {
-    throw new Error('Invalid internal token');
+    throw new Error('unauthorized');
   }
 }
 
@@ -16,10 +16,14 @@ export const list = query({
 });
 
 export const findById = query({
-  args: { internalToken: v.string(), id: v.id('proxySources') },
+  args: { internalToken: v.string(), id: v.string() },
   handler: async (ctx, args) => {
     guardInternalToken(args.internalToken);
-    return await ctx.db.get(args.id);
+    const id = ctx.db.normalizeId('proxySources', args.id);
+    if (!id) {
+      return null;
+    }
+    return await ctx.db.get(id);
   },
 });
 
@@ -32,14 +36,23 @@ export const create = mutation({
       url: args.url,
       token: args.token,
     });
-    return await ctx.db.get(id);
+    const created = await ctx.db.get(id);
+    if (!created) {
+      throw new Error('failed to create proxy source');
+    }
+    return created;
   },
 });
 
 export const remove = mutation({
-  args: { internalToken: v.string(), id: v.id('proxySources') },
+  args: { internalToken: v.string(), id: v.string() },
   handler: async (ctx, args) => {
     guardInternalToken(args.internalToken);
-    await ctx.db.delete(args.id);
+    const id = ctx.db.normalizeId('proxySources', args.id);
+    if (!id) {
+      return null;
+    }
+    await ctx.db.delete(id);
+    return null;
   },
 });

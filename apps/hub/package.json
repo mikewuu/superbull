@@ -8,36 +8,30 @@
     "build": "next build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "db:migrate": "dotenv -e .env.local db migrate",
-    "postdb:migrate": "pnpm db:generate",
-    "db:generate": "dotenv -e .env.local db make:types public",
-    "db:drop": "dotenv -e .env.local db drop",
-    "db:reset": "pnpm db:drop && pnpm db:migrate"
+    "convex:dev": "convex dev",
+    "convex:codegen": "convex codegen"
   },
   "dependencies": {
+    "@bullwatch/react": "workspace:*",
+    "@nextastic/http": "^7.0.0",
     "@t3-oss/env-nextjs": "^0.13.11",
     "convex": "^1.42.1",
-    "kysely": "^0.29.3",
     "next": "^16.2.10",
-    "pg": "^8.22.0",
-    "pg-connection-from-env": "^1.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@bullwatch/tsconfig": "workspace:*",
-    "@nextastic/db": "^5.0.2",
+    "@edge-runtime/vm": "^5.0.0",
     "@tailwindcss/postcss": "^4.3.2",
     "@types/node": "^22.10.2",
-    "@types/pg": "^8.20.0",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
-    "dotenv-cli": "^11.0.0",
-    "node-pg-migrate": "^8.0.4",
+    "convex-test": "^0.0.54",
     "tailwindcss": "^4.3.2",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.8",
-    "zapatos": "^6.6.1"
+    "vite": "^5.4.21",
+    "vitest": "^2.1.8"
   }
 }
