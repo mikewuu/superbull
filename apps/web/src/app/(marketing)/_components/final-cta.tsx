@@ -14,7 +14,7 @@ export function FinalCta(): React.ReactElement {
           <p className="mx-auto mt-5 max-w-md text-lg leading-8 text-content-default">
             One install, and your queues stop being a Redis key you&apos;re afraid to touch.
           </p>
-          <div className="mx-auto mt-8 max-w-md">
+          <div className="mx-auto mt-8 max-w-lg">
             <InstallCommand />
           </div>
           <p className="mt-4 text-2sm text-content-subtle">
