@@ -22,7 +22,7 @@ export function QueuePagination(props: QueuePaginationProps) {
   const total = status === 'latest' ? null : (queue.counts[status as JobStatus] ?? null);
 
   return (
-    <div className="flex items-center justify-between text-sm text-content-subtle">
+    <div className="flex items-center justify-between text-2sm text-content-subtle">
       <span>
         Viewing {shownStart.toLocaleString()}–{shownEnd.toLocaleString()}
         {total !== null && ` of ${total.toLocaleString()}`}

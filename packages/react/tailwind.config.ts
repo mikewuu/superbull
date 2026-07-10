@@ -6,10 +6,26 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Geist', 'system-ui', 'sans-serif'],
         mono: ['Geist Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
+      fontSize: {
+        '2sm': ['0.8125rem', { lineHeight: '1.25rem' }],
+      },
+      transitionTimingFunction: {
+        snout: 'var(--ease-snout)',
+      },
       colors: {
+        brand: 'rgb(var(--brand) / <alpha-value>)',
+        'brand-deep': 'rgb(var(--brand-deep) / <alpha-value>)',
+        'brand-ink': 'rgb(var(--brand-ink) / <alpha-value>)',
+        'brand-tint': 'rgb(var(--brand-tint) / <alpha-value>)',
+        'brand-tint-2': 'rgb(var(--brand-tint-2) / <alpha-value>)',
+        'candy-blue': 'rgb(var(--candy-blue) / <alpha-value>)',
+        'candy-green': 'rgb(var(--candy-green) / <alpha-value>)',
+        'candy-yellow': 'rgb(var(--candy-yellow) / <alpha-value>)',
+        'candy-orange': 'rgb(var(--candy-orange) / <alpha-value>)',
+        'candy-pink': 'rgb(var(--candy-pink) / <alpha-value>)',
         'bg-emphasis': 'rgb(var(--bg-emphasis) / <alpha-value>)',
         'bg-default': 'rgb(var(--bg-default) / <alpha-value>)',
         'bg-subtle': 'rgb(var(--bg-subtle) / <alpha-value>)',

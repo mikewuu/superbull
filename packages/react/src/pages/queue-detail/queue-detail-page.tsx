@@ -12,7 +12,7 @@ import { JobTable } from './_components/job-table';
 import { MetricsChart } from './_components/metrics-chart';
 import { QueueActions } from './_components/queue-actions';
 import { QueuePagination } from './_components/queue-pagination';
-import { StatusTabs } from './_components/status-tabs';
+import { StatusFilter } from './_components/status-filter';
 
 function readSelectedStatus(value: string | null): QueueStatus {
   const match = jobStatuses.find((status) => status === value);
@@ -71,12 +71,12 @@ export function QueueDetailPage() {
     return (
       <>
         <PageHeader title={queueName} />
-        <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-5 px-3 py-6 lg:px-6">
-          <div className="grid gap-5 md:grid-cols-2">
-            <Skeleton className="h-44" />
-            <Skeleton className="h-44" />
+        <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-4 px-3 py-5 lg:px-6">
+          <div className="grid gap-3 md:grid-cols-2">
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
           </div>
-          <Skeleton className="h-9 w-96" />
+          <Skeleton className="h-8 w-96" />
           <Skeleton className="h-64" />
         </div>
       </>
@@ -98,14 +98,14 @@ export function QueueDetailPage() {
         }
         controls={!queue.read_only_mode && <QueueActions queue={queue} />}
       />
-      <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-5 px-3 py-6 lg:px-6">
-        <div className="grid gap-5 md:grid-cols-2">
+      <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-4 px-3 py-5 lg:px-6">
+        <div className="grid gap-3 md:grid-cols-2">
           <MetricsChart queueName={queue.name} type="completed" />
           <MetricsChart queueName={queue.name} type="failed" />
         </div>
 
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <StatusTabs
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <StatusFilter
             queue={queue}
             status={status}
             onChange={(next) => {

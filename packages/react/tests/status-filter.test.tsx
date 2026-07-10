@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import type { AppQueue } from '../src/lib/api-types';
-import { StatusTabs } from '../src/pages/queue-detail/_components/status-tabs';
+import { StatusFilter } from '../src/pages/queue-detail/_components/status-filter';
 
 function makeQueue(): AppQueue {
   return {
@@ -24,25 +24,32 @@ function makeQueue(): AppQueue {
     allow_retries: true,
     allow_completed_retries: true,
     is_paused: false,
+    worker_count: 0,
+    oldest_waiting_ms: null,
   };
 }
 
-describe('StatusTabs', () => {
-  it('renders an "All" tab first for the latest status', () => {
-    render(<StatusTabs queue={makeQueue()} status="latest" onChange={() => {}} />);
-    expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
-  });
-
-  it('shows a count chip only for statuses with jobs', () => {
-    render(<StatusTabs queue={makeQueue()} status="latest" onChange={() => {}} />);
+describe('StatusFilter', () => {
+  it('opens a picker with per-status counts', async () => {
+    render(<StatusFilter queue={makeQueue()} status="latest" onChange={() => {}} />);
+    await userEvent.click(screen.getByTestId('status-filter-button'));
     expect(screen.getByTestId('status-tab-failed')).toHaveTextContent('4');
     expect(screen.getByTestId('status-tab-completed')).toHaveTextContent('3');
   });
 
   it('calls onChange with the picked status', async () => {
     const onChange = vi.fn();
-    render(<StatusTabs queue={makeQueue()} status="latest" onChange={onChange} />);
+    render(<StatusFilter queue={makeQueue()} status="latest" onChange={onChange} />);
+    await userEvent.click(screen.getByTestId('status-filter-button'));
     await userEvent.click(screen.getByTestId('status-tab-failed'));
     expect(onChange).toHaveBeenCalledWith('failed');
+  });
+
+  it('shows a removable applied pill for a concrete status', async () => {
+    const onChange = vi.fn();
+    render(<StatusFilter queue={makeQueue()} status="failed" onChange={onChange} />);
+    expect(screen.getByTestId('applied-status')).toHaveTextContent('failed');
+    await userEvent.click(screen.getByLabelText('Clear status filter'));
+    expect(onChange).toHaveBeenCalledWith('latest');
   });
 });

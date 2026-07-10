@@ -1,58 +1,57 @@
-import { Inbox } from 'lucide-react';
+import { CheckCircle2, Inbox, PauseCircle } from 'lucide-react';
 import { EmptyState } from '../../components/empty-state';
 import { PageHeader } from '../../components/page-header';
 import { Skeleton } from '../../components/skeleton';
+import { useOverviewMetrics } from '../../hooks/use-overview-metrics';
 import { useQueues } from '../../hooks/use-queues';
 import type { AppQueue } from '../../lib/api-types';
-import { QueueCard } from './_components/queue-card';
 import { RedisStatsCard } from './_components/redis-stats-card';
 import { StatTile } from './_components/stat-tile';
+import { WorkloadTable } from './_components/workload-table';
 
 export function OverviewPage() {
   const { data: queues, error, isLoading } = useQueues({});
+  const { data: metrics } = useOverviewMetrics(queues?.map((queue) => queue.name) ?? []);
 
   return (
     <>
-      <PageHeader title="Queues" />
-      <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-5 px-3 py-6 lg:px-6">
+      <PageHeader title="Overview" />
+      <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-4 px-3 py-5 lg:px-6">
         {error && (
-          <p className="rounded-xl border border-red-200 bg-bg-error/40 px-4 py-3 text-sm text-content-error">
+          <p className="rounded-xl border border-red-200 bg-bg-error/50 px-4 py-3 text-sm text-content-error">
             Failed to load queues: {error.message}
           </p>
         )}
 
         {isLoading && (
           <>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              <Skeleton className="h-24" />
-              <Skeleton className="h-24" />
-              <Skeleton className="h-24" />
-              <Skeleton className="h-24" />
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              {[0, 1, 2, 3, 4].map((index) => (
+                <Skeleton key={index} className="h-[74px]" />
+              ))}
             </div>
-            <div className="grid gap-5 md:grid-cols-2">
-              <Skeleton className="h-40" />
-              <Skeleton className="h-40" />
-            </div>
+            <Skeleton className="h-64" />
           </>
         )}
 
         {queues && (
           <>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              <StatTile label="Queues" value={queues.length} />
-              <StatTile label="Active" value={sumCount(queues, 'active')} accent="info" />
-              <StatTile label="Waiting" value={sumCount(queues, 'waiting')} />
-              <StatTile label="Failed" value={sumCount(queues, 'failed')} accent="error" />
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              <StatTile label="Jobs per minute" value={metrics?.jobsPerMinute ?? 0} />
+              <StatTile label="Jobs past hour" value={metrics?.jobsPastHour ?? 0} />
+              <StatTile
+                label="Failed past 24h"
+                value={metrics?.failedPastDay ?? 0}
+                accent={(metrics?.failedPastDay ?? 0) > 0 ? 'error' : undefined}
+              />
+              <StatTile label="Workers" value={sumWorkers(queues)} />
+              <StatTile label="Status" value={<OverallStatus queues={queues} />} />
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2">
-              {queues.map((queue) => (
-                <QueueCard key={queue.name} queue={queue} />
-              ))}
-            </div>
-
-            {queues.length === 0 && (
-              <div className="rounded-xl border border-border-subtle bg-bg-default">
+            {queues.length > 0 ? (
+              <WorkloadTable queues={queues} />
+            ) : (
+              <div className="candy-card rounded-2xl">
                 <EmptyState
                   icon={Inbox}
                   title="No queues registered"
@@ -69,6 +68,26 @@ export function OverviewPage() {
   );
 }
 
-function sumCount(queues: AppQueue[], status: 'active' | 'waiting' | 'failed'): number {
-  return queues.reduce((total, queue) => total + (queue.counts[status] ?? 0), 0);
+function sumWorkers(queues: AppQueue[]): number {
+  return queues.reduce((total, queue) => total + queue.worker_count, 0);
+}
+
+function OverallStatus(props: { queues: AppQueue[] }) {
+  const { queues } = props;
+  const pausedCount = queues.filter((queue) => queue.is_paused).length;
+
+  if (pausedCount > 0) {
+    return (
+      <span className="flex items-center gap-1.5 text-content-warning">
+        <PauseCircle className="size-5" />
+        {pausedCount} paused
+      </span>
+    );
+  }
+  return (
+    <span className="flex items-center gap-1.5 text-content-success">
+      <CheckCircle2 className="size-5" />
+      Active
+    </span>
+  );
 }

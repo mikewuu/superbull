@@ -1,6 +1,7 @@
 import { formatDistanceToNowStrict } from 'date-fns';
 import { RotateCcw } from 'lucide-react';
-import { Link } from 'react-router';
+import type { MouseEvent } from 'react';
+import { useNavigate } from 'react-router';
 import { Button } from '../../../components/button';
 import { JobStatusBadge } from '../../../components/job-status-badge';
 import { useRetryJob } from '../../../hooks/use-retry-job';
@@ -19,59 +20,69 @@ interface JobRowProps {
 
 export function JobRow(props: JobRowProps) {
   const { queueName, job, status, selected, showActions, onToggle } = props;
+  const navigate = useNavigate();
   const retryJob = useRetryJob();
   const jobId = job.id != null ? String(job.id) : null;
+  const jobUrl = jobId
+    ? `/queue/${encodeURIComponent(queueName)}/${encodeURIComponent(jobId)}`
+    : null;
+
+  const handleRowClick = (event: MouseEvent<HTMLTableRowElement>) => {
+    if (!jobUrl) {
+      return;
+    }
+    const target = event.target as HTMLElement;
+    if (target.closest('a, button, input')) {
+      return;
+    }
+    navigate(jobUrl);
+  };
 
   return (
     <tr
       data-testid="job-row"
+      onClick={handleRowClick}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' && jobUrl) {
+          navigate(jobUrl);
+        }
+      }}
       className={cn(
-        'group border-b border-border-subtle transition-colors last:border-b-0 hover:bg-bg-muted',
-        { 'bg-blue-50/60 hover:bg-blue-50/60': selected },
+        'group cursor-pointer border-b border-border-subtle transition-colors last:border-b-0 hover:bg-bg-muted',
+        { 'bg-brand-tint/50 hover:bg-brand-tint/50': selected },
       )}
     >
       {showActions && (
-        <td className="px-4 py-3">
+        <td className="px-3 py-2">
           <input
             type="checkbox"
             aria-label={`Select job ${jobId ?? ''}`}
             disabled={jobId === null}
             checked={selected}
             onChange={() => jobId && onToggle(jobId)}
-            className="size-4 rounded border-border-default text-black focus:ring-0 focus:ring-offset-0"
+            className="size-3.5 rounded border-border-default text-brand-deep focus:ring-0 focus:ring-offset-0"
           />
         </td>
       )}
-      <td className="max-w-72 px-4 py-3">
-        {jobId ? (
-          <Link
-            to={`/queue/${encodeURIComponent(queueName)}/${encodeURIComponent(jobId)}`}
-            className="flex flex-col"
-          >
-            <span className="truncate font-medium text-content-emphasis group-hover:underline group-hover:decoration-border-emphasis group-hover:underline-offset-2">
-              {job.name}
-            </span>
-            <span className="font-mono text-xs text-content-muted">#{jobId}</span>
-            {status === 'failed' && job.failed_reason && (
-              <span className="mt-0.5 truncate text-xs text-content-error">
-                {job.failed_reason}
-              </span>
-            )}
-          </Link>
-        ) : (
-          <span className="font-medium text-content-emphasis">{job.name}</span>
-        )}
+      <td className="max-w-64 px-3 py-2">
+        <div className="flex flex-col">
+          <span className="truncate text-2sm font-medium text-content-emphasis">{job.name}</span>
+          <span className="font-mono text-[11px] text-content-muted">#{jobId ?? '—'}</span>
+          {status === 'failed' && job.failed_reason && (
+            <span className="mt-0.5 truncate text-xs text-content-error">{job.failed_reason}</span>
+          )}
+        </div>
       </td>
-      <td className="px-4 py-3">
+      <td className="px-3 py-2">
         <JobStatusBadge status={status} />
       </td>
-      <td className="whitespace-nowrap px-4 py-3 text-content-subtle">
+      <td className="whitespace-nowrap px-3 py-2 text-2sm text-content-subtle">
         {formatDistanceToNowStrict(job.timestamp, { addSuffix: true })}
       </td>
-      <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-content-subtle">
+      <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-content-subtle">
         {formatDuration(job)}
       </td>
-      <td className="px-4 py-3">
+      <td className="px-3 py-2">
         <span
           className={cn('font-mono text-xs text-content-subtle', {
             'text-content-attention': job.attempts > 1,
@@ -81,13 +92,13 @@ export function JobRow(props: JobRowProps) {
         </span>
       </td>
       {showActions && (
-        <td className="px-4 py-3">
-          <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        <td className="px-3 py-2">
+          <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
             {status === 'failed' && jobId && (
               <Button
                 variant="secondary"
-                className="h-8 px-2.5 text-xs"
-                icon={<RotateCcw className="size-3.5" />}
+                className="h-7 px-2 text-xs"
+                icon={<RotateCcw className="size-3" />}
                 text="Retry"
                 loading={retryJob.isPending}
                 onClick={() => retryJob.mutate({ queueName, jobId })}

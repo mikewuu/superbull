@@ -11,9 +11,9 @@ export function JobLogsPanel(props: JobLogsPanelProps) {
 
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-sm font-medium text-content-emphasis">Logs</h2>
+      <h2 className="text-2sm font-medium text-content-emphasis">Logs</h2>
       {logs && logs.length > 0 ? (
-        <div className="overflow-x-auto rounded-xl border border-border-subtle bg-bg-muted p-4">
+        <div className="candy-card overflow-x-auto rounded-xl p-4">
           {logs.map((line, index) => (
             <div key={`${index}-${line}`} className="flex gap-3 font-mono text-xs leading-5">
               <span className="w-6 shrink-0 select-none text-right text-content-muted">
@@ -24,7 +24,7 @@ export function JobLogsPanel(props: JobLogsPanelProps) {
           ))}
         </div>
       ) : (
-        <p className="rounded-xl border border-border-subtle bg-bg-muted p-4 text-xs text-content-muted">
+        <p className="candy-card rounded-xl p-4 text-xs text-content-muted">
           No logs for this job.
         </p>
       )}

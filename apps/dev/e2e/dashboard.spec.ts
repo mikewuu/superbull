@@ -2,19 +2,19 @@ import { expect, test } from '@playwright/test';
 
 test.describe.configure({ mode: 'serial' });
 
-test('overview shows stat tiles, queue cards and redis health', async ({ page }) => {
+test('overview shows horizon stats, workload table and redis health', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Queues' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible();
 
-  await expect(page.getByTestId('stat-queues')).toContainText('3');
-  await expect(page.getByTestId('stat-failed')).toContainText('8');
+  await expect(page.getByTestId('stat-jobs-per-minute')).toBeVisible();
+  await expect(page.getByTestId('stat-failed-past-24h')).toBeVisible();
+  await expect(page.getByTestId('stat-workers')).toBeVisible();
+  await expect(page.getByTestId('stat-status')).toContainText('paused');
 
-  const main = page.locator('main');
-  await expect(main.getByRole('link', { name: /send-emails/ })).toBeVisible();
-  await expect(main.getByRole('link', { name: /process-videos/ })).toBeVisible();
+  await expect(page.getByTestId('workload-row')).toHaveCount(3);
+  const syncRow = page.getByTestId('workload-row').filter({ hasText: 'sync-contacts' });
+  await expect(syncRow).toContainText('paused');
   await expect(page.getByText(/Redis \d/).first()).toBeVisible();
-
-  await expect(main.getByRole('link', { name: /sync-contacts/ })).toContainText('paused');
 });
 
 test('sidebar navigates to a queue with tab counts and metrics totals', async ({ page }) => {
@@ -25,10 +25,12 @@ test('sidebar navigates to a queue with tab counts and metrics totals', async ({
     .click();
 
   await expect(page.getByRole('heading', { name: 'send-emails' })).toBeVisible();
+  await page.getByTestId('status-filter-button').click();
   await expect(page.getByTestId('status-tab-waiting')).toContainText('8');
   await expect(page.getByTestId('status-tab-completed')).toContainText('24');
   await expect(page.getByTestId('status-tab-failed')).toContainText('6');
   await expect(page.getByTestId('status-tab-delayed')).toContainText('5');
+  await page.keyboard.press('Escape');
 
   await expect(page.getByTestId('metrics-completed')).toContainText('24');
   await expect(page.getByTestId('metrics-failed')).toContainText('6');
@@ -53,13 +55,13 @@ test('search filters jobs by name or id', async ({ page }) => {
   await expect(page.getByTestId('job-row')).toHaveCount(10);
 });
 
-test('job detail shows meta, failed reason, data, options and logs', async ({ page }) => {
+test('clicking a row opens the full job view with timeline, payload and logs', async ({ page }) => {
   await page.goto('/queue/send-emails?status=failed');
-  const jobLink = page.getByTestId('job-row').first().getByRole('link');
-  const href = await jobLink.getAttribute('href');
-  await page.goto(href ?? '');
+  await page.getByTestId('job-row').first().click();
 
+  await expect(page).toHaveURL(/\/queue\/send-emails\/\d+/);
   await expect(page.getByRole('heading', { name: /bounce-notification/ })).toBeVisible();
+  await expect(page.getByText('Created').first()).toBeVisible();
   await expect(page.getByText('Failed reason')).toBeVisible();
   await expect(page.getByText(/SMTP 550/).first()).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Data' })).toBeVisible();
@@ -70,9 +72,7 @@ test('job detail shows meta, failed reason, data, options and logs', async ({ pa
 
 test('retrying a job from the detail page moves it to waiting', async ({ page }) => {
   await page.goto('/queue/send-emails?status=failed');
-  const jobLink = page.getByTestId('job-row').first().getByRole('link');
-  const href = await jobLink.getAttribute('href');
-  await page.goto(href ?? '');
+  await page.getByTestId('job-row').first().click();
 
   await expect(page.getByRole('heading', { name: /bounce-notification/ })).toBeVisible();
   await page.locator('header').getByRole('button', { name: 'Retry' }).click();
@@ -176,10 +176,24 @@ test('paused queue shows its state and prioritized jobs are listed', async ({ pa
 
 test('completed job detail shows the return value', async ({ page }) => {
   await page.goto('/queue/process-videos?status=completed');
-  const jobLink = page.getByTestId('job-row').first().getByRole('link');
-  const href = await jobLink.getAttribute('href');
-  await page.goto(href ?? '');
+  await page.getByTestId('job-row').first().click();
+  await expect(page).toHaveURL(/\/queue\/process-videos\/\d+/);
 
   await expect(page.getByRole('heading', { name: 'Return value' })).toBeVisible();
   await expect(page.getByText('s3://videos/')).toBeVisible();
+});
+
+test('replaying a job enqueues a fresh copy with the same payload', async ({ page }) => {
+  await page.goto('/queue/process-videos?status=completed');
+  const firstRow = page.getByTestId('job-row').first();
+  const jobName = (await firstRow.locator('span').first().textContent()) ?? '';
+  await firstRow.click();
+
+  await expect(page.getByRole('heading', { name: /./ })).toBeVisible();
+  await page.getByRole('button', { name: 'Replay' }).click();
+
+  await page.goto('/queue/process-videos?status=waiting');
+  await expect(
+    page.getByTestId('job-row').filter({ hasText: jobName.trim() }).first(),
+  ).toBeVisible();
 });

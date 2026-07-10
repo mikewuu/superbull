@@ -20,7 +20,7 @@ export function JobTable(props: JobTableProps) {
 
   if (queue.jobs.length === 0) {
     return (
-      <div className="rounded-xl border border-border-subtle bg-bg-default">
+      <div data-testid="job-table" className="candy-card rounded-2xl">
         <EmptyState
           icon={Inbox}
           title={selectedStatus === 'latest' ? 'No jobs yet' : `No ${selectedStatus} jobs`}
@@ -35,30 +35,27 @@ export function JobTable(props: JobTableProps) {
   }
 
   return (
-    <div
-      data-testid="job-table"
-      className="overflow-x-auto rounded-xl border border-border-subtle bg-bg-default"
-    >
-      <table className="w-full border-collapse text-sm">
+    <div data-testid="job-table" className="candy-card overflow-x-auto rounded-2xl">
+      <table className="w-full border-collapse">
         <thead>
-          <tr className="border-b border-border-subtle text-left text-xs text-content-subtle">
+          <tr className="border-b border-border-subtle bg-bg-muted/60 text-left text-xs text-content-subtle">
             {showActions && (
-              <th className="w-12 px-4 py-3">
+              <th className="w-10 px-3 py-2.5">
                 <input
                   type="checkbox"
                   aria-label="Select all jobs"
                   checked={allSelected}
                   onChange={() => onToggleAll(selectableIds)}
-                  className="size-4 rounded border-border-default text-black focus:ring-0 focus:ring-offset-0"
+                  className="size-3.5 rounded border-border-default text-brand-deep focus:ring-0 focus:ring-offset-0"
                 />
               </th>
             )}
-            <th className="px-4 py-3 font-medium">Job</th>
-            <th className="px-4 py-3 font-medium">Status</th>
-            <th className="px-4 py-3 font-medium">Created</th>
-            <th className="px-4 py-3 font-medium">Duration</th>
-            <th className="px-4 py-3 font-medium">Attempts</th>
-            {showActions && <th className="w-28 px-4 py-3" />}
+            <th className="px-3 py-2.5 font-medium">Job</th>
+            <th className="px-3 py-2.5 font-medium">Status</th>
+            <th className="px-3 py-2.5 font-medium">Created</th>
+            <th className="px-3 py-2.5 font-medium">Duration</th>
+            <th className="px-3 py-2.5 font-medium">Attempts</th>
+            {showActions && <th className="w-24 px-3 py-2.5" />}
           </tr>
         </thead>
         <tbody>
