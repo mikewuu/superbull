@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   title: 'SuperBull — the BullMQ dashboard',
   description:
     'Monitor, debug and operate BullMQ queues. Standalone board, headless proxy, or a federated hub with analytics, error tracking, email alerts and public status pages.',
+  icons: {
+    icon: [{ url: '/icon.png', type: 'image/png' }],
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout(props: { children: ReactNode }) {
