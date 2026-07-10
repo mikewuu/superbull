@@ -5,7 +5,34 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { cn } from '../_lib/cn';
 import { docsNav } from '../_lib/nav';
-import { docsSearchIndex } from '../_lib/search-index';
+import type { DocsSearchMatch } from '../_lib/search-index';
+import { docsSearchIndex, findMatch } from '../_lib/search-index';
+
+type DocsNavMatchItem = {
+  href: string;
+  label: string;
+  match: DocsSearchMatch | null;
+};
+
+function findMatchingGroups(query: string) {
+  return docsNav
+    .map((group) => {
+      const items: DocsNavMatchItem[] = [];
+      for (const item of group.items) {
+        if (item.label.toLowerCase().includes(query)) {
+          items.push({ ...item, match: null });
+          continue;
+        }
+        const page = docsSearchIndex.find((indexed) => indexed.href === item.href);
+        const match = page ? findMatch(page, query) : null;
+        if (match) {
+          items.push({ ...item, match });
+        }
+      }
+      return { label: group.label, items };
+    })
+    .filter((group) => group.items.length > 0);
+}
 
 export function DocsNavLinks(props: { onNavigate?: () => void }) {
   const { onNavigate } = props;
@@ -14,19 +41,11 @@ export function DocsNavLinks(props: { onNavigate?: () => void }) {
 
   const normalizedQuery = query.trim().toLowerCase();
   const filteredNav = normalizedQuery
-    ? docsNav
-        .map((group) => ({
-          ...group,
-          items: group.items.filter((item) => {
-            if (item.label.toLowerCase().includes(normalizedQuery)) {
-              return true;
-            }
-            const entry = docsSearchIndex.find((indexed) => indexed.href === item.href);
-            return entry ? entry.text.includes(normalizedQuery) : false;
-          }),
-        }))
-        .filter((group) => group.items.length > 0)
-    : docsNav;
+    ? findMatchingGroups(normalizedQuery)
+    : docsNav.map((group) => ({
+        label: group.label,
+        items: group.items.map((item) => ({ ...item, match: null as DocsSearchMatch | null })),
+      }));
 
   return (
     <nav className="space-y-6">
@@ -48,10 +67,16 @@ export function DocsNavLinks(props: { onNavigate?: () => void }) {
           <ul className="mt-2 space-y-0.5">
             {group.items.map((item) => {
               const isActive = pathname === item.href;
+              const href = item.match?.headingId
+                ? `${item.href}#${item.match.headingId}`
+                : item.href;
+              const matchLine = item.match
+                ? [item.match.headingText, item.match.snippet].filter(Boolean).join(' — ')
+                : null;
               return (
                 <li key={item.href}>
                   <Link
-                    href={item.href}
+                    href={href}
                     onClick={onNavigate}
                     className={cn(
                       'block rounded-md px-2 py-1.5 text-sm transition-colors',
@@ -60,7 +85,12 @@ export function DocsNavLinks(props: { onNavigate?: () => void }) {
                         : 'text-content-subtle hover:bg-bg-muted hover:text-content-emphasis',
                     )}
                   >
-                    {item.label}
+                    <span className="block">{item.label}</span>
+                    {matchLine ? (
+                      <span className="mt-0.5 block truncate text-xs text-content-muted">
+                        {matchLine}
+                      </span>
+                    ) : null}
                   </Link>
                 </li>
               );

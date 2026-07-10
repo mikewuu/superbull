@@ -64,104 +64,172 @@ import {
   outro as statusPagesOutro,
   rows as statusPagesRows,
 } from '../status-pages/content';
+import { slugify } from './slugify';
 
-type SearchEntry = { href: string; text: string };
+export type DocsSearchSection = {
+  heading: string | null;
+  headingId: string | null;
+  body: string;
+};
 
-export const docsSearchIndex: SearchEntry[] = [
-  { href: '/docs', text: overviewContent.toLowerCase() },
-  { href: '/docs/getting-started', text: gettingStartedContent.toLowerCase() },
-  {
-    href: '/docs/standalone',
-    text: [standaloneIntro, adapterHeaders.join(' '), adapterRows.flat().join(' '), perAdapter]
-      .join(' ')
-      .toLowerCase(),
-  },
-  {
-    href: '/docs/proxy',
-    text: [proxyIntro, flagHeaders.join(' '), flagRows.flat().join(' '), behavior]
-      .join(' ')
-      .toLowerCase(),
-  },
-  {
-    href: '/docs/hub',
-    text: [hubIntro, hubHeaders.join(' '), hubRows.flat().join(' '), ingestSection]
-      .join(' ')
-      .toLowerCase(),
-  },
-  {
-    href: '/docs/alerts',
-    text: [alertsIntro, alertsHeaders.join(' '), alertsRows.flat().join(' '), alertsOutro]
-      .join(' ')
-      .toLowerCase(),
-  },
-  {
-    href: '/docs/status-pages',
-    text: [
-      statusPagesContent,
-      statusPagesHeaders.join(' '),
-      statusPagesRows.flat().join(' '),
-      statusPagesOutro,
-    ]
-      .join(' ')
-      .toLowerCase(),
-  },
-  {
-    href: '/docs/dashboards',
-    text: [
-      dashboardsContent,
-      dashboardsHeaders.join(' '),
-      dashboardsRows.flat().join(' '),
-      dashboardsOutro,
-    ]
-      .join(' ')
-      .toLowerCase(),
-  },
-  {
-    href: '/docs/analytics',
-    text: [
+export type DocsSearchPage = {
+  href: string;
+  sections: DocsSearchSection[];
+};
+
+export type DocsSearchMatch = {
+  headingText: string | null;
+  headingId: string | null;
+  snippet: string | null;
+};
+
+function tableMarkdown(headers: string[], rows: string[][]): string {
+  const headerLine = `| ${headers.join(' | ')} |`;
+  const separatorLine = `| ${headers.map(() => '---').join(' | ')} |`;
+  const rowLines = rows.map((row) => `| ${row.join(' | ')} |`);
+  return [headerLine, separatorLine, ...rowLines].join('\n');
+}
+
+function splitSections(markdown: string): DocsSearchSection[] {
+  const sections: DocsSearchSection[] = [];
+  let heading: string | null = null;
+  let headingId: string | null = null;
+  let bodyLines: string[] = [];
+
+  for (const line of markdown.split('\n')) {
+    const h3Text = line.match(/^###\s+(.+)$/)?.[1];
+    const h2Text = line.match(/^##\s+(.+)$/)?.[1];
+    const headingText = h3Text ?? h2Text;
+    if (headingText) {
+      sections.push({ heading, headingId, body: bodyLines.join('\n') });
+      heading = headingText;
+      headingId = slugify(headingText);
+      bodyLines = [];
+      continue;
+    }
+    if (/^#\s+.+$/.test(line)) {
+      continue;
+    }
+    bodyLines.push(line);
+  }
+  sections.push({ heading, headingId, body: bodyLines.join('\n') });
+  return sections;
+}
+
+function buildPage(href: string, markdown: string): DocsSearchPage {
+  return { href, sections: splitSections(markdown) };
+}
+
+export const docsSearchIndex: DocsSearchPage[] = [
+  buildPage('/docs', overviewContent),
+  buildPage('/docs/getting-started', gettingStartedContent),
+  buildPage(
+    '/docs/standalone',
+    [standaloneIntro, tableMarkdown(adapterHeaders, adapterRows), perAdapter].join('\n\n'),
+  ),
+  buildPage(
+    '/docs/proxy',
+    [proxyIntro, tableMarkdown(flagHeaders, flagRows), behavior].join('\n\n'),
+  ),
+  buildPage(
+    '/docs/hub',
+    [hubIntro, tableMarkdown(hubHeaders, hubRows), ingestSection].join('\n\n'),
+  ),
+  buildPage(
+    '/docs/alerts',
+    [alertsIntro, tableMarkdown(alertsHeaders, alertsRows), alertsOutro].join('\n\n'),
+  ),
+  buildPage(
+    '/docs/status-pages',
+    [statusPagesContent, tableMarkdown(statusPagesHeaders, statusPagesRows), statusPagesOutro].join(
+      '\n\n',
+    ),
+  ),
+  buildPage(
+    '/docs/dashboards',
+    [dashboardsContent, tableMarkdown(dashboardsHeaders, dashboardsRows), dashboardsOutro].join(
+      '\n\n',
+    ),
+  ),
+  buildPage(
+    '/docs/analytics',
+    [
       analyticsIntro,
-      rangeHeaders.join(' '),
-      rangeRows.flat().join(' '),
+      tableMarkdown(rangeHeaders, rangeRows),
       analyticsMid,
-      seriesHeaders.join(' '),
-      seriesRows.flat().join(' '),
+      tableMarkdown(seriesHeaders, seriesRows),
       analyticsOutro,
-    ]
-      .join(' ')
-      .toLowerCase(),
-  },
-  {
-    href: '/docs/api',
-    text: [
+    ].join('\n\n'),
+  ),
+  buildPage(
+    '/docs/api',
+    [
       apiIntro,
-      globalHeaders.join(' '),
-      globalRows.flat().join(' '),
+      tableMarkdown(globalHeaders, globalRows),
       midMarkdown,
-      queueHeaders.join(' '),
-      queueRows.flat().join(' '),
+      tableMarkdown(queueHeaders, queueRows),
       jobHeading,
-      jobHeaders.join(' '),
-      jobRows.flat().join(' '),
+      tableMarkdown(jobHeaders, jobRows),
       jobIntro,
-    ]
-      .join(' ')
-      .toLowerCase(),
-  },
-  {
-    href: '/docs/mcp',
-    text: [mcpIntro, mcpHeaders.join(' '), mcpRows.flat().join(' '), mcpOutro]
-      .join(' ')
-      .toLowerCase(),
-  },
-  {
-    href: '/docs/configuration',
-    text: [
-      configurationIntro,
-      configurationHeaders.join(' '),
-      configurationRows.flat().join(' '),
-      redaction,
-    ]
-      .join(' ')
-      .toLowerCase(),
-  },
+    ].join('\n\n'),
+  ),
+  buildPage('/docs/mcp', [mcpIntro, tableMarkdown(mcpHeaders, mcpRows), mcpOutro].join('\n\n')),
+  buildPage(
+    '/docs/configuration',
+    [configurationIntro, tableMarkdown(configurationHeaders, configurationRows), redaction].join(
+      '\n\n',
+    ),
+  ),
 ];
+
+const SNIPPET_RADIUS = 40;
+const SNIPPET_MAX_LENGTH = 80;
+
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/```/g, ' ')
+    .replace(/`/g, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/[#|]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function buildSnippet(body: string, query: string): string | null {
+  const plainBody = stripMarkdown(body);
+  if (!plainBody) {
+    return null;
+  }
+
+  const matchIndex = plainBody.toLowerCase().indexOf(query);
+  if (matchIndex === -1) {
+    if (plainBody.length <= SNIPPET_MAX_LENGTH) {
+      return plainBody;
+    }
+    return `${plainBody.slice(0, SNIPPET_MAX_LENGTH).trim()}…`;
+  }
+
+  const start = Math.max(0, matchIndex - SNIPPET_RADIUS);
+  const end = Math.min(plainBody.length, matchIndex + query.length + SNIPPET_RADIUS);
+  const prefix = start > 0 ? '…' : '';
+  const suffix = end < plainBody.length ? '…' : '';
+  return `${prefix}${plainBody.slice(start, end).trim()}${suffix}`;
+}
+
+export function findMatch(page: DocsSearchPage, query: string): DocsSearchMatch | null {
+  for (const section of page.sections) {
+    const headingMatches = section.heading?.toLowerCase().includes(query) ?? false;
+    const bodyMatches = section.body.toLowerCase().includes(query);
+    if (!headingMatches && !bodyMatches) {
+      continue;
+    }
+
+    return {
+      headingText: section.heading,
+      headingId: section.headingId,
+      snippet: buildSnippet(section.body, query),
+    };
+  }
+
+  return null;
+}
