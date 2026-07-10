@@ -17,7 +17,7 @@ export function InsightsWorkers(props: InsightsWorkersProps) {
       {isPending ? (
         <Skeleton className="h-10" />
       ) : !workers || workers.length === 0 ? (
-        <div className="rounded-lg bg-bg-error/40">
+        <div className="rounded-lg bg-bg-warning/40">
           <EmptyState
             icon={UserX}
             title="No workers connected"

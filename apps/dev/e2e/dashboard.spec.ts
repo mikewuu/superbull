@@ -279,7 +279,7 @@ test('insights section renders stats numbers for the queue', async ({ page }) =>
   await expect(page.getByTestId('insights-top-errors')).toContainText('ffmpeg exited with code 1');
 });
 
-test('workers panel shows a red empty state when no worker is connected', async ({ page }) => {
+test('workers panel shows an amber empty state when no worker is connected', async ({ page }) => {
   await page.goto('/queue/process-videos');
   await page.getByTestId('queue-insights-toggle').click();
 
