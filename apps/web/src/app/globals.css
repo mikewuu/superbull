@@ -47,13 +47,6 @@
   .cursor-blink {
     animation: cursor-blink 1s steps(2, jump-none) infinite;
   }
-
-  .scrollbar-hide {
-    scrollbar-width: none;
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
 }
 
 @keyframes cursor-blink {

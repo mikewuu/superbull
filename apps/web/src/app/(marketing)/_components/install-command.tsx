@@ -33,7 +33,10 @@ export function InstallCommand(): React.ReactElement {
         ))}
       </div>
       <div className="flex items-center gap-3 px-4 py-3.5 sm:px-5">
-        <code className="scrollbar-hide min-w-0 flex-1 overflow-x-auto font-mono text-xs leading-none whitespace-nowrap text-white sm:text-sm">
+        <code
+          title={active.command}
+          className="min-w-0 flex-1 truncate font-mono text-xs leading-none text-white sm:text-sm"
+        >
           {active.command}
         </code>
         <CopyButton text={active.command} />
