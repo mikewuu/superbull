@@ -1,3 +1,4 @@
+import { PageHeader } from '@bullwatch/ui';
 import { listSources } from '../../lib/sources/list-sources';
 import type { ProxySource } from '../../lib/sources/types';
 import { AddSourceForm } from './_components/add-source-form';
@@ -10,16 +11,15 @@ export default async function SourcesPage() {
   const rows = await getSourceRows(sources);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-6 py-8">
-      <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Sources</h1>
-        <p className="text-sm text-neutral-500">Remote bullwatch proxies this hub federates.</p>
+    <>
+      <PageHeader title="Sources" subtitle="Remote bullwatch proxies this hub federates." />
+      <div className="flex w-full flex-col gap-4 px-4 py-4 lg:px-6">
+        <div className="grid gap-5 md:grid-cols-[1fr_320px]">
+          <SourcesTable rows={rows} />
+          <AddSourceForm />
+        </div>
       </div>
-      <div className="grid gap-5 md:grid-cols-[1fr_320px]">
-        <SourcesTable rows={rows} />
-        <AddSourceForm />
-      </div>
-    </div>
+    </>
   );
 }
 
