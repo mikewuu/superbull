@@ -1,7 +1,6 @@
+import { Button, ConfirmDialog } from '@bullwatch/ui';
 import { ArrowUpCircle, RotateCcw, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '../../../components/button';
-import { ConfirmDialog } from '../../../components/confirm-dialog';
 import { useBulkJobAction } from '../../../hooks/use-bulk-job-action';
 
 interface BulkActionsBarProps {

@@ -1,9 +1,9 @@
+import { cn } from '@bullwatch/ui';
 import { Activity, LayoutGrid } from 'lucide-react';
 import { NavLink } from 'react-router';
 import { useQueues } from '../hooks/use-queues';
 import { useRedisStats } from '../hooks/use-redis-stats';
 import type { AppQueue } from '../lib/api-types';
-import { cn } from '../lib/cn';
 
 export function Sidebar() {
   const { data: queues } = useQueues({});

@@ -1,7 +1,7 @@
+import { cn } from '@bullwatch/ui';
 import { cva } from 'class-variance-authority';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { cn } from '../../../lib/cn';
 
 const statTileIconVariants = cva('flex size-7 shrink-0 items-center justify-center rounded-lg', {
   variants: {

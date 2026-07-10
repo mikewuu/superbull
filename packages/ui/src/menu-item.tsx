@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { cn } from '../lib/cn';
+import { cn } from './cn';
 
 interface MenuItemProps {
   icon: LucideIcon;

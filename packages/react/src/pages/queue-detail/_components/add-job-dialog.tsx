@@ -1,6 +1,5 @@
+import { Button, Dialog } from '@bullwatch/ui';
 import { useState } from 'react';
-import { Button } from '../../../components/button';
-import { Dialog } from '../../../components/dialog';
 import { useAddJob } from '../../../hooks/use-add-job';
 
 interface AddJobDialogProps {

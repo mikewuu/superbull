@@ -1,0 +1,4 @@
+{
+  "extends": "@bullwatch/tsconfig/react-library.json",
+  "include": ["src", "tests"]
+}

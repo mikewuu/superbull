@@ -1,12 +1,8 @@
+import { Button, ConfirmDialog, JobStatusBadge, PageHeader, Skeleton } from '@bullwatch/ui';
 import { ArrowUpCircle, RefreshCcw, RotateCcw, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Breadcrumbs } from '../../components/breadcrumbs';
-import { Button } from '../../components/button';
-import { ConfirmDialog } from '../../components/confirm-dialog';
-import { JobStatusBadge } from '../../components/job-status-badge';
-import { PageHeader } from '../../components/page-header';
-import { Skeleton } from '../../components/skeleton';
 import { useJob } from '../../hooks/use-job';
 import { usePromoteJob } from '../../hooks/use-promote-job';
 import { useRemoveJob } from '../../hooks/use-remove-job';

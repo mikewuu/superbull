@@ -1,3 +1,4 @@
+import { Button, ConfirmDialog, MenuItem, Popover } from '@bullwatch/ui';
 import {
   ArrowUpCircle,
   Eraser,
@@ -9,10 +10,6 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '../../../components/button';
-import { ConfirmDialog } from '../../../components/confirm-dialog';
-import { MenuItem } from '../../../components/menu-item';
-import { Popover } from '../../../components/popover';
 import { useCleanQueue } from '../../../hooks/use-clean-queue';
 import { useEmptyQueue } from '../../../hooks/use-empty-queue';
 import { usePauseQueue } from '../../../hooks/use-pause-queue';

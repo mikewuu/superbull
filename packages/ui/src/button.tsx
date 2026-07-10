@@ -1,7 +1,7 @@
 import { type VariantProps, cva } from 'class-variance-authority';
 import { Loader2 } from 'lucide-react';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
-import { cn } from '../lib/cn';
+import { cn } from './cn';
 
 const buttonVariants = cva(
   'flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-lg border px-3 text-sm font-medium outline-none transition-[transform,background-color,color] duration-150 ease-snout focus-visible:ring-2 focus-visible:ring-blue-500/40 disabled:cursor-not-allowed disabled:opacity-60 disabled:active:transform-none',

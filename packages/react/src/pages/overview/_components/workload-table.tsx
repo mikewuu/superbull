@@ -1,8 +1,7 @@
+import { StatusBadge, cn } from '@bullwatch/ui';
 import { CirclePause } from 'lucide-react';
 import { useNavigate } from 'react-router';
-import { StatusBadge } from '../../../components/status-badge';
 import type { AppQueue } from '../../../lib/api-types';
-import { cn } from '../../../lib/cn';
 
 interface WorkloadTableProps {
   queues: AppQueue[];

@@ -1,7 +1,7 @@
 import { type VariantProps, cva } from 'class-variance-authority';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { cn } from '../lib/cn';
+import { cn } from './cn';
 
 const statusBadgeVariants = cva(
   'flex max-w-fit items-center gap-1 whitespace-nowrap rounded px-1.5 py-0.5 text-[11px] font-medium',

@@ -1,10 +1,10 @@
+import { cn } from '@bullwatch/ui';
 import { curveMonotoneX } from '@visx/curve';
 import { LinearGradient } from '@visx/gradient';
 import { ParentSize } from '@visx/responsive';
 import { scaleLinear } from '@visx/scale';
 import { AreaClosed, LinePath } from '@visx/shape';
 import { useState } from 'react';
-import { cn } from '../../../lib/cn';
 
 interface ThroughputChartProps {
   completedBuckets: number[];

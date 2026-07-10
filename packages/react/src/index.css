@@ -15,11 +15,3 @@
     color: rgb(var(--brand-ink));
   }
 }
-
-@layer components {
-  /* flat panel — part of the page, not floating above it */
-  .candy-card {
-    background: #ffffff;
-    border: 1px solid rgb(var(--border-subtle));
-  }
-}

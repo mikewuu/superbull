@@ -1,8 +1,7 @@
+import { Popover, cn } from '@bullwatch/ui';
 import { Check, ChevronDown, ListFilter, X } from 'lucide-react';
 import { useState } from 'react';
-import { Popover } from '../../../components/popover';
 import { type AppQueue, type JobStatus, jobStatuses } from '../../../lib/api-types';
-import { cn } from '../../../lib/cn';
 
 interface StatusFilterProps {
   queue: AppQueue;

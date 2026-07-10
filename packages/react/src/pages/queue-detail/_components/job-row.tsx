@@ -1,12 +1,10 @@
+import { Button, JobStatusBadge, cn } from '@bullwatch/ui';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { RotateCcw } from 'lucide-react';
 import type { MouseEvent } from 'react';
 import { useNavigate } from 'react-router';
-import { Button } from '../../../components/button';
-import { JobStatusBadge } from '../../../components/job-status-badge';
 import { useRetryJob } from '../../../hooks/use-retry-job';
 import type { AppJob, JobStatus } from '../../../lib/api-types';
-import { cn } from '../../../lib/cn';
 import { JobActionsMenu } from './job-actions-menu';
 
 interface JobRowProps {

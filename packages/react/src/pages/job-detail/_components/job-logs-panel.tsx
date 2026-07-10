@@ -1,5 +1,5 @@
+import { cn } from '@bullwatch/ui';
 import { useJobLogs } from '../../../hooks/use-job-logs';
-import { cn } from '../../../lib/cn';
 
 interface JobLogsPanelProps {
   queueName: string;

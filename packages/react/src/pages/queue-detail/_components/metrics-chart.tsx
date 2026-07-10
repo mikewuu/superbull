@@ -1,3 +1,4 @@
+import { cn } from '@bullwatch/ui';
 import { curveMonotoneX } from '@visx/curve';
 import { LinearGradient } from '@visx/gradient';
 import { ParentSize } from '@visx/responsive';
@@ -6,7 +7,6 @@ import { AreaClosed, LinePath } from '@visx/shape';
 import { useState } from 'react';
 import { useQueueMetrics } from '../../../hooks/use-queue-metrics';
 import type { MetricsType } from '../../../lib/api-types';
-import { cn } from '../../../lib/cn';
 
 interface MetricsChartProps {
   queueName: string;

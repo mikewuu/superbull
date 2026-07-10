@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { JobStatusBadge } from '../src/components/job-status-badge';
-import { type JobStatus, jobStatuses } from '../src/lib/api-types';
+import { type JobStatus, jobStatuses } from '../src/job-status';
+import { JobStatusBadge } from '../src/job-status-badge';
 
 describe('JobStatusBadge', () => {
   it.each(jobStatuses)('renders a label for the %s status', (status: JobStatus) => {

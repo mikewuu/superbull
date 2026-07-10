@@ -1,5 +1,5 @@
+import { EmptyState } from '@bullwatch/ui';
 import { ArrowDown, ArrowUp, Inbox } from 'lucide-react';
-import { EmptyState } from '../../../components/empty-state';
 import type { AppQueue, QueueStatus } from '../../../lib/api-types';
 import { getJobStatus } from '../../../lib/get-job-status';
 import { JobRow } from './job-row';

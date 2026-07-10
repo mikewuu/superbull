@@ -1,5 +1,5 @@
+import { cn } from '@bullwatch/ui';
 import { format } from 'date-fns';
-import { cn } from '../../../lib/cn';
 
 interface TimingSidebarProps {
   timestamp: number;

@@ -1,5 +1,5 @@
+import { Button } from '@bullwatch/ui';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '../../../components/button';
 import type { AppQueue, JobStatus, QueueStatus } from '../../../lib/api-types';
 
 interface QueuePaginationProps {

@@ -8,7 +8,7 @@ import {
   CirclePlay,
   Clock,
 } from 'lucide-react';
-import type { JobStatus } from '../lib/api-types';
+import type { JobStatus } from './job-status';
 import { StatusBadge } from './status-badge';
 
 interface JobStatusBadgeProps {

@@ -1,3 +1,4 @@
+import { EmptyState, PageHeader, Skeleton } from '@bullwatch/ui';
 import {
   Activity,
   AlertCircle,
@@ -7,9 +8,6 @@ import {
   PauseCircle,
   Users,
 } from 'lucide-react';
-import { EmptyState } from '../../components/empty-state';
-import { PageHeader } from '../../components/page-header';
-import { Skeleton } from '../../components/skeleton';
 import { useOverviewMetrics } from '../../hooks/use-overview-metrics';
 import { useQueues } from '../../hooks/use-queues';
 import type { AppQueue } from '../../lib/api-types';

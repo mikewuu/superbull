@@ -1,10 +1,7 @@
+import { Button, EmptyState, Skeleton, cn } from '@bullwatch/ui';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { ListTodo, Play } from 'lucide-react';
-import { Button } from '../../../components/button';
-import { EmptyState } from '../../../components/empty-state';
-import { Skeleton } from '../../../components/skeleton';
 import { useJobNames } from '../../../hooks/use-job-names';
-import { cn } from '../../../lib/cn';
 
 interface JobNamesTableProps {
   queueName: string;

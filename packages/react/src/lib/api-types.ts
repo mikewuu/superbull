@@ -1,15 +1,8 @@
-export const jobStatuses = [
-  'active',
-  'waiting',
-  'waiting-children',
-  'prioritized',
-  'completed',
-  'failed',
-  'delayed',
-  'paused',
-] as const;
+import type { JobStatus } from '@bullwatch/ui';
 
-export type JobStatus = (typeof jobStatuses)[number];
+export { jobStatuses } from '@bullwatch/ui';
+export type { JobStatus };
+
 export type QueueStatus = JobStatus | 'latest';
 export type JobCleanStatus = 'completed' | 'waiting' | 'active' | 'delayed' | 'failed';
 export type JobRetryStatus = 'completed' | 'failed';
