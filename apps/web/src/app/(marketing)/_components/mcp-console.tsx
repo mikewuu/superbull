@@ -89,13 +89,13 @@ export function McpConsole(): React.ReactElement {
       </div>
       <p className="px-5 pt-4 text-2sm text-content-default">{active.desc}</p>
       <div className="grid gap-px bg-border-subtle sm:grid-cols-2">
-        <div className="bg-bg-inverted p-5">
+        <div className="min-h-[232px] bg-bg-inverted p-5">
           <p className="font-mono text-xs text-white/40">request</p>
           <pre className="mt-2 font-mono text-[12.5px] leading-relaxed whitespace-pre-wrap break-all text-white/85">
             {active.request}
           </pre>
         </div>
-        <div className="bg-bg-inverted p-5">
+        <div className="min-h-[232px] bg-bg-inverted p-5">
           <p className="font-mono text-xs text-white/40">response</p>
           <pre className="mt-2 font-mono text-[12.5px] leading-relaxed whitespace-pre-wrap break-all text-candy-green/80">
             {active.response}
