@@ -42,7 +42,7 @@ export default function LandingPage(): React.ReactElement {
       {/* hero */}
       <section
         id="install"
-        className="relative isolate scroll-mt-16 overflow-hidden px-4 pt-16 pb-24 sm:px-6 sm:pt-20 sm:pb-28"
+        className="relative isolate scroll-mt-16 overflow-hidden px-4 pt-16 sm:px-6 sm:pt-20"
       >
         <div className="relative z-10">
           <div className="mx-auto max-w-3xl text-center">
@@ -50,16 +50,15 @@ export default function LandingPage(): React.ReactElement {
               Open source · MIT licensed
             </span>
             <h1 className="mt-6 text-5xl leading-[1.05] font-semibold tracking-tight text-content-emphasis sm:text-6xl">
-              See every job.
+              A beautiful dashboard
               <br />
-              Fix what&apos;s stuck.
+              for BullMQ
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-content-default">
-              SuperBull is an open-source dashboard for BullMQ: a dense runs table, full job
-              timelines, one-click retries, and alerts — wired straight into the queues you already
-              run.
+              A dense runs table, full job timelines, one-click retries, and alerts — wired straight
+              into the queues you already run.
             </p>
-            <div className="mx-auto mt-8 max-w-md">
+            <div className="mx-auto mt-8 max-w-lg">
               <InstallCommand />
             </div>
             <p className="mt-4 text-2sm text-content-subtle">
