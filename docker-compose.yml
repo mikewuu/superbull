@@ -1,0 +1,7 @@
+name: superbull
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6386:6379'
