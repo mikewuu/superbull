@@ -27,3 +27,48 @@
   --color-candy-yellow: #f5c344;
   --color-candy-orange: #f0793a;
 }
+
+@layer components {
+  .reveal {
+    transition: opacity 0.7s var(--ease-snout), translate 0.7s var(--ease-snout), filter 0.7s
+      var(--ease-snout);
+  }
+  .reveal[data-animate="true"] {
+    opacity: 0;
+    translate: 0 1.5rem;
+    filter: blur(12px);
+  }
+  .reveal[data-animate="true"][data-visible="true"] {
+    opacity: 1;
+    translate: 0 0;
+    filter: none;
+  }
+
+  .bull-bob {
+    animation: bull-bob 4.5s ease-in-out infinite;
+  }
+}
+
+@keyframes bull-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal[data-animate="true"],
+  .reveal[data-animate="true"][data-visible="true"] {
+    transition: none;
+    opacity: 1;
+    translate: 0 0;
+    filter: none;
+  }
+  .bull-bob {
+    animation: none;
+  }
+}
