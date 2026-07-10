@@ -110,8 +110,13 @@ async function getJobPage(args: {
   const asc = query.sort === 'asc';
 
   if (!query.search) {
-    const jobs = await queue.getJobs(statuses, pagination.range.start, pagination.range.end, asc);
-    return { jobs, pagination };
+    const fetched = await queue.getJobs(
+      statuses,
+      pagination.range.start,
+      pagination.range.end,
+      asc,
+    );
+    return { jobs: capToPageSize(fetched, query.per_page, asc), pagination };
   }
 
   const matching = await searchJobs({ queue, statuses, search: query.search, asc });
@@ -124,6 +129,19 @@ async function getJobPage(args: {
       range: { start, end: start + query.per_page - 1 },
     },
   };
+}
+
+// BullMQ's getJobs returns up to a full range per status, so a multi-status
+// fetch can exceed the page size; sort across statuses and cap to one page.
+function capToPageSize(jobs: QueueJob[], perPage: number, asc: boolean): QueueJob[] {
+  if (jobs.length <= perPage) {
+    return jobs;
+  }
+  const sorted = [...jobs].sort((a, b) => {
+    const delta = a.toJSON().timestamp - b.toJSON().timestamp;
+    return asc ? delta : -delta;
+  });
+  return sorted.slice(0, perPage);
 }
 
 // Search scans a bounded window of recent jobs rather than the whole queue.

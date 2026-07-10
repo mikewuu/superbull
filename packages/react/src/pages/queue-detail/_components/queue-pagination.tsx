@@ -20,7 +20,7 @@ export function QueuePagination(props: QueuePaginationProps) {
   }
 
   const shownStart = pagination.range.start + 1;
-  const shownEnd = pagination.range.start + queue.jobs.length;
+  const shownEnd = pagination.range.start + Math.min(queue.jobs.length, perPage);
   const total = status === 'latest' ? null : (queue.counts[status as JobStatus] ?? null);
 
   return (
