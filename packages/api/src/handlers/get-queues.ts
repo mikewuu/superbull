@@ -34,9 +34,20 @@ export async function getQueues(req: BoardRequest): Promise<HandlerResponse> {
   }
 
   const query = parsed.data;
-  const queues = await Promise.all(
+  // One broken or mid-obliterate queue must not blank the whole dashboard,
+  // but a total failure should still surface as an error.
+  const results = await Promise.allSettled(
     [...req.queues.entries()].map(([queueName, queue]) => toAppQueue(queueName, queue, query)),
   );
+  const queues = results
+    .filter((result): result is PromiseFulfilledResult<AppQueue> => result.status === 'fulfilled')
+    .map((result) => result.value);
+  const firstFailure = results.find(
+    (result): result is PromiseRejectedResult => result.status === 'rejected',
+  );
+  if (queues.length === 0 && firstFailure) {
+    throw firstFailure.reason;
+  }
 
   return { body: { queues } };
 }
