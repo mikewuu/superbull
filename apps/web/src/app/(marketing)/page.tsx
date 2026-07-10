@@ -87,7 +87,7 @@ export default function LandingPage(): React.ReactElement {
               width={112}
               height={96}
               unoptimized
-              className="absolute -top-9 right-10 z-10 w-16 select-none sm:-top-11 sm:right-20 sm:w-20"
+              className="absolute -top-4 right-10 z-10 w-16 select-none sm:-top-5 sm:right-20 sm:w-20"
             />
             <div className="overflow-hidden rounded-2xl border border-border-subtle bg-bg-default shadow-[0_30px_80px_-30px_rgba(0,0,0,0.28)]">
               <div className="flex items-center gap-1.5 border-b border-border-subtle bg-bg-muted px-4 py-2.5">
