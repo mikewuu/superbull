@@ -25,7 +25,7 @@ async function handle(
     contentType: req.headers.get('content-type'),
   });
 
-  return new NextResponse(result.body, {
+  return new NextResponse(result.status === 204 ? null : result.body, {
     status: result.status,
     headers: result.contentType ? { 'content-type': result.contentType } : undefined,
   });

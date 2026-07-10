@@ -1,5 +1,4 @@
 import { readFile } from 'node:fs/promises';
-import { createRequire } from 'node:module';
 import path from 'node:path';
 import { NextResponse } from 'next/server';
 import { renderSpaEntry } from '../../../../lib/forwarding/render-spa-entry';
@@ -46,9 +45,7 @@ export async function GET(
 }
 
 function getReactDistDir(): string {
-  const require = createRequire(import.meta.url);
-  const packageJsonPath = require.resolve('@bullwatch/react/package.json');
-  return path.join(path.dirname(packageJsonPath), 'dist');
+  return path.join(process.cwd(), 'node_modules', '@bullwatch/react', 'dist');
 }
 
 async function getEntryTemplate(distDir: string): Promise<string> {
