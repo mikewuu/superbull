@@ -7,6 +7,7 @@ import { FinalCta } from './_components/final-cta';
 import { InstallCommand } from './_components/install-command';
 import { McpConsole } from './_components/mcp-console';
 import { NavBar } from './_components/nav-bar';
+import { RepoTreeCard } from './_components/repo-tree-card';
 import { Reveal } from './_components/reveal';
 import { StatFlood } from './_components/stat-flood';
 import { ThreeWaysSection } from './_components/three-ways-section';
@@ -231,27 +232,32 @@ export default function LandingPage(): React.ReactElement {
 
       {/* open source */}
       <section className="border-y border-border-subtle bg-bg-muted px-4 py-24 sm:px-6 sm:py-28">
-        <div className="mx-auto max-w-2xl">
+        <div className="mx-auto grid max-w-5xl items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
           <Reveal>
-            <p className="font-mono text-2sm text-content-subtle">06 — open source</p>
-            <h2 className="mt-3 text-4xl leading-[1.08] font-semibold tracking-tight text-content-emphasis sm:text-5xl">
-              MIT licensed.
-              <br />
-              <span className="text-content-muted">No seat limits, no pricing page.</span>
-            </h2>
-            <p className="mt-5 max-w-lg text-lg leading-8 text-content-default">
-              Fork it, self-host it, read every line. SuperBull&apos;s adapter architecture is
-              derived from bull-board (MIT, credited in the repo); the board, the proxy, and the hub
-              are all in the same public repository.
-            </p>
-            <a
-              href={githubUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-7 inline-flex h-11 items-center rounded-lg bg-brand px-5 text-2sm font-semibold text-white transition-colors hover:bg-brand-deep"
-            >
-              View source on GitHub
-            </a>
+            <div>
+              <p className="font-mono text-2sm text-content-subtle">06 — open source</p>
+              <h2 className="mt-3 text-4xl leading-[1.08] font-semibold tracking-tight text-content-emphasis sm:text-5xl">
+                MIT licensed.
+                <br />
+                <span className="text-content-muted">No seat limits, no pricing page.</span>
+              </h2>
+              <p className="mt-5 max-w-lg text-lg leading-8 text-content-default">
+                Fork it, self-host it, read every line. SuperBull&apos;s adapter architecture is
+                derived from bull-board (MIT, credited in the repo); the board, the proxy, and the
+                hub are all in the same public repository.
+              </p>
+              <a
+                href={githubUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-7 inline-flex h-11 items-center rounded-lg bg-brand px-5 text-2sm font-semibold text-white transition-colors hover:bg-brand-deep"
+              >
+                View source on GitHub
+              </a>
+            </div>
+          </Reveal>
+          <Reveal delay={140}>
+            <RepoTreeCard />
           </Reveal>
         </div>
       </section>
