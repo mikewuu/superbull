@@ -1,3 +1,5 @@
+@import "./themes.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,5 +7,10 @@
 @layer base {
   body {
     @apply bg-bg-default font-sans text-content-default antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  ::selection {
+    @apply bg-blue-100 text-blue-900;
   }
 }
