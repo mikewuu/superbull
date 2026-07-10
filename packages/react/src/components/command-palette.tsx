@@ -55,7 +55,7 @@ export function CommandPalette() {
 
           <Command.Group
             heading="Navigate"
-            className="px-1.5 py-1 text-[11px] font-medium uppercase tracking-wide text-content-muted [&_[cmdk-group-items]]:mt-1"
+            className="px-1.5 py-1 text-[11px] font-medium tracking-wide text-content-muted [&_[cmdk-group-items]]:mt-1"
           >
             <Command.Item
               value="Overview"
@@ -83,7 +83,7 @@ export function CommandPalette() {
           {currentQueue && (
             <Command.Group
               heading="This queue"
-              className="px-1.5 py-1 text-[11px] font-medium uppercase tracking-wide text-content-muted [&_[cmdk-group-items]]:mt-1"
+              className="px-1.5 py-1 text-[11px] font-medium tracking-wide text-content-muted [&_[cmdk-group-items]]:mt-1"
             >
               <Command.Item
                 value={currentQueue.is_paused ? 'Resume queue' : 'Pause queue'}
