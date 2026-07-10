@@ -59,7 +59,7 @@ export function createIngestBatcher(args: {
     await sleep(3000);
     const retried = await postEvents(events);
     if (!retried) {
-      console.warn(`bullwatch-proxy: dropped ${events.length} ingest event(s) after retry`);
+      console.warn(`superbull-proxy: dropped ${events.length} ingest event(s) after retry`);
     }
   }
 

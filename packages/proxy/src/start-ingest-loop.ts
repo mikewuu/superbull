@@ -1,4 +1,4 @@
-import type { BaseAdapter, QueueJobJson } from '@bullwatch/api';
+import type { BaseAdapter, QueueJobJson } from '@superbull/api';
 import type { IngestBatcher, IngestEvent } from './create-ingest-batcher';
 
 export interface IngestLoop {

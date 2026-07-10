@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { hostname } from 'node:os';
-import { BullMQAdapter } from '@bullwatch/api';
+import { BullMQAdapter } from '@superbull/api';
 import { Queue } from 'bullmq';
 import { createIngestBatcher } from './create-ingest-batcher';
 import { discoverQueueNames } from './discover-queue-names';
@@ -9,24 +9,24 @@ import { registerWithHub } from './register-with-hub';
 import { startIngestLoop } from './start-ingest-loop';
 import { startProxy } from './start-proxy';
 
-const helpText = `bullwatch-proxy — headless bullwatch agent
+const helpText = `superbull-proxy — headless superbull agent
 
-Usage: bullwatch-proxy --token <token> [options]
+Usage: superbull-proxy --token <token> [options]
 
 Options:
-  -n, --name <name>            Proxy name shown on the hub (BULLWATCH_NAME, default hostname)
-  -t, --token <token>          Bearer token clients must present (BULLWATCH_TOKEN, required)
-      --port <port>            Proxy port (BULLWATCH_PORT, default 4650)
+  -n, --name <name>            Proxy name shown on the hub (SUPERBULL_NAME, default hostname)
+  -t, --token <token>          Bearer token clients must present (SUPERBULL_TOKEN, required)
+      --port <port>            Proxy port (SUPERBULL_PORT, default 4650)
   -h, --redis-host <host>      Redis host (REDIS_HOST, default 127.0.0.1)
   -p, --redis-port <port>      Redis port (REDIS_PORT, default 6379)
       --redis-password <pw>    Redis password (REDIS_PASSWORD)
       --redis-db <db>          Redis db index (REDIS_DB)
       --tls                    Use TLS for Redis (REDIS_TLS=true)
-      --prefix <prefix>        Queue key prefix (BULLWATCH_PREFIX, default bull)
-      --queues <a,b,c>         Explicit queue names, comma separated (BULLWATCH_QUEUES)
+      --prefix <prefix>        Queue key prefix (SUPERBULL_PREFIX, default bull)
+      --queues <a,b,c>         Explicit queue names, comma separated (SUPERBULL_QUEUES)
       --queues-file <path>     Newline-separated queue names file
-      --hub <url>              Hub URL to register with (BULLWATCH_HUB_URL)
-      --hub-token <token>      Hub bearer token (BULLWATCH_HUB_TOKEN)
+      --hub <url>              Hub URL to register with (SUPERBULL_HUB_URL)
+      --hub-token <token>      Hub bearer token (SUPERBULL_HUB_TOKEN)
       --advertise-url <url>    URL advertised to the hub instead of the local hostname
       --no-ingest               Disable outbound event ingest even when a hub is configured
       --help                    Show this help
@@ -139,7 +139,7 @@ function logStartupSummary(
   port: number,
   hubStatus: HubStatus | undefined,
 ): void {
-  console.log(`bullwatch-proxy "${config.name}" listening on :${port}`);
+  console.log(`superbull-proxy "${config.name}" listening on :${port}`);
   console.log(`  queues: ${queueNames.join(', ')}`);
   if (!config.hubUrl) {
     console.log('  hub: not configured');

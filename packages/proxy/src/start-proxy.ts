@@ -8,7 +8,7 @@ import {
   type IServerAdapter,
   type UIConfig,
   createBoard,
-} from '@bullwatch/api';
+} from '@superbull/api';
 
 export interface RunningProxy {
   server: Server;

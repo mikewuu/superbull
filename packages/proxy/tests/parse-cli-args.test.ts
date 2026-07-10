@@ -55,18 +55,18 @@ describe('parseCliArgs', () => {
 
   it('falls back to env vars', () => {
     const config = parseCliArgs([], {
-      BULLWATCH_NAME: 'env-name',
-      BULLWATCH_TOKEN: 'env-token',
-      BULLWATCH_PORT: '4700',
+      SUPERBULL_NAME: 'env-name',
+      SUPERBULL_TOKEN: 'env-token',
+      SUPERBULL_PORT: '4700',
       REDIS_HOST: 'env-host',
       REDIS_PORT: '6390',
       REDIS_PASSWORD: 'env-pw',
       REDIS_DB: '3',
       REDIS_TLS: 'true',
-      BULLWATCH_PREFIX: 'env-prefix',
-      BULLWATCH_QUEUES: 'x,y',
-      BULLWATCH_HUB_URL: 'http://env-hub.local',
-      BULLWATCH_HUB_TOKEN: 'env-hub-token',
+      SUPERBULL_PREFIX: 'env-prefix',
+      SUPERBULL_QUEUES: 'x,y',
+      SUPERBULL_HUB_URL: 'http://env-hub.local',
+      SUPERBULL_HUB_TOKEN: 'env-hub-token',
     });
 
     expect(config).toMatchObject({
@@ -96,7 +96,7 @@ describe('parseCliArgs', () => {
   });
 
   it('reads queue names from a queues file, newline separated', () => {
-    const file = join(tmpdir(), `bullwatch-queues-${Date.now()}.txt`);
+    const file = join(tmpdir(), `superbull-queues-${Date.now()}.txt`);
     writeFileSync(file, 'alpha\nbeta:custom-prefix\n\ngamma\n');
 
     const config = parseCliArgs(['--token', 'secret', '--queues-file', file], {});

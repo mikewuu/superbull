@@ -1,4 +1,4 @@
-import { BullMQAdapter } from '@bullwatch/api';
+import { BullMQAdapter } from '@superbull/api';
 import { Queue } from 'bullmq';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { type RunningProxy, startProxy } from '../src/start-proxy';

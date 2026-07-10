@@ -65,25 +65,25 @@ export function parseCliArgs(argv: string[], env: NodeJS.ProcessEnv = process.en
     };
   }
 
-  const token = values.token ?? env.BULLWATCH_TOKEN;
+  const token = values.token ?? env.SUPERBULL_TOKEN;
   if (!token) {
-    throw new Error('bullwatch-proxy requires a token (-t/--token or BULLWATCH_TOKEN)');
+    throw new Error('superbull-proxy requires a token (-t/--token or SUPERBULL_TOKEN)');
   }
 
   return {
     help: false,
-    name: values.name ?? env.BULLWATCH_NAME ?? hostname(),
+    name: values.name ?? env.SUPERBULL_NAME ?? hostname(),
     token,
-    port: Number(values.port ?? env.BULLWATCH_PORT ?? 4650),
+    port: Number(values.port ?? env.SUPERBULL_PORT ?? 4650),
     redisHost: values['redis-host'] ?? env.REDIS_HOST ?? '127.0.0.1',
     redisPort: Number(values['redis-port'] ?? env.REDIS_PORT ?? 6379),
     redisPassword: values['redis-password'] ?? env.REDIS_PASSWORD,
     redisDb: parseOptionalInt(values['redis-db'] ?? env.REDIS_DB),
     redisTls: values.tls === true || env.REDIS_TLS === 'true',
-    prefix: values.prefix ?? env.BULLWATCH_PREFIX ?? 'bull',
-    queueNames: resolveQueueNames(values.queues, values['queues-file'], env.BULLWATCH_QUEUES),
-    hubUrl: values.hub ?? env.BULLWATCH_HUB_URL,
-    hubToken: values['hub-token'] ?? env.BULLWATCH_HUB_TOKEN,
+    prefix: values.prefix ?? env.SUPERBULL_PREFIX ?? 'bull',
+    queueNames: resolveQueueNames(values.queues, values['queues-file'], env.SUPERBULL_QUEUES),
+    hubUrl: values.hub ?? env.SUPERBULL_HUB_URL,
+    hubToken: values['hub-token'] ?? env.SUPERBULL_HUB_TOKEN,
     advertiseUrl: values['advertise-url'],
     ingest: values['no-ingest'] !== true,
   };

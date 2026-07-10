@@ -1,12 +1,12 @@
 {
-  "name": "@bullwatch/proxy",
+  "name": "@superbull/proxy",
   "version": "0.0.0",
-  "description": "Headless bullwatch agent — exposes the queue API for a remote hub, no UI",
+  "description": "Headless superbull agent — exposes the queue API for a remote hub, no UI",
   "keywords": ["bullmq", "dashboard", "monitoring", "queue", "redis", "proxy", "agent"],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mikewu/bullwatch.git",
+    "url": "git+https://github.com/mikewu/superbull.git",
     "directory": "packages/proxy"
   },
   "type": "module",
@@ -26,7 +26,7 @@
     }
   },
   "bin": {
-    "bullwatch-proxy": "./dist/cli.js"
+    "superbull-proxy": "./dist/cli.js"
   },
   "files": ["dist"],
   "publishConfig": {
@@ -38,14 +38,14 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@bullwatch/api": "workspace:*",
+    "@superbull/api": "workspace:*",
     "ioredis": "^5.10.1"
   },
   "peerDependencies": {
     "bullmq": "^5.0.0"
   },
   "devDependencies": {
-    "@bullwatch/tsconfig": "workspace:*",
+    "@superbull/tsconfig": "workspace:*",
     "@types/node": "^22.10.2",
     "bullmq": "^5.34.0",
     "tsup": "^8.3.5",

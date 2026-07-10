@@ -33,7 +33,7 @@ export async function registerWithHub(
     } catch (error) {
       if (attempt === attempts) {
         console.warn(
-          `bullwatch-proxy: failed to register with hub after ${attempts} attempts:`,
+          `superbull-proxy: failed to register with hub after ${attempts} attempts:`,
           error instanceof Error ? error.message : error,
         );
         return null;
