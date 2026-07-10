@@ -1,22 +1,58 @@
-import { getHubDatabase } from '../../lib/db/get-hub-database';
+import { listSources } from '../../lib/sources/list-sources';
+import type { ProxySource } from '../../lib/sources/types';
+import { AddSourceForm } from './_components/add-source-form';
+import { type SourceRow, SourcesTable } from './_components/sources-table';
+
+export const dynamic = 'force-dynamic';
 
 export default async function SourcesPage() {
-  const sources = await getHubDatabase().listSources();
+  const sources = await listSources();
+  const rows = await getSourceRows(sources);
 
   return (
-    <div className="space-y-4 text-sm">
-      <h2 className="text-base font-medium">Sources</h2>
-      <p className="text-neutral-500">
-        {sources.length} source{sources.length === 1 ? '' : 's'}
-      </p>
-      <ul className="divide-y divide-neutral-200">
-        {sources.map((source) => (
-          <li key={source.id} className="py-2">
-            <div className="font-medium">{source.name}</div>
-            <div className="text-neutral-500">{source.url}</div>
-          </li>
-        ))}
-      </ul>
+    <div className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+      <div>
+        <h1 className="text-lg font-semibold text-neutral-900">Sources</h1>
+        <p className="text-sm text-neutral-500">Remote bullwatch proxies this hub federates.</p>
+      </div>
+      <div className="grid gap-5 md:grid-cols-[1fr_320px]">
+        <SourcesTable rows={rows} />
+        <AddSourceForm />
+      </div>
     </div>
   );
+}
+
+async function getSourceRows(sources: ProxySource[]): Promise<SourceRow[]> {
+  const [healthResults, queueResults] = await Promise.all([
+    Promise.allSettled(sources.map((source) => checkSourceOnline(source.url))),
+    Promise.allSettled(sources.map((source) => getSourceQueueCount(source))),
+  ]);
+
+  return sources.map((source, index) => ({
+    source,
+    online: settledValue(healthResults[index], false),
+    queueCount: settledValue(queueResults[index], null),
+  }));
+}
+
+function settledValue<T>(result: PromiseSettledResult<T> | undefined, fallback: T): T {
+  return result?.status === 'fulfilled' ? result.value : fallback;
+}
+
+async function checkSourceOnline(url: string): Promise<boolean> {
+  const response = await fetch(`${url}/healthz`, { signal: AbortSignal.timeout(2000) });
+  return response.ok;
+}
+
+async function getSourceQueueCount(source: ProxySource): Promise<number | null> {
+  const response = await fetch(`${source.url}/api/queues`, {
+    headers: { authorization: `Bearer ${source.token}` },
+    signal: AbortSignal.timeout(2000),
+  });
+  if (!response.ok) {
+    return null;
+  }
+  const body = (await response.json()) as { queues: unknown[] };
+  return body.queues.length;
 }
