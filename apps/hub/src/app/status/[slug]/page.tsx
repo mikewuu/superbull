@@ -1,5 +1,4 @@
 import { StatusBadge } from '@superbull/ui';
-import { Activity } from 'lucide-react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getOverallStatus } from '../../../lib/status-pages/get-overall-status';
@@ -46,9 +45,7 @@ export default async function StatusPage(props: StatusPageProps) {
         {page.logo_url ? (
           <img src={page.logo_url} alt="" className="h-10 w-auto" />
         ) : (
-          <span className="flex size-10 items-center justify-center rounded-lg bg-bg-inverted">
-            <Activity className="size-5 text-content-inverted" />
-          </span>
+          <img src="/logo-mark.webp" alt="" className="h-10 w-auto" />
         )}
         <h1 className="text-xl font-semibold text-content-emphasis">{page.title}</h1>
       </div>

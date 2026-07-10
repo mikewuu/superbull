@@ -1,6 +1,7 @@
 import { cn } from '@superbull/ui';
-import { Activity, LayoutGrid } from 'lucide-react';
+import { LayoutGrid } from 'lucide-react';
 import { NavLink } from 'react-router';
+import logoMark from '../assets/logo-mark.webp';
 import { useQueues } from '../hooks/use-queues';
 import { useRedisStats } from '../hooks/use-redis-stats';
 import { QueueLink } from './queue-link';
@@ -12,9 +13,7 @@ export function Sidebar() {
   return (
     <aside className="flex w-60 shrink-0 flex-col gap-3 border-r border-border-subtle bg-bg-default p-3">
       <div className="flex h-10 items-center gap-2.5 px-2">
-        <span className="flex size-7 items-center justify-center rounded-lg bg-bg-inverted">
-          <Activity className="size-4 text-content-inverted" />
-        </span>
+        <img src={logoMark} alt="" className="h-7 w-auto" />
         <span className="text-2sm font-semibold tracking-tight text-content-emphasis">
           SuperBull
         </span>

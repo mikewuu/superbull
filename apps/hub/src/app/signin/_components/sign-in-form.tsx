@@ -2,7 +2,6 @@
 
 import { useAuthActions } from '@convex-dev/auth/react';
 import { Button } from '@superbull/ui';
-import { Activity } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { type FormEvent, useState } from 'react';
 
@@ -37,9 +36,7 @@ export function SignInForm(props: SignInFormProps) {
     <div className="flex min-h-screen items-center justify-center bg-bg-muted p-6">
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center gap-3 text-center">
-          <span className="flex size-10 items-center justify-center rounded-lg bg-bg-inverted">
-            <Activity className="size-5 text-content-inverted" />
-          </span>
+          <img src="/logo-mark.webp" alt="" className="h-10 w-auto" />
           <div>
             <h1 className="text-lg font-semibold text-content-emphasis">SuperBull Hub</h1>
             <p className="mt-1 text-sm text-content-subtle">
