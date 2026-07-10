@@ -29,14 +29,12 @@
   --content-warning: 202 138 4;
   --content-error: 220 38 38;
 
-  /* primary action face (black) + selection tints */
   --brand: 23 23 23;
   --brand-deep: 0 0 0;
   --brand-ink: 23 23 23;
   --brand-tint: 245 245 245;
   --brand-tint-2: 229 229 229;
 
-  /* chart series */
   --candy-blue: 88 166 255;
   --candy-green: 76 195 138;
   --candy-yellow: 245 195 68;
