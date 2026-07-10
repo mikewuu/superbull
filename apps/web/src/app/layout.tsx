@@ -7,11 +7,14 @@ const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' });
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' });
 
 export const metadata: Metadata = {
-  title: 'SuperBull — the BullMQ dashboard',
+  title: 'SuperBull: the BullMQ dashboard',
   description:
     'Monitor, debug and operate BullMQ queues. Standalone board, headless proxy, or a federated hub with analytics, error tracking, email alerts and public status pages.',
   icons: {
-    icon: [{ url: '/icon.png', type: 'image/png' }],
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.png', type: 'image/png', sizes: '512x512' },
+    ],
     apple: '/apple-touch-icon.png',
   },
 };
