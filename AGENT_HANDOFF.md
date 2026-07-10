@@ -292,6 +292,7 @@ entry (relative assets + injected `basePath`).
       (188 files) all green against local Redis.
 - [ ] Remaining before publish: end-to-end drive (mount express on a scratch app, load the UI in a
       browser, confirm actions); wire `bullmq` peerDep versions; first `npm publish` dry-run.
+- [x] Modes: proxy package + hub app (convex-only) + MCP + two-hop e2e
 
 **Build complete** — every package builds, typechecks, tests, and lints clean. v1 feature set
 (queue/job views, per-job + bulk actions, filters, quick-retry, metrics charts) is implemented.
