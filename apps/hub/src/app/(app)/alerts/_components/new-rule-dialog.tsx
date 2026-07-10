@@ -7,9 +7,6 @@ import { createAlertRuleAction } from '../actions';
 
 const initialState = { error: null };
 
-const inputClassName =
-  'mt-1 h-9 w-full rounded-lg border border-border-subtle bg-bg-default px-2.5 text-sm text-content-emphasis outline-none focus:border-border-emphasis focus:ring-0';
-
 interface NewRuleDialogProps {
   sources: Array<{ id: string; name: string }>;
 }
@@ -41,7 +38,7 @@ export function NewRuleDialog(props: NewRuleDialogProps) {
               data-testid="new-rule-type"
               value={type}
               onChange={(event) => setType(event.target.value as AlertRuleType)}
-              className={inputClassName}
+              className="mt-1 h-9 w-full rounded-lg border border-border-subtle bg-bg-default px-2.5 text-sm text-content-emphasis outline-none focus:border-border-emphasis focus:ring-0"
             >
               <option value="failed_threshold">Failed threshold</option>
               <option value="stuck_queue">Stuck queue</option>
@@ -53,7 +50,12 @@ export function NewRuleDialog(props: NewRuleDialogProps) {
             <label htmlFor="sourceId" className="block text-xs font-medium text-content-subtle">
               Source
             </label>
-            <select id="sourceId" name="sourceId" defaultValue="" className={inputClassName}>
+            <select
+              id="sourceId"
+              name="sourceId"
+              defaultValue=""
+              className="mt-1 h-9 w-full rounded-lg border border-border-subtle bg-bg-default px-2.5 text-sm text-content-emphasis outline-none focus:border-border-emphasis focus:ring-0"
+            >
               <option value="">All sources</option>
               {sources.map((source) => (
                 <option key={source.id} value={source.id}>
@@ -72,7 +74,7 @@ export function NewRuleDialog(props: NewRuleDialogProps) {
                 name="queueName"
                 data-testid="new-rule-queue-name"
                 required={type === 'stuck_queue' || type === 'worker_loss'}
-                className={`${inputClassName} font-mono`}
+                className="mt-1 h-9 w-full rounded-lg border border-border-subtle bg-bg-default px-2.5 font-mono text-sm text-content-emphasis outline-none focus:border-border-emphasis focus:ring-0"
               />
             </div>
           )}
@@ -88,7 +90,7 @@ export function NewRuleDialog(props: NewRuleDialogProps) {
                 min="1"
                 required
                 data-testid="new-rule-threshold"
-                className={inputClassName}
+                className="mt-1 h-9 w-full rounded-lg border border-border-subtle bg-bg-default px-2.5 text-sm text-content-emphasis outline-none focus:border-border-emphasis focus:ring-0"
               />
             </div>
           )}
@@ -107,7 +109,7 @@ export function NewRuleDialog(props: NewRuleDialogProps) {
               required
               defaultValue={5}
               data-testid="new-rule-window-minutes"
-              className={inputClassName}
+              className="mt-1 h-9 w-full rounded-lg border border-border-subtle bg-bg-default px-2.5 text-sm text-content-emphasis outline-none focus:border-border-emphasis focus:ring-0"
             />
           </div>
           <div>
@@ -120,7 +122,7 @@ export function NewRuleDialog(props: NewRuleDialogProps) {
               type="email"
               required
               data-testid="new-rule-email"
-              className={inputClassName}
+              className="mt-1 h-9 w-full rounded-lg border border-border-subtle bg-bg-default px-2.5 text-sm text-content-emphasis outline-none focus:border-border-emphasis focus:ring-0"
             />
           </div>
           {state.error && <p className="text-xs text-content-error">{state.error}</p>}
