@@ -3,6 +3,7 @@ import { ArrowUpCircle, Pencil, RefreshCcw, RotateCcw, Trash2 } from 'lucide-rea
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Breadcrumbs } from '../../components/breadcrumbs';
+import { useDocumentTitle } from '../../hooks/use-document-title';
 import { useJob } from '../../hooks/use-job';
 import { usePromoteJob } from '../../hooks/use-promote-job';
 import { useQueues } from '../../hooks/use-queues';
@@ -24,6 +25,7 @@ export function JobDetailPage() {
   const [confirmingRemove, setConfirmingRemove] = useState(false);
   const [showingReplayDialog, setShowingReplayDialog] = useState(false);
   const { data, error } = useJob({ queueName, jobId });
+  useDocumentTitle(data ? `${data.job.name} #${jobId}` : `#${jobId}`);
   const { data: queues } = useQueues({});
   const currentQueue = queues?.find((candidate) => candidate.name === queueName);
   const retryJob = useRetryJob();

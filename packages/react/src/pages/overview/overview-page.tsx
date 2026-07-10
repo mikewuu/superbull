@@ -8,6 +8,7 @@ import {
   PauseCircle,
   Users,
 } from 'lucide-react';
+import { useDocumentTitle } from '../../hooks/use-document-title';
 import { useOverviewMetrics } from '../../hooks/use-overview-metrics';
 import { useQueues } from '../../hooks/use-queues';
 import type { AppQueue } from '../../lib/api-types';
@@ -17,6 +18,7 @@ import { ThroughputChart } from './_components/throughput-chart';
 import { WorkloadTable } from './_components/workload-table';
 
 export function OverviewPage() {
+  useDocumentTitle(null);
   const { data: queues, error, isLoading } = useQueues({});
   const { data: metrics } = useOverviewMetrics(queues?.map((queue) => queue.name) ?? []);
   const pausedCount = queues?.filter((queue) => queue.is_paused).length ?? 0;

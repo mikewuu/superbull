@@ -3,6 +3,7 @@ import { CirclePause } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router';
 import { Breadcrumbs } from '../../components/breadcrumbs';
+import { useDocumentTitle } from '../../hooks/use-document-title';
 import { useQueues } from '../../hooks/use-queues';
 import { type JobStatus, jobStatuses } from '../../lib/api-types';
 import { AddJobDialog } from './_components/add-job-dialog';
@@ -63,6 +64,7 @@ export function QueueDetailPage() {
     search: search || undefined,
   });
   const queue = queues?.find((candidate) => candidate.name === queueName);
+  useDocumentTitle(queue?.display_name || queueName);
 
   const clearSelection = () => setSelectedIds(new Set());
 
