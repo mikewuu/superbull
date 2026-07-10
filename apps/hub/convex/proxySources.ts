@@ -83,6 +83,24 @@ export const remove = mutation({
     if (!id) {
       return null;
     }
+    const events = await ctx.db
+      .query('ingestEvents')
+      .withIndex('by_source_ts', (q) => q.eq('sourceId', id))
+      .collect();
+    const errorGroups = await ctx.db
+      .query('errorGroups')
+      .withIndex('by_source_last_seen', (q) => q.eq('sourceId', id))
+      .collect();
+    const annotations = await ctx.db
+      .query('deployAnnotations')
+      .withIndex('by_source_ts', (q) => q.eq('sourceId', id))
+      .collect();
+    const statusPages = await ctx.db
+      .query('statusPageConfigs')
+      .withIndex('by_source', (q) => q.eq('sourceId', id))
+      .collect();
+    const children = [...events, ...errorGroups, ...annotations, ...statusPages];
+    await Promise.all(children.map((child) => ctx.db.delete(child._id)));
     await ctx.db.delete(id);
     return null;
   },

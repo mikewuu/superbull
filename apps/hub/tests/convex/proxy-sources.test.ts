@@ -99,6 +99,64 @@ describe('proxySources', () => {
     expect(sources).toHaveLength(0);
   });
 
+  it('remove deletes the source rows in every child table', async () => {
+    const t = makeTestClient();
+
+    const created = await t.mutation(api.proxySources.create, {
+      internalToken: INTERNAL_TOKEN,
+      name: 'proxy-a',
+      url: 'https://proxy-a.example.com',
+      token: 'secret',
+    });
+    await t.run(async (ctx) => {
+      await ctx.db.insert('ingestEvents', {
+        sourceId: created._id,
+        uuid: 'q:completed:1:1',
+        type: 'completed',
+        queueName: 'emails',
+        ts: 1000,
+      });
+      await ctx.db.insert('errorGroups', {
+        sourceId: created._id,
+        fingerprint: 'fp-1',
+        queueName: 'emails',
+        message: 'boom',
+        state: 'open',
+        count: 1,
+        firstSeenTs: 1000,
+        lastSeenTs: 1000,
+        isRegression: false,
+      });
+      await ctx.db.insert('deployAnnotations', {
+        sourceId: created._id,
+        label: 'v1',
+        ts: 1000,
+      });
+      await ctx.db.insert('statusPageConfigs', {
+        sourceId: created._id,
+        slug: 'proxy-a',
+        isEnabled: true,
+        title: 'Proxy A',
+      });
+    });
+
+    await t.mutation(api.proxySources.remove, {
+      internalToken: INTERNAL_TOKEN,
+      id: created._id,
+    });
+
+    const remaining = await t.run(async (ctx) => ({
+      events: await ctx.db.query('ingestEvents').collect(),
+      errorGroups: await ctx.db.query('errorGroups').collect(),
+      annotations: await ctx.db.query('deployAnnotations').collect(),
+      statusPages: await ctx.db.query('statusPageConfigs').collect(),
+    }));
+    expect(remaining.events).toHaveLength(0);
+    expect(remaining.errorGroups).toHaveLength(0);
+    expect(remaining.annotations).toHaveLength(0);
+    expect(remaining.statusPages).toHaveLength(0);
+  });
+
   it('list throws with the wrong internal token', async () => {
     const t = makeTestClient();
 
