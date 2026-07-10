@@ -27,8 +27,9 @@ export function QueueLink(props: QueueLinkProps) {
             <span
               className={cn('size-1.5 rounded-full', {
                 'bg-blue-600': isActive,
-                'bg-red-500': !isActive && failedCount > 0,
-                'bg-candy-green': !isActive && failedCount === 0,
+                'bg-content-warning': !isActive && queue.is_paused,
+                'bg-red-500': !isActive && !queue.is_paused && failedCount > 0,
+                'bg-candy-green': !isActive && !queue.is_paused && failedCount === 0,
               })}
             />
           </span>
