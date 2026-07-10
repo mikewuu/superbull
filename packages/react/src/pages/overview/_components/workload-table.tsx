@@ -27,54 +27,60 @@ export function WorkloadTable(props: WorkloadTableProps) {
           </tr>
         </thead>
         <tbody>
-          {queues.map((queue) => (
-            <tr
-              key={queue.name}
-              data-testid="workload-row"
-              onClick={() => navigate(`/queue/${encodeURIComponent(queue.name)}`)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  navigate(`/queue/${encodeURIComponent(queue.name)}`);
-                }
-              }}
-              className="cursor-pointer border-b border-border-subtle transition-colors last:border-b-0 hover:bg-bg-muted"
-            >
-              <td className="px-5 py-3">
-                <span className="flex items-center gap-2 font-medium text-content-emphasis">
-                  {queue.display_name || queue.name}
-                  {queue.is_paused && (
-                    <StatusBadge variant="neutral" icon={CirclePause}>
-                      paused
-                    </StatusBadge>
-                  )}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-right font-mono text-content-default">
-                {(queue.counts.waiting ?? 0) +
-                  (queue.counts.prioritized ?? 0) +
-                  (queue.counts.paused ?? 0)}
-              </td>
-              <td
-                className={cn('px-4 py-3 text-right font-mono', {
-                  'text-content-error': (queue.counts.failed ?? 0) > 0,
-                  'text-content-muted': (queue.counts.failed ?? 0) === 0,
-                })}
+          {queues.map((queue) => {
+            const waitingCount =
+              (queue.counts.waiting ?? 0) +
+              (queue.counts.prioritized ?? 0) +
+              (queue.counts.paused ?? 0);
+
+            return (
+              <tr
+                key={queue.name}
+                data-testid="workload-row"
+                onClick={() => navigate(`/queue/${encodeURIComponent(queue.name)}`)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    navigate(`/queue/${encodeURIComponent(queue.name)}`);
+                  }
+                }}
+                className="cursor-pointer border-b border-border-subtle transition-colors last:border-b-0 hover:bg-bg-muted"
               >
-                {queue.counts.failed ?? 0}
-              </td>
-              <td
-                className={cn('px-4 py-3 text-right font-mono', {
-                  'text-content-default': queue.worker_count > 0,
-                  'text-content-error': queue.worker_count === 0 && !queue.is_paused,
-                })}
-              >
-                {queue.worker_count}
-              </td>
-              <td className="px-5 py-3 text-right font-mono text-content-subtle">
-                {formatWait(queue.oldest_waiting_ms)}
-              </td>
-            </tr>
-          ))}
+                <td className="px-5 py-3">
+                  <span className="flex items-center gap-2 font-medium text-content-emphasis">
+                    {queue.display_name || queue.name}
+                    {queue.is_paused && (
+                      <StatusBadge variant="neutral" icon={CirclePause}>
+                        paused
+                      </StatusBadge>
+                    )}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right font-mono text-content-default">
+                  {waitingCount}
+                </td>
+                <td
+                  className={cn('px-4 py-3 text-right font-mono', {
+                    'text-content-error': (queue.counts.failed ?? 0) > 0,
+                    'text-content-muted': (queue.counts.failed ?? 0) === 0,
+                  })}
+                >
+                  {queue.counts.failed ?? 0}
+                </td>
+                <td
+                  className={cn('px-4 py-3 text-right font-mono', {
+                    'text-content-default': queue.worker_count > 0,
+                    'text-content-error': queue.worker_count === 0 && waitingCount > 0,
+                    'text-content-muted': queue.worker_count === 0 && waitingCount === 0,
+                  })}
+                >
+                  {queue.worker_count}
+                </td>
+                <td className="px-5 py-3 text-right font-mono text-content-subtle">
+                  {formatWait(queue.oldest_waiting_ms)}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
