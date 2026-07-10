@@ -24,10 +24,20 @@ export function validateBulkJobs(text: string): { jobs: BulkJobDraft[] } | { err
     if (typeof name !== 'string' || name.trim() === '') {
       return { error: `Job at index ${index} is missing a "name".` };
     }
-    if (opts !== undefined && (typeof opts !== 'object' || opts === null || Array.isArray(opts))) {
+    if (opts !== undefined && !isJobOpts(opts)) {
       return { error: `Job at index ${index} has an invalid "opts".` };
     }
-    jobs.push({ name, data, opts: opts as BulkJobDraft['opts'] });
+    jobs.push({ name, data, opts });
   }
   return { jobs };
+}
+
+function isJobOpts(opts: unknown): opts is NonNullable<BulkJobDraft['opts']> {
+  if (typeof opts !== 'object' || opts === null || Array.isArray(opts)) {
+    return false;
+  }
+  const record = opts as Record<string, unknown>;
+  return ['delay', 'attempts', 'priority'].every(
+    (field) => record[field] === undefined || typeof record[field] === 'number',
+  );
 }
