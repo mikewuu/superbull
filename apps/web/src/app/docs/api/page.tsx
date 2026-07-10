@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { DocsMarkdown } from '../_components/docs-markdown';
 import { DocsTable } from '../_components/docs-table';
+import { DocsToc } from '../_components/docs-toc';
+import { getHeadings } from '../_lib/get-headings';
 
 export const metadata: Metadata = {
   title: 'REST API — SuperBull docs',
@@ -196,16 +198,26 @@ type JobStatus =
 \`\`\`
 `;
 
+const headings = [
+  ...getHeadings(intro),
+  ...getHeadings(midMarkdown),
+  ...getHeadings(jobHeading),
+  ...getHeadings(jobIntro),
+];
+
 export default function ApiPage() {
   return (
-    <>
-      <DocsMarkdown content={intro} />
-      <DocsTable headers={globalHeaders} rows={globalRows} />
-      <DocsMarkdown content={midMarkdown} />
-      <DocsTable headers={queueHeaders} rows={queueRows} />
-      <DocsMarkdown content={jobHeading} />
-      <DocsTable headers={jobHeaders} rows={jobRows} />
-      <DocsMarkdown content={jobIntro} />
-    </>
+    <div className="xl:flex xl:items-start xl:gap-10">
+      <div className="min-w-0 flex-1">
+        <DocsMarkdown content={intro} />
+        <DocsTable headers={globalHeaders} rows={globalRows} />
+        <DocsMarkdown content={midMarkdown} />
+        <DocsTable headers={queueHeaders} rows={queueRows} />
+        <DocsMarkdown content={jobHeading} />
+        <DocsTable headers={jobHeaders} rows={jobRows} />
+        <DocsMarkdown content={jobIntro} />
+      </div>
+      <DocsToc headings={headings} />
+    </div>
   );
 }
