@@ -1,4 +1,6 @@
 import { join } from 'node:path';
+import { bodyParser } from '@koa/bodyparser';
+import Router from '@koa/router';
 import type {
   AppControllerRoute,
   AppViewRoute,
@@ -7,8 +9,6 @@ import type {
   IServerAdapter,
   UIConfig,
 } from '@superbull/api';
-import { bodyParser } from '@koa/bodyparser';
-import Router from '@koa/router';
 import ejs from 'ejs';
 import type { Middleware } from 'koa';
 import serve from 'koa-static';

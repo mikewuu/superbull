@@ -1,4 +1,3 @@
-import { createBoard } from '@superbull/api';
 import {
   type DynamicModule,
   Inject,
@@ -8,6 +7,7 @@ import {
   type Provider,
 } from '@nestjs/common';
 import { ApplicationConfig, HttpAdapterHost } from '@nestjs/core';
+import { createBoard } from '@superbull/api';
 import { boardAdapterToken, boardInstanceToken, boardOptionsToken } from './constants';
 import { isExpressAdapter } from './is-express-adapter';
 import { isFastifyAdapter } from './is-fastify-adapter';

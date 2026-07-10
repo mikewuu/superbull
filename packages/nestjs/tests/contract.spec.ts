@@ -1,8 +1,8 @@
 import 'reflect-metadata';
-import { ExpressAdapter } from '@superbull/express';
-import { runServerAdapterContract, uiFixtureBasePath } from '@superbull/test-utils';
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter as NestExpressAdapter } from '@nestjs/platform-express';
+import { ExpressAdapter } from '@superbull/express';
+import { runServerAdapterContract, uiFixtureBasePath } from '@superbull/test-utils';
 import { BoardModule } from '../src/board-module';
 import { boardInstanceToken } from '../src/constants';
 import type { BoardInstance } from '../src/types';

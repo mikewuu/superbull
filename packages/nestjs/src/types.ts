@@ -1,16 +1,16 @@
 import type {
+  InjectionToken,
+  ModuleMetadata,
+  OptionalFactoryDependency,
+  Type,
+} from '@nestjs/common';
+import type {
   BaseAdapter,
   BoardOptions,
   IServerAdapter,
   QueueAdapterOptions,
   createBoard,
 } from '@superbull/api';
-import type {
-  InjectionToken,
-  ModuleMetadata,
-  OptionalFactoryDependency,
-  Type,
-} from '@nestjs/common';
 import type { Queue } from 'bullmq';
 
 export type Middleware = Type<unknown> | ((...args: unknown[]) => unknown);

@@ -1,3 +1,6 @@
+import type { Plugin, RouteOptions } from '@hapi/hapi';
+import Inert from '@hapi/inert';
+import Vision from '@hapi/vision';
 import type {
   AppControllerRoute,
   AppViewRoute,
@@ -6,9 +9,6 @@ import type {
   IServerAdapter,
   UIConfig,
 } from '@superbull/api';
-import type { Plugin, RouteOptions } from '@hapi/hapi';
-import Inert from '@hapi/inert';
-import Vision from '@hapi/vision';
 import ejs from 'ejs';
 
 export class HapiAdapter implements IServerAdapter {

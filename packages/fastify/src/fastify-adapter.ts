@@ -1,3 +1,5 @@
+import fastifyStatic from '@fastify/static';
+import fastifyView from '@fastify/view';
 import type {
   AppControllerRoute,
   AppViewRoute,
@@ -7,8 +9,6 @@ import type {
   IServerAdapter,
   UIConfig,
 } from '@superbull/api';
-import fastifyStatic from '@fastify/static';
-import fastifyView from '@fastify/view';
 import ejs from 'ejs';
 import type { FastifyInstance, FastifyPluginCallback, HTTPMethods } from 'fastify';
 
