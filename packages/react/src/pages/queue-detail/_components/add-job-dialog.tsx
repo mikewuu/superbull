@@ -1,4 +1,4 @@
-import { Button, Dialog, cn } from '@bullwatch/ui';
+import { Button, Dialog, cn } from '@superbull/ui';
 import { useState } from 'react';
 import { useAddJob } from '../../../hooks/use-add-job';
 import { validateBulkJobs } from '../../../lib/validate-bulk-jobs';

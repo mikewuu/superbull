@@ -1,4 +1,4 @@
-import { Button, Dialog } from '@bullwatch/ui';
+import { Button, Dialog } from '@superbull/ui';
 import { useState } from 'react';
 import { useObliterateQueue } from '../../../hooks/use-obliterate-queue';
 

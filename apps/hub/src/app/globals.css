@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "@bullwatch/ui/tokens.css";
+@import "@superbull/ui/tokens.css";
 @source "../../../../packages/ui/src";
 
 @theme {

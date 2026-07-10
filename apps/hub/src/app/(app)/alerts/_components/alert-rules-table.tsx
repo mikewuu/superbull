@@ -1,4 +1,4 @@
-import { StatusBadge } from '@bullwatch/ui';
+import { StatusBadge } from '@superbull/ui';
 import type { AlertRule } from '../../../../lib/alerts/types';
 import { DeleteRuleButton } from './delete-rule-button';
 import { EnableRuleToggle } from './enable-rule-toggle';

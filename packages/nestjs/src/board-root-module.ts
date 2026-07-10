@@ -1,4 +1,4 @@
-import { createBoard } from '@bullwatch/api';
+import { createBoard } from '@superbull/api';
 import {
   type DynamicModule,
   Inject,

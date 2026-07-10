@@ -1,4 +1,4 @@
-import { Button, ConfirmDialog, MenuItem, Popover } from '@bullwatch/ui';
+import { Button, ConfirmDialog, MenuItem, Popover } from '@superbull/ui';
 import {
   ArrowUpCircle,
   Droplets,

@@ -1,4 +1,4 @@
-import { StatusBadge } from '@bullwatch/ui';
+import { StatusBadge } from '@superbull/ui';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getOverallStatus } from '../../../lib/status-pages/get-overall-status';

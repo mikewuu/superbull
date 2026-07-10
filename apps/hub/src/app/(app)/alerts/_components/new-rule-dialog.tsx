@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Dialog } from '@bullwatch/ui';
+import { Button, Dialog } from '@superbull/ui';
 import { useActionState, useEffect, useState } from 'react';
 import type { AlertRuleType } from '../../../../lib/alerts/types';
 import { createAlertRuleAction } from '../actions';

@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@bullwatch/ui';
+import { cn } from '@superbull/ui';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { AnalyticsRange } from '../../../../lib/analytics/types';
 

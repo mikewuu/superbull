@@ -1,4 +1,4 @@
-import { Button } from '@bullwatch/ui';
+import { Button } from '@superbull/ui';
 import { Pause, Play, Trash2 } from 'lucide-react';
 import { useEmptyQueue } from '../../../hooks/use-empty-queue';
 import { usePauseQueue } from '../../../hooks/use-pause-queue';

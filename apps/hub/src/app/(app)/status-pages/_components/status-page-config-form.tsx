@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@bullwatch/ui';
+import { Button } from '@superbull/ui';
 import { useActionState, useState } from 'react';
 import type { StatusPageConfig } from '../../../../lib/status-pages/types';
 import { saveStatusPageConfigAction } from '../actions';

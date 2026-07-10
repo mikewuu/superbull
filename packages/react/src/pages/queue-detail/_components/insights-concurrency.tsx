@@ -1,4 +1,4 @@
-import { Button } from '@bullwatch/ui';
+import { Button } from '@superbull/ui';
 import { useState } from 'react';
 import { useQueueConcurrency } from '../../../hooks/use-queue-concurrency';
 import { useSetConcurrency } from '../../../hooks/use-set-concurrency';

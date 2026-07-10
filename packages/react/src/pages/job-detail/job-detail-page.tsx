@@ -1,4 +1,4 @@
-import { Button, ConfirmDialog, JobStatusBadge, PageHeader, Skeleton } from '@bullwatch/ui';
+import { Button, ConfirmDialog, JobStatusBadge, PageHeader, Skeleton } from '@superbull/ui';
 import { ArrowUpCircle, Pencil, RefreshCcw, RotateCcw, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';

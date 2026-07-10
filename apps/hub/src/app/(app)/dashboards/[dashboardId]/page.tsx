@@ -1,4 +1,4 @@
-import { EmptyState, PageHeader } from '@bullwatch/ui';
+import { EmptyState, PageHeader } from '@superbull/ui';
 import { LayoutDashboard } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { getHeatmap } from '../../../../lib/analytics/get-heatmap';

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, ConfirmDialog } from '@bullwatch/ui';
+import { Button, ConfirmDialog } from '@superbull/ui';
 import { useState, useTransition } from 'react';
 import type { ErrorGroupState } from '../../../../../lib/errors/types';
 import {

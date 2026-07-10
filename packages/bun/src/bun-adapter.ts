@@ -6,7 +6,7 @@ import type {
   HandlerResponse,
   IServerAdapter,
   UIConfig,
-} from '@bullwatch/api';
+} from '@superbull/api';
 import { file } from 'bun';
 import ejs from 'ejs';
 

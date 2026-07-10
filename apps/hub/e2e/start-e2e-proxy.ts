@@ -1,5 +1,5 @@
-import { BullMQAdapter } from '@bullwatch/api';
-import { startProxy } from '@bullwatch/proxy';
+import { BullMQAdapter } from '@superbull/api';
+import { startProxy } from '@superbull/proxy';
 import { type Job, Queue, Worker } from 'bullmq';
 
 const connection = { host: '127.0.0.1', port: Number(process.env.REDIS_PORT ?? 6379) };

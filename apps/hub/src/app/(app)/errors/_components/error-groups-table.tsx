@@ -1,4 +1,4 @@
-import { StatusBadge } from '@bullwatch/ui';
+import { StatusBadge } from '@superbull/ui';
 import { formatDistanceToNowStrict } from 'date-fns';
 import Link from 'next/link';
 import type { ErrorGroup } from '../../../../lib/errors/types';

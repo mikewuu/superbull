@@ -1,4 +1,4 @@
-import { cn } from '@bullwatch/ui';
+import { cn } from '@superbull/ui';
 import { cva } from 'class-variance-authority';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';

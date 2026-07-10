@@ -1,4 +1,4 @@
-export const boardOptionsToken = 'bullwatch_board_options';
-export const boardQueuesToken = 'bullwatch_board_queues';
-export const boardAdapterToken = 'bullwatch_board_adapter';
-export const boardInstanceToken = 'bullwatch_board_instance';
+export const boardOptionsToken = 'superbull_board_options';
+export const boardQueuesToken = 'superbull_board_queues';
+export const boardAdapterToken = 'superbull_board_adapter';
+export const boardInstanceToken = 'superbull_board_instance';

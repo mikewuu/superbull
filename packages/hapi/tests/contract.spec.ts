@@ -1,5 +1,5 @@
-import { createBoard } from '@bullwatch/api';
-import { runServerAdapterContract, uiFixtureBasePath } from '@bullwatch/test-utils';
+import { createBoard } from '@superbull/api';
+import { runServerAdapterContract, uiFixtureBasePath } from '@superbull/test-utils';
 import Hapi from '@hapi/hapi';
 import { HapiAdapter } from '../src/hapi-adapter';
 

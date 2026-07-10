@@ -1,4 +1,4 @@
-import { EmptyState, PageHeader } from '@bullwatch/ui';
+import { EmptyState, PageHeader } from '@superbull/ui';
 import { Bell } from 'lucide-react';
 import { listAlertRules } from '../../../lib/alerts/list-alert-rules';
 import { listAlertStates } from '../../../lib/alerts/list-alert-states';

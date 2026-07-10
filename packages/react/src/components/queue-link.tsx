@@ -1,4 +1,4 @@
-import { cn } from '@bullwatch/ui';
+import { cn } from '@superbull/ui';
 import { NavLink } from 'react-router';
 import type { AppQueue } from '../lib/api-types';
 

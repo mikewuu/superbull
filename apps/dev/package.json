@@ -1,5 +1,5 @@
 {
-  "name": "@bullwatch/dev",
+  "name": "@superbull/dev",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -12,16 +12,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@bullwatch/api": "workspace:*",
-    "@bullwatch/express": "workspace:*",
-    "@bullwatch/react": "workspace:*",
+    "@superbull/api": "workspace:*",
+    "@superbull/express": "workspace:*",
+    "@superbull/react": "workspace:*",
     "bullmq": "^5.0.0",
     "express": "^5.0.0",
     "ioredis": "^5.4.1",
     "tsx": "^4.19.2"
   },
   "devDependencies": {
-    "@bullwatch/tsconfig": "workspace:*",
+    "@superbull/tsconfig": "workspace:*",
     "@playwright/test": "^1.49.1",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.2",

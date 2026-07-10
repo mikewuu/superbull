@@ -6,7 +6,7 @@ import type {
   HandlerResponse,
   IServerAdapter,
   UIConfig,
-} from '@bullwatch/api';
+} from '@superbull/api';
 import { bodyParser } from '@koa/bodyparser';
 import Router from '@koa/router';
 import ejs from 'ejs';

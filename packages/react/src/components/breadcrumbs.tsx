@@ -1,4 +1,4 @@
-import { Breadcrumbs as BreadcrumbsBase } from '@bullwatch/ui';
+import { Breadcrumbs as BreadcrumbsBase } from '@superbull/ui';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 

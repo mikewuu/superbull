@@ -1,4 +1,4 @@
-import { EmptyState, Skeleton } from '@bullwatch/ui';
+import { EmptyState, Skeleton } from '@superbull/ui';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { UserX } from 'lucide-react';
 import { useQueueWorkers } from '../../../hooks/use-queue-workers';

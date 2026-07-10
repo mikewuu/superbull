@@ -1,4 +1,4 @@
-import { EmptyState, PageHeader } from '@bullwatch/ui';
+import { EmptyState, PageHeader } from '@superbull/ui';
 import { LayoutDashboard } from 'lucide-react';
 import { listDashboards } from '../../../lib/dashboards/list-dashboards';
 import { CreateDashboardDialog } from './_components/create-dashboard-dialog';

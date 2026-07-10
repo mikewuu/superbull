@@ -1,4 +1,4 @@
-import { PageHeader, SearchInput, Skeleton, StatusBadge, cn } from '@bullwatch/ui';
+import { PageHeader, SearchInput, Skeleton, StatusBadge, cn } from '@superbull/ui';
 import { CirclePause } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router';

@@ -5,7 +5,7 @@ import type {
   HandlerResponse,
   IServerAdapter,
   UIConfig,
-} from '@bullwatch/api';
+} from '@superbull/api';
 import type { Plugin, RouteOptions } from '@hapi/hapi';
 import Inert from '@hapi/inert';
 import Vision from '@hapi/vision';
@@ -63,7 +63,7 @@ export class HapiAdapter implements IServerAdapter {
 
   public registerPlugin(): Plugin<RouteOptions> {
     return {
-      name: '@bullwatch/hapi',
+      name: '@superbull/hapi',
       register: async (server, routeOptions = {}) => {
         const { statics, entryRoute, viewPath, apiRoutes, boardQueues, errorHandler } = this;
         if (!statics) {

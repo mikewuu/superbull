@@ -1,4 +1,4 @@
-import { Skeleton, cn } from '@bullwatch/ui';
+import { Skeleton, cn } from '@superbull/ui';
 import { useQueueStats } from '../../../hooks/use-queue-stats';
 
 interface InsightsStatsProps {

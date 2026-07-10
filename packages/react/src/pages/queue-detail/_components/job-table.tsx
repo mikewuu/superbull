@@ -1,4 +1,4 @@
-import { EmptyState } from '@bullwatch/ui';
+import { EmptyState } from '@superbull/ui';
 import { ArrowDown, ArrowUp, Inbox } from 'lucide-react';
 import type { AppQueue, QueueStatus } from '../../../lib/api-types';
 import { getJobStatus } from '../../../lib/get-job-status';

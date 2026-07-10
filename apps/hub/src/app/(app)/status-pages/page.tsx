@@ -1,4 +1,4 @@
-import { EmptyState, PageHeader, StatusBadge } from '@bullwatch/ui';
+import { EmptyState, PageHeader, StatusBadge } from '@superbull/ui';
 import { Globe } from 'lucide-react';
 import { listSources } from '../../../lib/sources/list-sources';
 import type { ProxySource } from '../../../lib/sources/types';

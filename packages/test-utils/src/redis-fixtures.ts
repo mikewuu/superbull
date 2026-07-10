@@ -1,4 +1,4 @@
-import { BullMQAdapter } from '@bullwatch/api';
+import { BullMQAdapter } from '@superbull/api';
 import { Queue } from 'bullmq';
 
 export const connection = {

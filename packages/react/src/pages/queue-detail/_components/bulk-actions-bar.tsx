@@ -1,4 +1,4 @@
-import { Button, ConfirmDialog } from '@bullwatch/ui';
+import { Button, ConfirmDialog } from '@superbull/ui';
 import { ArrowUpCircle, RotateCcw, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import { useBulkJobAction } from '../../../hooks/use-bulk-job-action';

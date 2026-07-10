@@ -1,4 +1,4 @@
-import { EmptyState, PageHeader } from '@bullwatch/ui';
+import { EmptyState, PageHeader } from '@superbull/ui';
 import { ChartLine } from 'lucide-react';
 import { getHeatmap } from '../../../lib/analytics/get-heatmap';
 import { getLatencySeries } from '../../../lib/analytics/get-latency-series';

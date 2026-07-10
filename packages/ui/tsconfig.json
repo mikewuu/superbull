@@ -1,4 +1,4 @@
 {
-  "extends": "@bullwatch/tsconfig/react-library.json",
+  "extends": "@superbull/tsconfig/react-library.json",
   "include": ["src", "tests"]
 }

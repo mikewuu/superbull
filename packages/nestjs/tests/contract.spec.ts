@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import { ExpressAdapter } from '@bullwatch/express';
-import { runServerAdapterContract, uiFixtureBasePath } from '@bullwatch/test-utils';
+import { ExpressAdapter } from '@superbull/express';
+import { runServerAdapterContract, uiFixtureBasePath } from '@superbull/test-utils';
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter as NestExpressAdapter } from '@nestjs/platform-express';
 import { BoardModule } from '../src/board-module';

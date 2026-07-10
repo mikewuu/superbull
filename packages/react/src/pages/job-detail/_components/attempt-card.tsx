@@ -1,4 +1,4 @@
-import { cn } from '@bullwatch/ui';
+import { cn } from '@superbull/ui';
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 

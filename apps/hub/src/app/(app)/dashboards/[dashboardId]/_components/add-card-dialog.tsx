@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Dialog } from '@bullwatch/ui';
+import { Button, Dialog } from '@superbull/ui';
 import { useState, useTransition } from 'react';
 import type { DashboardCardType, DashboardRange } from '../../../../../lib/dashboards/types';
 import { addDashboardCardAction } from '../../actions';

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Dialog } from '@bullwatch/ui';
+import { Button, Dialog } from '@superbull/ui';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { createDashboardAction } from '../actions';

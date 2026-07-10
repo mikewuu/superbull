@@ -1,5 +1,5 @@
 {
-  "name": "@bullwatch/fastify",
+  "name": "@superbull/fastify",
   "version": "0.0.0",
   "license": "MIT",
   "type": "module",
@@ -22,11 +22,11 @@
   "publishConfig": {
     "access": "public"
   },
-  "description": "Fastify server adapter for the bullwatch BullMQ dashboard",
+  "description": "Fastify server adapter for the superbull BullMQ dashboard",
   "keywords": ["bullmq", "dashboard", "monitoring", "queue", "redis", "fastify"],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mikewu/bullwatch.git",
+    "url": "git+https://github.com/mikewu/superbull.git",
     "directory": "packages/fastify"
   },
   "scripts": {
@@ -35,7 +35,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@bullwatch/api": "workspace:*",
+    "@superbull/api": "workspace:*",
     "@fastify/static": "^9.1.3",
     "@fastify/view": "^11.1.1",
     "ejs": "^6.0.1"
@@ -44,8 +44,8 @@
     "fastify": "^5.0.0"
   },
   "devDependencies": {
-    "@bullwatch/test-utils": "workspace:*",
-    "@bullwatch/tsconfig": "workspace:*",
+    "@superbull/test-utils": "workspace:*",
+    "@superbull/tsconfig": "workspace:*",
     "@types/node": "^22.10.2",
     "bullmq": "^5.34.0",
     "tsup": "^8.3.5",

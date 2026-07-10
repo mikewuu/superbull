@@ -1,4 +1,4 @@
-import { StatusBadge, cn } from '@bullwatch/ui';
+import { StatusBadge, cn } from '@superbull/ui';
 import { CirclePause } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import type { AppQueue } from '../../../lib/api-types';

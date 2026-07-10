@@ -1,4 +1,4 @@
-import { Button } from '@bullwatch/ui';
+import { Button } from '@superbull/ui';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { AppQueue, JobStatus, QueueStatus } from '../../../lib/api-types';
 

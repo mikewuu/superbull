@@ -1,6 +1,6 @@
 'use client';
 
-import { ConfirmDialog } from '@bullwatch/ui';
+import { ConfirmDialog } from '@superbull/ui';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { deleteDashboardAction } from '../../actions';

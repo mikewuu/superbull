@@ -1,4 +1,4 @@
-import { cn } from '@bullwatch/ui';
+import { cn } from '@superbull/ui';
 
 interface TimelineWaterfallProps {
   timestamp: number;

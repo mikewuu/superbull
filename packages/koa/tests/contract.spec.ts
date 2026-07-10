@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
-import { createBoard } from '@bullwatch/api';
-import { runServerAdapterContract, uiFixtureBasePath } from '@bullwatch/test-utils';
+import { createBoard } from '@superbull/api';
+import { runServerAdapterContract, uiFixtureBasePath } from '@superbull/test-utils';
 import Koa from 'koa';
 import { KoaAdapter } from '../src/koa-adapter';
 

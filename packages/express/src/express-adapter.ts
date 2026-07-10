@@ -5,7 +5,7 @@ import type {
   HandlerResponse,
   IServerAdapter,
   UIConfig,
-} from '@bullwatch/api';
+} from '@superbull/api';
 import ejs from 'ejs';
 import express, { type Express, type Request, type Response, Router } from 'express';
 

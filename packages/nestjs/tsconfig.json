@@ -1,5 +1,5 @@
 {
-  "extends": "@bullwatch/tsconfig/node-library.json",
+  "extends": "@superbull/tsconfig/node-library.json",
   "compilerOptions": {
     "experimentalDecorators": true
   },

@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@bullwatch/ui';
+import { cn } from '@superbull/ui';
 import { curveMonotoneX } from '@visx/curve';
 import { ParentSize } from '@visx/responsive';
 import { scaleLinear } from '@visx/scale';

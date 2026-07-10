@@ -1,4 +1,4 @@
-import { Button, EmptyState, Skeleton, cn } from '@bullwatch/ui';
+import { Button, EmptyState, Skeleton, cn } from '@superbull/ui';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { ListTodo, Play } from 'lucide-react';
 import { useJobNames } from '../../../hooks/use-job-names';

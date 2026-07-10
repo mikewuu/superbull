@@ -1,5 +1,5 @@
 {
-  "name": "@bullwatch/hub",
+  "name": "@superbull/hub",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "@auth/core": "^0.41.2",
-    "@bullwatch/react": "workspace:*",
-    "@bullwatch/ui": "workspace:*",
+    "@superbull/react": "workspace:*",
+    "@superbull/ui": "workspace:*",
     "@convex-dev/auth": "^0.0.94",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "@nextastic/http": "^7.0.0",
@@ -41,9 +41,9 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@bullwatch/api": "workspace:*",
-    "@bullwatch/proxy": "workspace:*",
-    "@bullwatch/tsconfig": "workspace:*",
+    "@superbull/api": "workspace:*",
+    "@superbull/proxy": "workspace:*",
+    "@superbull/tsconfig": "workspace:*",
     "@edge-runtime/vm": "^5.0.0",
     "@playwright/test": "^1.49.1",
     "@tailwindcss/postcss": "^4.3.2",

@@ -4,7 +4,7 @@ import type {
   IServerAdapter,
   QueueAdapterOptions,
   createBoard,
-} from '@bullwatch/api';
+} from '@superbull/api';
 import type {
   InjectionToken,
   ModuleMetadata,

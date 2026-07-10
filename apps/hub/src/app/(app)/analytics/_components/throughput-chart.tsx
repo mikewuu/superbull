@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@bullwatch/ui';
+import { cn } from '@superbull/ui';
 import { curveMonotoneX } from '@visx/curve';
 import { LinearGradient } from '@visx/gradient';
 import { ParentSize } from '@visx/responsive';

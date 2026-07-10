@@ -1,5 +1,5 @@
 {
-  "name": "@bullwatch/h3",
+  "name": "@superbull/h3",
   "version": "0.0.0",
   "license": "MIT",
   "type": "module",
@@ -22,11 +22,11 @@
   "publishConfig": {
     "access": "public"
   },
-  "description": "h3 server adapter for the bullwatch BullMQ dashboard",
+  "description": "h3 server adapter for the superbull BullMQ dashboard",
   "keywords": ["bullmq", "dashboard", "monitoring", "queue", "redis", "h3"],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mikewu/bullwatch.git",
+    "url": "git+https://github.com/mikewu/superbull.git",
     "directory": "packages/h3"
   },
   "scripts": {
@@ -35,15 +35,15 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@bullwatch/api": "workspace:*",
+    "@superbull/api": "workspace:*",
     "ejs": "^6.0.1"
   },
   "peerDependencies": {
     "h3": "^1.15.0"
   },
   "devDependencies": {
-    "@bullwatch/test-utils": "workspace:*",
-    "@bullwatch/tsconfig": "workspace:*",
+    "@superbull/test-utils": "workspace:*",
+    "@superbull/tsconfig": "workspace:*",
     "@types/node": "^22.10.2",
     "bullmq": "^5.34.0",
     "tsup": "^8.3.5",

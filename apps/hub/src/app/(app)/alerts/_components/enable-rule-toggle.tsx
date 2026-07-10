@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@bullwatch/ui';
+import { cn } from '@superbull/ui';
 import { useTransition } from 'react';
 import { setAlertRuleEnabledAction } from '../actions';
 

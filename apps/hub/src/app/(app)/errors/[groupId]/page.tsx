@@ -1,4 +1,4 @@
-import { Breadcrumbs, PageHeader, StatusBadge } from '@bullwatch/ui';
+import { Breadcrumbs, PageHeader, StatusBadge } from '@superbull/ui';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { listDeployAnnotations } from '../../../../lib/deploy-annotations/list-deploy-annotations';

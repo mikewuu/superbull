@@ -1,12 +1,12 @@
 {
-  "name": "@bullwatch/api",
+  "name": "@superbull/api",
   "version": "0.0.0",
-  "description": "Core API for bullwatch, a dashboard for BullMQ",
+  "description": "Core API for superbull, a dashboard for BullMQ",
   "keywords": ["bullmq", "dashboard", "monitoring", "queue", "redis"],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mikewu/bullwatch.git",
+    "url": "git+https://github.com/mikewu/superbull.git",
     "directory": "packages/api"
   },
   "type": "module",
@@ -38,16 +38,16 @@
     "zod": "^3.24.1"
   },
   "peerDependencies": {
-    "@bullwatch/react": "workspace:*",
+    "@superbull/react": "workspace:*",
     "bullmq": "^5.0.0"
   },
   "peerDependenciesMeta": {
-    "@bullwatch/react": {
+    "@superbull/react": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@bullwatch/tsconfig": "workspace:*",
+    "@superbull/tsconfig": "workspace:*",
     "@types/node": "^22.10.2",
     "bullmq": "^5.34.0",
     "tsup": "^8.3.5",

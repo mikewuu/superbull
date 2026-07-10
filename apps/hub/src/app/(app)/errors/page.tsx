@@ -1,4 +1,4 @@
-import { EmptyState, PageHeader } from '@bullwatch/ui';
+import { EmptyState, PageHeader } from '@superbull/ui';
 import { AlertTriangle } from 'lucide-react';
 import { listErrorGroups } from '../../../lib/errors/list-error-groups';
 import type { ErrorGroup } from '../../../lib/errors/types';

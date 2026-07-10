@@ -6,7 +6,7 @@ import type {
   HandlerResponse,
   IServerAdapter,
   UIConfig,
-} from '@bullwatch/api';
+} from '@superbull/api';
 import fastifyStatic from '@fastify/static';
 import fastifyView from '@fastify/view';
 import ejs from 'ejs';

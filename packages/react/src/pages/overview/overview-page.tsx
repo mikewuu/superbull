@@ -1,4 +1,4 @@
-import { EmptyState, PageHeader, Skeleton } from '@bullwatch/ui';
+import { EmptyState, PageHeader, Skeleton } from '@superbull/ui';
 import {
   Activity,
   AlertCircle,

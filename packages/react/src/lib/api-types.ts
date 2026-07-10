@@ -1,6 +1,6 @@
-import type { JobStatus } from '@bullwatch/ui';
+import type { JobStatus } from '@superbull/ui';
 
-export { jobStatuses } from '@bullwatch/ui';
+export { jobStatuses } from '@superbull/ui';
 export type { JobStatus };
 
 export type QueueStatus = JobStatus | 'latest';

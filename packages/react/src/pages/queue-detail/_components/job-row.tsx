@@ -1,4 +1,4 @@
-import { Button, JobStatusBadge, cn } from '@bullwatch/ui';
+import { Button, JobStatusBadge, cn } from '@superbull/ui';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { RotateCcw } from 'lucide-react';
 import type { MouseEvent } from 'react';

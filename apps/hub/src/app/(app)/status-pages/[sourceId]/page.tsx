@@ -1,4 +1,4 @@
-import { PageHeader } from '@bullwatch/ui';
+import { PageHeader } from '@superbull/ui';
 import { notFound } from 'next/navigation';
 import { findSourceById } from '../../../../lib/sources/find-source-by-id';
 import { getStatusPageConfig } from '../../../../lib/status-pages/get-status-page-config';

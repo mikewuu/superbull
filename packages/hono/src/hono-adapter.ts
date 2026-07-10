@@ -6,7 +6,7 @@ import type {
   HandlerResponse,
   IServerAdapter,
   UIConfig,
-} from '@bullwatch/api';
+} from '@superbull/api';
 import ejs from 'ejs';
 import { type Context, Hono, type MiddlewareHandler } from 'hono';
 

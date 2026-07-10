@@ -1,4 +1,4 @@
 {
-  "extends": "@bullwatch/tsconfig/vite-app.json",
+  "extends": "@superbull/tsconfig/vite-app.json",
   "include": ["src", "tests", "vite.config.ts"]
 }

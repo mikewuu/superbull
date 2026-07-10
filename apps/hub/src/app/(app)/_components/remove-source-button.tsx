@@ -1,6 +1,6 @@
 'use client';
 
-import { ConfirmDialog } from '@bullwatch/ui';
+import { ConfirmDialog } from '@superbull/ui';
 import { useState, useTransition } from 'react';
 import { deleteSourceAction } from '../actions';
 

@@ -7,7 +7,7 @@ import type {
   HandlerResponse,
   IServerAdapter,
   UIConfig,
-} from '@bullwatch/api';
+} from '@superbull/api';
 import ejs from 'ejs';
 import { Elysia } from 'elysia';
 import mime from 'mime';
@@ -23,7 +23,7 @@ export class ElysiaAdapter implements IServerAdapter {
 
   constructor(options: { prefix?: string; basePath?: string } = {}) {
     this.basePath = options.basePath ?? '';
-    this.plugin = new Elysia({ prefix: options.prefix ?? '', name: '@bullwatch/elysia' });
+    this.plugin = new Elysia({ prefix: options.prefix ?? '', name: '@superbull/elysia' });
   }
 
   public setStaticPath(staticsRoute: string, staticsPath: string): ElysiaAdapter {

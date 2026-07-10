@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@bullwatch/ui';
+import { cn } from '@superbull/ui';
 import { AlertTriangle, Bell, ChartLine, LayoutDashboard, Radio, Server } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';

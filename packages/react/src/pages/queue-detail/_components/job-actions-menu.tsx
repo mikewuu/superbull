@@ -1,4 +1,4 @@
-import { ConfirmDialog, MenuItem, Popover } from '@bullwatch/ui';
+import { ConfirmDialog, MenuItem, Popover } from '@superbull/ui';
 import { ArrowUpCircle, MoreHorizontal, RotateCcw, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { usePromoteJob } from '../../../hooks/use-promote-job';
