@@ -157,3 +157,47 @@ jobs:
 
       - name: Test UI
         run: pnpm --filter @bullwatch/react test
+
+  test-hub:
+    name: Test hub (MCP + two-hop e2e)
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Unit test hub
+        run: pnpm --filter @bullwatch/hub test
+
+      - name: Install Playwright chromium
+        run: pnpm --filter @bullwatch/hub exec playwright install --with-deps chromium
+
+      # convex dev downloads a local-backend binary on first run; needs network access.
+      - name: Run hub e2e
+        run: pnpm --filter @bullwatch/hub e2e
+        env:
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379

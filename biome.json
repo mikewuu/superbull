@@ -29,7 +29,8 @@
       "node_modules",
       "**/*.gen.ts",
       "next-env.d.ts",
-      "**/convex/_generated"
+      "**/convex/_generated",
+      "**/.convex"
     ]
   }
 }
