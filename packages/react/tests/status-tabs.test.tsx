@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import type { AppQueue } from '../src/lib/api-types';
-import { StatusFilter } from '../src/pages/queue-detail/_components/status-filter';
+import { StatusTabs } from '../src/pages/queue-detail/_components/status-tabs';
 
 function makeQueue(): AppQueue {
   return {
@@ -27,21 +27,22 @@ function makeQueue(): AppQueue {
   };
 }
 
-describe('StatusFilter', () => {
-  it('always offers a "latest" option first', () => {
-    render(<StatusFilter queue={makeQueue()} status="latest" onChange={() => {}} />);
-    expect(screen.getByRole('button', { name: /latest/ })).toBeInTheDocument();
+describe('StatusTabs', () => {
+  it('renders an "All" tab first for the latest status', () => {
+    render(<StatusTabs queue={makeQueue()} status="latest" onChange={() => {}} />);
+    expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
   });
 
-  it('shows the count next to each concrete status', () => {
-    render(<StatusFilter queue={makeQueue()} status="latest" onChange={() => {}} />);
-    expect(screen.getByRole('button', { name: /failed 4/ })).toBeInTheDocument();
+  it('shows a count chip only for statuses with jobs', () => {
+    render(<StatusTabs queue={makeQueue()} status="latest" onChange={() => {}} />);
+    expect(screen.getByTestId('status-tab-failed')).toHaveTextContent('4');
+    expect(screen.getByTestId('status-tab-completed')).toHaveTextContent('3');
   });
 
   it('calls onChange with the picked status', async () => {
     const onChange = vi.fn();
-    render(<StatusFilter queue={makeQueue()} status="latest" onChange={onChange} />);
-    await userEvent.click(screen.getByRole('button', { name: /failed 4/ }));
+    render(<StatusTabs queue={makeQueue()} status="latest" onChange={onChange} />);
+    await userEvent.click(screen.getByTestId('status-tab-failed'));
     expect(onChange).toHaveBeenCalledWith('failed');
   });
 });

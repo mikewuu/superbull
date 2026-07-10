@@ -1,5 +1,7 @@
-import { ArrowUpCircle, RotateCcw, Trash2 } from 'lucide-react';
+import { ArrowUpCircle, RotateCcw, Trash2, X } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '../../../components/button';
+import { ConfirmDialog } from '../../../components/confirm-dialog';
 import { useBulkJobAction } from '../../../hooks/use-bulk-job-action';
 
 interface BulkActionsBarProps {
@@ -10,6 +12,7 @@ interface BulkActionsBarProps {
 
 export function BulkActionsBar(props: BulkActionsBarProps) {
   const { queueName, selectedIds, onDone } = props;
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
   const bulkAction = useBulkJobAction();
 
   const run = (action: 'retry' | 'promote' | 'remove') => {
@@ -17,10 +20,23 @@ export function BulkActionsBar(props: BulkActionsBarProps) {
   };
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border border-border-subtle bg-bg-muted px-4 py-3">
-      <span className="text-sm font-medium text-content-emphasis">
-        {selectedIds.length} selected
-      </span>
+    <div
+      data-testid="bulk-bar"
+      className="flex animate-fade-in items-center justify-between gap-4 rounded-xl border border-border-default bg-bg-default px-4 py-2.5 shadow-sm"
+    >
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          aria-label="Clear selection"
+          onClick={onDone}
+          className="rounded-md p-1 text-content-muted hover:bg-bg-muted hover:text-content-emphasis"
+        >
+          <X className="size-4" />
+        </button>
+        <span className="text-sm font-medium text-content-emphasis">
+          {selectedIds.length} selected
+        </span>
+      </div>
       <div className="flex items-center gap-2">
         <Button
           variant="secondary"
@@ -44,9 +60,22 @@ export function BulkActionsBar(props: BulkActionsBarProps) {
           icon={<Trash2 className="size-3.5" />}
           text="Remove"
           loading={bulkAction.isPending}
-          onClick={() => run('remove')}
+          onClick={() => setConfirmingRemove(true)}
         />
       </div>
+
+      <ConfirmDialog
+        showing={confirmingRemove}
+        onClose={() => setConfirmingRemove(false)}
+        title="Remove jobs"
+        description={`Delete ${selectedIds.length} selected job${selectedIds.length === 1 ? '' : 's'} from "${queueName}". This cannot be undone.`}
+        confirmText={`Remove ${selectedIds.length}`}
+        loading={bulkAction.isPending}
+        onConfirm={() => {
+          setConfirmingRemove(false);
+          run('remove');
+        }}
+      />
     </div>
   );
 }
