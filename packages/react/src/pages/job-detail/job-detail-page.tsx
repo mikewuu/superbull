@@ -166,6 +166,13 @@ export function JobDetailPage() {
           )}
           {job.attempts > 1 && <AttemptsPanel stacktrace={job.stacktrace} />}
           <JobLogsPanel queueName={queueName} jobId={jobId} />
+          <div className="divide-y divide-border-subtle border-t border-border-subtle">
+            <JsonPanel title="Data" copyLabel="Copy payload" value={job.data} />
+            <JsonPanel title="Options" copyLabel="Copy options" value={job.opts} />
+            {job.return_value != null && (
+              <JsonPanel title="Return value" copyLabel="Copy output" value={job.return_value} />
+            )}
+          </div>
         </div>
 
         <div className="candy-card w-full shrink-0 divide-y divide-border-subtle self-start rounded-lg lg:w-[26rem]">
@@ -184,11 +191,6 @@ export function JobDetailPage() {
             delayMs={job.delay}
             priority={priority}
           />
-          <JsonPanel title="Data" copyLabel="Copy payload" value={job.data} />
-          <JsonPanel title="Options" copyLabel="Copy options" value={job.opts} />
-          {job.return_value != null && (
-            <JsonPanel title="Return value" copyLabel="Copy output" value={job.return_value} />
-          )}
         </div>
       </div>
 
