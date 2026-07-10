@@ -198,7 +198,7 @@ function stripMarkdown(text: string): string {
     .trim();
 }
 
-type ProseBlock = { text: string; isProse: boolean };
+type ProseBlock = { lines: string[]; isProse: boolean };
 
 function buildProseBlocks(body: string): ProseBlock[] {
   const blocks: ProseBlock[] = [];
@@ -208,7 +208,7 @@ function buildProseBlocks(body: string): ProseBlock[] {
 
   const flush = () => {
     if (currentIsProse !== null && currentLines.length > 0) {
-      blocks.push({ text: currentLines.join(' '), isProse: currentIsProse });
+      blocks.push({ lines: currentLines, isProse: currentIsProse });
     }
     currentLines = [];
     currentIsProse = null;
@@ -266,16 +266,38 @@ function snippetAroundMatch(plainText: string, matchIndex: number, matchLength: 
 function findBlockMatch(
   blocks: ProseBlock[],
   query: string,
-  wantProse: boolean,
 ): { plainText: string; matchIndex: number } | null {
   for (const block of blocks) {
-    if (block.isProse !== wantProse) {
+    if (!block.isProse) {
       continue;
     }
-    const plainText = stripMarkdown(block.text);
+    const plainText = stripMarkdown(block.lines.join(' '));
     const matchIndex = plainText.toLowerCase().indexOf(query);
     if (matchIndex !== -1) {
       return { plainText, matchIndex };
+    }
+  }
+  return null;
+}
+
+function stripCodeLine(line: string): string {
+  return stripMarkdown(line.replace(/^\$\s*/, ''));
+}
+
+function findCodeLineMatch(
+  blocks: ProseBlock[],
+  query: string,
+): { plainText: string; matchIndex: number } | null {
+  for (const block of blocks) {
+    if (block.isProse) {
+      continue;
+    }
+    for (const line of block.lines) {
+      const plainText = stripCodeLine(line);
+      const matchIndex = plainText.toLowerCase().indexOf(query);
+      if (matchIndex !== -1) {
+        return { plainText, matchIndex };
+      }
     }
   }
   return null;
@@ -286,7 +308,7 @@ function firstProseBlock(blocks: ProseBlock[]): string | null {
     if (!block.isProse) {
       continue;
     }
-    const plainText = stripMarkdown(block.text);
+    const plainText = stripMarkdown(block.lines.join(' '));
     if (plainText) {
       return plainText;
     }
@@ -313,7 +335,7 @@ function rankSectionMatch(section: DocsSearchSection, query: string): RankedSect
   const headingId = section.headingId;
   const blocks = buildProseBlocks(section.body);
 
-  const proseMatch = findBlockMatch(blocks, query, true);
+  const proseMatch = findBlockMatch(blocks, query);
   if (proseMatch) {
     return {
       rank: 0,
@@ -330,7 +352,7 @@ function rankSectionMatch(section: DocsSearchSection, query: string): RankedSect
     return { rank: 1, match: { headingText, headingId, snippet: representativeSnippet(blocks) } };
   }
 
-  const codeMatch = findBlockMatch(blocks, query, false);
+  const codeMatch = findCodeLineMatch(blocks, query);
   if (codeMatch) {
     return {
       rank: 2,
