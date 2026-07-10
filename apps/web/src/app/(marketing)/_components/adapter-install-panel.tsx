@@ -171,20 +171,26 @@ export function AdapterInstallPanel(): React.ReactElement {
   return (
     <div className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl bg-bg-inverted shadow-[0_20px_50px_-20px_rgba(0,0,0,0.45)] ring-1 ring-black/10">
       <div className="flex items-start justify-between gap-2 border-b border-white/10 px-3 pt-3 pb-2">
-        <div className="flex flex-wrap gap-1">
-          {adapterIds.map((adapterId) => (
-            <button
-              key={adapterId}
-              type="button"
-              onClick={() => setId(adapterId)}
-              className={cn('rounded-md px-2.5 py-1 text-xs font-medium transition-colors', {
-                'bg-white/10 text-white': id === adapterId,
-                'text-white/40 hover:text-white/70': id !== adapterId,
-              })}
-            >
-              {adapters[adapterId].label}
-            </button>
-          ))}
+        <div className="relative min-w-0 flex-1">
+          <div className="flex flex-nowrap gap-1 overflow-x-auto">
+            {adapterIds.map((adapterId) => (
+              <button
+                key={adapterId}
+                type="button"
+                onClick={() => setId(adapterId)}
+                className={cn(
+                  'shrink-0 whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+                  {
+                    'bg-white/10 text-white': id === adapterId,
+                    'text-white/40 hover:text-white/70': id !== adapterId,
+                  },
+                )}
+              >
+                {adapters[adapterId].label}
+              </button>
+            ))}
+          </div>
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-bg-inverted to-transparent" />
         </div>
         <CopyButton text={active.code} className="shrink-0" />
       </div>
