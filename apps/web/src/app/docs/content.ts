@@ -1,4 +1,4 @@
-export const content = `
+export const introContent = `
 # SuperBull
 
 SuperBull is a dashboard for [BullMQ](https://docs.bullmq.io). It embeds into your
@@ -21,7 +21,9 @@ There are three ways to run it:
 All three modes share the same core: \`@superbull/api\` defines the route table, the
 \`BaseAdapter\`/\`BullMQAdapter\` queue wrapper, and \`createBoard()\`; \`@superbull/react\`
 is the SPA served by every standalone adapter and by the hub's per-source dashboards.
+`;
 
+export const quickstartContent = `
 ## Quickstart
 
 Mount the Express adapter against one queue:

@@ -2,11 +2,29 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { cn } from '../_lib/cn';
 import { docsNav } from '../_lib/nav';
 import type { DocsSearchMatch } from '../_lib/search-index';
 import { docsSearchIndex, findMatch } from '../_lib/search-index';
+
+function highlightMatch(text: string, query: string): ReactNode {
+  const matchIndex = text.toLowerCase().indexOf(query);
+  if (!query || matchIndex === -1) {
+    return text;
+  }
+  const matchEnd = matchIndex + query.length;
+  return (
+    <>
+      {text.slice(0, matchIndex)}
+      <strong className="font-semibold text-content-emphasis">
+        {text.slice(matchIndex, matchEnd)}
+      </strong>
+      {text.slice(matchEnd)}
+    </>
+  );
+}
 
 type DocsNavMatchItem = {
   href: string;
@@ -70,9 +88,11 @@ export function DocsNavLinks(props: { onNavigate?: () => void }) {
               const href = item.match?.headingId
                 ? `${item.href}#${item.match.headingId}`
                 : item.href;
-              const matchLine = item.match
-                ? [item.match.headingText, item.match.snippet].filter(Boolean).join(' — ')
-                : null;
+              const matchParts = item.match
+                ? [item.match.headingText, item.match.snippet].filter(
+                    (part): part is string => part !== null,
+                  )
+                : [];
               return (
                 <li key={item.href}>
                   <Link
@@ -86,9 +106,14 @@ export function DocsNavLinks(props: { onNavigate?: () => void }) {
                     )}
                   >
                     <span className="block">{item.label}</span>
-                    {matchLine ? (
+                    {matchParts.length > 0 ? (
                       <span className="mt-0.5 block truncate text-xs text-content-muted">
-                        {matchLine}
+                        {matchParts.map((part, index) => (
+                          <span key={part}>
+                            {index > 0 ? ' — ' : null}
+                            {highlightMatch(part, normalizedQuery)}
+                          </span>
+                        ))}
                       </span>
                     ) : null}
                   </Link>

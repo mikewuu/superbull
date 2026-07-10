@@ -31,7 +31,10 @@ import {
   rows as configurationRows,
   redaction,
 } from '../configuration/content';
-import { content as overviewContent } from '../content';
+import {
+  introContent as overviewIntroContent,
+  quickstartContent as overviewQuickstartContent,
+} from '../content';
 import {
   content as dashboardsContent,
   headers as dashboardsHeaders,
@@ -121,7 +124,7 @@ function buildPage(href: string, markdown: string): DocsSearchPage {
 }
 
 export const docsSearchIndex: DocsSearchPage[] = [
-  buildPage('/docs', overviewContent),
+  buildPage('/docs', [overviewIntroContent, overviewQuickstartContent].join('\n\n')),
   buildPage('/docs/getting-started', gettingStartedContent),
   buildPage(
     '/docs/standalone',
@@ -195,41 +198,166 @@ function stripMarkdown(text: string): string {
     .trim();
 }
 
-function buildSnippet(body: string, query: string): string | null {
-  const plainBody = stripMarkdown(body);
-  if (!plainBody) {
-    return null;
-  }
+type ProseBlock = { text: string; isProse: boolean };
 
-  const matchIndex = plainBody.toLowerCase().indexOf(query);
-  if (matchIndex === -1) {
-    if (plainBody.length <= SNIPPET_MAX_LENGTH) {
-      return plainBody;
+function buildProseBlocks(body: string): ProseBlock[] {
+  const blocks: ProseBlock[] = [];
+  let currentLines: string[] = [];
+  let currentIsProse: boolean | null = null;
+  let inFence = false;
+
+  const flush = () => {
+    if (currentIsProse !== null && currentLines.length > 0) {
+      blocks.push({ text: currentLines.join(' '), isProse: currentIsProse });
     }
-    return `${plainBody.slice(0, SNIPPET_MAX_LENGTH).trim()}…`;
-  }
+    currentLines = [];
+    currentIsProse = null;
+  };
 
-  const start = Math.max(0, matchIndex - SNIPPET_RADIUS);
-  const end = Math.min(plainBody.length, matchIndex + query.length + SNIPPET_RADIUS);
-  const prefix = start > 0 ? '…' : '';
-  const suffix = end < plainBody.length ? '…' : '';
-  return `${prefix}${plainBody.slice(start, end).trim()}${suffix}`;
-}
-
-export function findMatch(page: DocsSearchPage, query: string): DocsSearchMatch | null {
-  for (const section of page.sections) {
-    const headingMatches = section.heading?.toLowerCase().includes(query) ?? false;
-    const bodyMatches = section.body.toLowerCase().includes(query);
-    if (!headingMatches && !bodyMatches) {
+  for (const line of body.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('```')) {
+      inFence = !inFence;
+      flush();
       continue;
     }
+    if (!trimmed) {
+      flush();
+      continue;
+    }
+    const isProse = !inFence && !trimmed.startsWith('|') && !trimmed.startsWith('$');
+    if (currentIsProse !== null && currentIsProse !== isProse) {
+      flush();
+    }
+    currentIsProse = isProse;
+    currentLines.push(trimmed);
+  }
+  flush();
+  return blocks;
+}
 
+function snapToWordStart(text: string, index: number): number {
+  let i = index;
+  while (i > 0 && !/\s/.test(text.charAt(i - 1))) {
+    i--;
+  }
+  return i;
+}
+
+function snapToWordEnd(text: string, index: number): number {
+  let i = index;
+  while (i < text.length && !/\s/.test(text.charAt(i))) {
+    i++;
+  }
+  return i;
+}
+
+function snippetAroundMatch(plainText: string, matchIndex: number, matchLength: number): string {
+  const start = snapToWordStart(plainText, Math.max(0, matchIndex - SNIPPET_RADIUS));
+  const end = snapToWordEnd(
+    plainText,
+    Math.min(plainText.length, matchIndex + matchLength + SNIPPET_RADIUS),
+  );
+  const prefix = start > 0 ? '…' : '';
+  const suffix = end < plainText.length ? '…' : '';
+  return `${prefix}${plainText.slice(start, end).trim()}${suffix}`;
+}
+
+function findBlockMatch(
+  blocks: ProseBlock[],
+  query: string,
+  wantProse: boolean,
+): { plainText: string; matchIndex: number } | null {
+  for (const block of blocks) {
+    if (block.isProse !== wantProse) {
+      continue;
+    }
+    const plainText = stripMarkdown(block.text);
+    const matchIndex = plainText.toLowerCase().indexOf(query);
+    if (matchIndex !== -1) {
+      return { plainText, matchIndex };
+    }
+  }
+  return null;
+}
+
+function firstProseBlock(blocks: ProseBlock[]): string | null {
+  for (const block of blocks) {
+    if (!block.isProse) {
+      continue;
+    }
+    const plainText = stripMarkdown(block.text);
+    if (plainText) {
+      return plainText;
+    }
+  }
+  return null;
+}
+
+function representativeSnippet(blocks: ProseBlock[]): string | null {
+  const fallback = firstProseBlock(blocks);
+  if (!fallback) {
+    return null;
+  }
+  if (fallback.length <= SNIPPET_MAX_LENGTH) {
+    return fallback;
+  }
+  const end = snapToWordEnd(fallback, SNIPPET_MAX_LENGTH);
+  return `${fallback.slice(0, end).trim()}…`;
+}
+
+type RankedSectionMatch = { rank: number; match: DocsSearchMatch };
+
+function rankSectionMatch(section: DocsSearchSection, query: string): RankedSectionMatch | null {
+  const headingText = section.heading;
+  const headingId = section.headingId;
+  const blocks = buildProseBlocks(section.body);
+
+  const proseMatch = findBlockMatch(blocks, query, true);
+  if (proseMatch) {
     return {
-      headingText: section.heading,
-      headingId: section.headingId,
-      snippet: buildSnippet(section.body, query),
+      rank: 0,
+      match: {
+        headingText,
+        headingId,
+        snippet: snippetAroundMatch(proseMatch.plainText, proseMatch.matchIndex, query.length),
+      },
+    };
+  }
+
+  const headingMatches = headingText?.toLowerCase().includes(query) ?? false;
+  if (headingMatches) {
+    return { rank: 1, match: { headingText, headingId, snippet: representativeSnippet(blocks) } };
+  }
+
+  const codeMatch = findBlockMatch(blocks, query, false);
+  if (codeMatch) {
+    return {
+      rank: 2,
+      match: {
+        headingText,
+        headingId,
+        snippet: snippetAroundMatch(codeMatch.plainText, codeMatch.matchIndex, query.length),
+      },
     };
   }
 
   return null;
+}
+
+export function findMatch(page: DocsSearchPage, query: string): DocsSearchMatch | null {
+  let best: RankedSectionMatch | null = null;
+  for (const section of page.sections) {
+    const ranked = rankSectionMatch(section, query);
+    if (!ranked) {
+      continue;
+    }
+    if (!best || ranked.rank < best.rank) {
+      best = ranked;
+    }
+    if (best.rank === 0) {
+      break;
+    }
+  }
+  return best?.match ?? null;
 }

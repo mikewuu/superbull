@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import { DocsArchitectureDiagram } from './_components/docs-architecture-diagram';
 import { DocsMarkdown } from './_components/docs-markdown';
-import { content } from './content';
+import { introContent, quickstartContent } from './content';
 
 export const metadata: Metadata = {
   title: 'SuperBull docs',
@@ -9,5 +10,11 @@ export const metadata: Metadata = {
 };
 
 export default function DocsOverviewPage() {
-  return <DocsMarkdown content={content} />;
+  return (
+    <>
+      <DocsMarkdown content={introContent} />
+      <DocsArchitectureDiagram />
+      <DocsMarkdown content={quickstartContent} />
+    </>
+  );
 }
