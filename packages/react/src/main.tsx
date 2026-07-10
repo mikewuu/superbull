@@ -5,11 +5,14 @@ import { RouterProvider, createBrowserRouter } from 'react-router';
 import { AppShell } from './components/app-shell';
 import './index.css';
 import { readBasePath } from './lib/read-base-path';
+import { readUIConfig } from './lib/read-ui-config';
 import { JobDetailPage } from './pages/job-detail/job-detail-page';
 import { OverviewPage } from './pages/overview/overview-page';
 import { QueueDetailPage } from './pages/queue-detail/queue-detail-page';
 
 const queryClient = new QueryClient();
+
+document.title = readUIConfig().board_title ?? 'SuperBull';
 
 const basename = readBasePath().replace(/\/$/, '') || '/';
 

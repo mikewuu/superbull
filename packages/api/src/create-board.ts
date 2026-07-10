@@ -18,7 +18,7 @@ export function createBoard(args: {
     .setQueues(registry.boardQueues)
     .setViewsPath(path.join(uiBasePath, 'dist'))
     .setStaticPath('/static', path.join(uiBasePath, 'dist/static'))
-    .setUIConfig({ board_title: 'superbull', ...options.uiConfig })
+    .setUIConfig({ board_title: 'SuperBull', ...options.uiConfig })
     .setEntryRoute(appRoutes.entryPoint)
     .setErrorHandler(handleError)
     .setApiRoutes(appRoutes.api);

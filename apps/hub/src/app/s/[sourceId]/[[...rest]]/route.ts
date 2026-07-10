@@ -34,7 +34,7 @@ export async function GET(
   const html = renderSpaEntry({
     template,
     basePath: `/s/${sourceId}/`,
-    title: `${source.name} — superbull`,
+    title: `${source.name} — SuperBull`,
     uiConfig: JSON.stringify({ board_title: source.name }),
   });
 

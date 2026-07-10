@@ -19,7 +19,7 @@ export default function AppLayout(props: AppLayoutProps) {
             <Activity className="size-4 text-content-inverted" />
           </span>
           <span className="text-2sm font-semibold tracking-tight text-content-emphasis">
-            superbull hub
+            SuperBull Hub
           </span>
         </Link>
         <NavLinks />

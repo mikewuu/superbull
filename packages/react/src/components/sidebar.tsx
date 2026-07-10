@@ -16,7 +16,7 @@ export function Sidebar() {
           <Activity className="size-4 text-content-inverted" />
         </span>
         <span className="text-2sm font-semibold tracking-tight text-content-emphasis">
-          superbull
+          SuperBull
         </span>
       </div>
 

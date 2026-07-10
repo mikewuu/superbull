@@ -43,7 +43,7 @@ async function main() {
 
   app.listen(httpPort, () => {
     const label = queueNames.length > 0 ? queueNames.join(', ') : 'none discovered';
-    console.log(`superbull dev → http://localhost:${httpPort}`);
+    console.log(`SuperBull dev → http://localhost:${httpPort}`);
     console.log(`redis ${host}:${port} · queues: ${label}`);
   });
 }
