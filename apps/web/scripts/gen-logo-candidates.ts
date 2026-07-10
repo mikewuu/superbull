@@ -9,9 +9,13 @@ import { fal } from '@fal-ai/client';
 fal.config({ credentials: process.env.FAL_API_KEY });
 
 const destDir = path.join(process.cwd(), 'public/landing/raw/logos');
+const faviconDestDir = path.join(process.cwd(), 'public/landing/raw/favicon');
 
 const flyingStyle =
   'bold simple geometry, flat solid colors only, two colors total (near-black and crimson-red), no gradients, no outline strokes, sticker-like, centered on pure white background. No text, no letters, no watermark.';
+
+const faviconStyle =
+  'extremely simplified two-shape icon, only 2 total flat colors (near-black and crimson-red), no gradients, no outlines, no fine detail, no eyes, huge bold forms that fill almost the entire square canvas edge to edge, must read clearly as a tiny 16x16 pixel app icon, sticker-like, centered on pure white background. No text, no letters, no watermark.';
 
 const jobs = [
   [
@@ -36,22 +40,47 @@ const jobs = [
   ],
 ] as const;
 
+const faviconJobs = [
+  [
+    'favicon-head-cape',
+    `Minimal flat vector app icon: one huge chunky solid near-black bull head filling most of the square, facing forward, two thick short horns, no eyes no nostrils no face lines, a single bold flat crimson-red cape collar shape peeking out from behind one side of the head, ${faviconStyle}`,
+  ],
+  [
+    'favicon-horns-block',
+    `Minimal flat vector app icon: two total shapes only, one giant solid near-black rounded block shape suggesting a bull head with two thick short horns on top, one giant flat crimson-red triangular cape wedge shape overlapping the bottom corner, both shapes huge and simplified, ${faviconStyle}`,
+  ],
+  [
+    'favicon-charge-blob',
+    `Minimal flat vector app icon: one massive solid near-black blob silhouette of a charging bull head and shoulders seen from the side, two short thick horns, a single flat crimson-red cape flag shape trailing from the top corner, ${faviconStyle}`,
+  ],
+] as const;
+
+async function generate(dir: string, slug: string, prompt: string): Promise<void> {
+  console.log(`→ ${slug}`);
+  const r = await fal.subscribe('fal-ai/nano-banana-pro', {
+    input: { prompt, aspect_ratio: '1:1' },
+    logs: false,
+  });
+  const url = (r.data as { images?: Array<{ url?: string }> }).images?.[0]?.url;
+  if (!url) {
+    console.log(`✗ ${slug}`);
+    return;
+  }
+  const res = await fetch(url);
+  await fs.mkdir(dir, { recursive: true });
+  await fs.writeFile(path.join(dir, `${slug}.png`), Buffer.from(await res.arrayBuffer()));
+  console.log(`✓ ${slug}`);
+}
+
 async function main(): Promise<void> {
-  for (const [slug, prompt] of jobs) {
-    console.log(`→ ${slug}`);
-    const r = await fal.subscribe('fal-ai/nano-banana-pro', {
-      input: { prompt, aspect_ratio: '1:1' },
-      logs: false,
-    });
-    const url = (r.data as { images?: Array<{ url?: string }> }).images?.[0]?.url;
-    if (!url) {
-      console.log(`✗ ${slug}`);
-      continue;
+  const faviconOnly = process.argv.includes('--favicon-only');
+  if (!faviconOnly) {
+    for (const [slug, prompt] of jobs) {
+      await generate(destDir, slug, prompt);
     }
-    const res = await fetch(url);
-    await fs.mkdir(destDir, { recursive: true });
-    await fs.writeFile(path.join(destDir, `${slug}.png`), Buffer.from(await res.arrayBuffer()));
-    console.log(`✓ ${slug}`);
+  }
+  for (const [slug, prompt] of faviconJobs) {
+    await generate(faviconDestDir, slug, prompt);
   }
 }
 
