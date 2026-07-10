@@ -1,0 +1,4 @@
+{
+  "extends": "@bullwatch/tsconfig/node-library.json",
+  "include": ["server.ts", "seed.ts", "e2e", "playwright.config.ts"]
+}

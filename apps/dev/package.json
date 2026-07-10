@@ -1,0 +1,30 @@
+{
+  "name": "@bullwatch/dev",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch server.ts",
+    "start": "tsx server.ts",
+    "seed": "tsx seed.ts",
+    "seed:live": "tsx seed.ts --live",
+    "e2e": "playwright test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@bullwatch/api": "workspace:*",
+    "@bullwatch/express": "workspace:*",
+    "@bullwatch/react": "workspace:*",
+    "bullmq": "^5.0.0",
+    "express": "^5.0.0",
+    "ioredis": "^5.4.1",
+    "tsx": "^4.19.2"
+  },
+  "devDependencies": {
+    "@bullwatch/tsconfig": "workspace:*",
+    "@playwright/test": "^1.49.1",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
