@@ -89,7 +89,7 @@ describe('annotations REST routes', () => {
       authedRequest('http://localhost/api/annotations', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ source_id: 'source-1', label: 'deploy' }),
+        body: JSON.stringify({ source_id: 'source-1', label: 'deploy', ts: null }),
       }),
       { params: Promise.resolve({}) },
     );
@@ -121,7 +121,7 @@ describe('annotations REST routes', () => {
       new NextRequest('http://localhost/api/annotations', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ source_id: 'source-1', label: 'v1' }),
+        body: JSON.stringify({ source_id: 'source-1', label: 'v1', ts: null }),
       }),
       { params: Promise.resolve({}) },
     );

@@ -41,7 +41,7 @@ export const POST = buildRoute({
   body: z.object({
     source_id: z.string(),
     label: z.string().min(1),
-    ts: z.number().optional(),
+    ts: z.number().nullable(),
   }),
   response: annotationSchema,
 })
