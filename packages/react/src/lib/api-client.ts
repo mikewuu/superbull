@@ -8,7 +8,11 @@ import type {
   JobRetryStatus,
   JobStatus,
   MetricsType,
+  QueueConcurrency,
   QueueMetrics,
+  QueuePriority,
+  QueueStats,
+  QueueWorker,
   RedisStats,
 } from './api-types';
 import { readBasePath } from './read-base-path';
@@ -170,4 +174,50 @@ export async function applyBulkJobAction(args: {
     action,
     job_ids: jobIds,
   });
+}
+
+export async function getQueueWorkers(queueName: string): Promise<QueueWorker[]> {
+  const response = await client.get<{ workers: QueueWorker[] }>(
+    `api/queues/${encodeURIComponent(queueName)}/workers`,
+  );
+  return response.data.workers;
+}
+
+export async function getQueueConcurrency(queueName: string): Promise<QueueConcurrency> {
+  const response = await client.get<QueueConcurrency>(
+    `api/queues/${encodeURIComponent(queueName)}/concurrency`,
+  );
+  return response.data;
+}
+
+export async function setQueueConcurrency(args: {
+  queueName: string;
+  globalConcurrency: number;
+}): Promise<void> {
+  const { queueName, globalConcurrency } = args;
+  await client.put(`api/queues/${encodeURIComponent(queueName)}/concurrency`, {
+    global_concurrency: globalConcurrency,
+  });
+}
+
+export async function getQueuePriorities(queueName: string): Promise<QueuePriority[]> {
+  const response = await client.get<{ priorities: QueuePriority[] }>(
+    `api/queues/${encodeURIComponent(queueName)}/priorities`,
+  );
+  return response.data.priorities;
+}
+
+export async function getQueueStats(queueName: string): Promise<QueueStats> {
+  const response = await client.get<QueueStats>(
+    `api/queues/${encodeURIComponent(queueName)}/stats`,
+  );
+  return response.data;
+}
+
+export async function drainQueue(queueName: string): Promise<void> {
+  await client.put(`api/queues/${encodeURIComponent(queueName)}/drain`);
+}
+
+export async function obliterateQueue(queueName: string): Promise<void> {
+  await client.put(`api/queues/${encodeURIComponent(queueName)}/obliterate`);
 }

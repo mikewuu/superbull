@@ -93,3 +93,31 @@ export interface JobNameStats {
   last_seen_ms: number;
   activity: number[];
 }
+
+export interface QueueWorker {
+  id?: string;
+  name?: string;
+  addr?: string;
+  started_ms?: number;
+}
+
+export interface QueueConcurrency {
+  global_concurrency: number | null;
+  rate_limit_ttl_ms: number | null;
+}
+
+export interface QueuePriority {
+  priority: number;
+  count: number;
+}
+
+export interface QueueStats {
+  wait_ms: { p50: number | null; p95: number | null };
+  run_ms: { p50: number | null; p95: number | null };
+  retry_rate: number;
+  stalled_count: number;
+  failed_count_window: number;
+  completed_count_window: number;
+  top_errors: { message: string; count: number }[];
+  est_drain_ms: number | null;
+}

@@ -7,10 +7,12 @@ import { useQueues } from '../../hooks/use-queues';
 import { type JobStatus, jobStatuses } from '../../lib/api-types';
 import { AddJobDialog } from './_components/add-job-dialog';
 import { BulkActionsBar } from './_components/bulk-actions-bar';
+import { CreatedAfterFilter } from './_components/created-after-filter';
 import { JobNamesTable } from './_components/job-names-table';
 import { JobTable } from './_components/job-table';
 import { MetricsChart } from './_components/metrics-chart';
 import { QueueActions } from './_components/queue-actions';
+import { QueueInsights } from './_components/queue-insights';
 import { QueuePagination } from './_components/queue-pagination';
 import { StatusFilter } from './_components/status-filter';
 
@@ -41,6 +43,18 @@ export function QueueDetailPage() {
   const sort = searchParams.get('sort') === 'asc' ? 'asc' : 'desc';
   const perPage = Number(searchParams.get('per_page') ?? '10');
   const view = readSelectedView(searchParams.get('view'));
+  const createdAfterMs = Number(searchParams.get('created_after')) || null;
+
+  const changeCreatedAfter = (createdAfter: number | null) => {
+    setSearchParams((params) => {
+      if (createdAfter) {
+        params.set('created_after', String(createdAfter));
+      } else {
+        params.delete('created_after');
+      }
+      return params;
+    });
+  };
 
   const changeView = (next: QueueDetailView) => {
     setSearchParams((params) => {
@@ -110,6 +124,11 @@ export function QueueDetailPage() {
     );
   }
 
+  const filteredJobs = createdAfterMs
+    ? queue.jobs.filter((job) => job.timestamp >= createdAfterMs)
+    : queue.jobs;
+  const jobTableQueue = createdAfterMs ? { ...queue, jobs: filteredJobs } : queue;
+
   return (
     <>
       <PageHeader
@@ -139,6 +158,8 @@ export function QueueDetailPage() {
           <MetricsChart queueName={queue.name} type="completed" />
           <MetricsChart queueName={queue.name} type="failed" />
         </div>
+
+        <QueueInsights queueName={queue.name} />
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -184,6 +205,14 @@ export function QueueDetailPage() {
                 }}
               />
             )}
+            {view === 'runs' && (
+              <>
+                <CreatedAfterFilter onChange={changeCreatedAfter} />
+                {createdAfterMs && (
+                  <span className="text-xs text-content-muted">(filtered from current page)</span>
+                )}
+              </>
+            )}
           </div>
           {view === 'runs' && (
             <SearchInput
@@ -207,7 +236,7 @@ export function QueueDetailPage() {
             )}
 
             <JobTable
-              queue={queue}
+              queue={jobTableQueue}
               selectedStatus={statuses.length === 1 && statuses[0] ? statuses[0] : 'latest'}
               selectedIds={selectedIds}
               sortOrder={sort}

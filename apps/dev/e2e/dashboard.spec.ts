@@ -267,3 +267,102 @@ test('multiple status filters combine with OR and clear per chip', async ({ page
   await page.getByLabel('Remove prioritized filter').click();
   await expect(page.getByTestId('job-row')).toHaveCount(2);
 });
+
+test('insights section renders stats numbers for the queue', async ({ page }) => {
+  await page.goto('/queue/process-videos');
+  await page.getByTestId('queue-insights-toggle').click();
+
+  await expect(page.getByText('Wait p50 / p95')).toBeVisible();
+  await expect(page.getByText('Run p50 / p95')).toBeVisible();
+  await expect(page.getByText('Retry rate')).toBeVisible();
+  await expect(page.getByText('Est. drain')).toBeVisible();
+  await expect(page.getByTestId('insights-top-errors')).toContainText('ffmpeg exited with code 1');
+});
+
+test('workers panel shows a red empty state when no worker is connected', async ({ page }) => {
+  await page.goto('/queue/process-videos');
+  await page.getByTestId('queue-insights-toggle').click();
+
+  await expect(page.getByTestId('insights-workers')).toContainText('No workers connected');
+});
+
+test('cmd-K opens the command palette and navigates to a queue', async ({ page }) => {
+  await page.goto('/');
+  await page.keyboard.press('Control+k');
+
+  const input = page.getByPlaceholder('Jump to a queue or run an action…');
+  await expect(input).toBeVisible();
+  await input.fill('sync-contacts');
+  await page.getByText('Go to sync-contacts').click();
+
+  await expect(page).toHaveURL(/\/queue\/sync-contacts/);
+  await expect(input).toHaveCount(0);
+});
+
+test('replay with edited payload adds a new waiting job carrying the edited data', async ({
+  page,
+}) => {
+  await page.goto('/queue/send-emails?status=completed');
+  await page.getByTestId('job-row').first().click();
+
+  await page.getByLabel('Edit and resend job').click();
+  const textarea = page.getByLabel('Data (JSON)');
+  await expect(textarea).toBeVisible();
+  await textarea.fill('{"to":"edited@example.com","source":"e2e-edit"}');
+  await page.getByRole('dialog').getByRole('button', { name: 'Replay' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+
+  await page.goto('/queue/send-emails?status=waiting');
+  await page.getByTestId('job-row').first().click();
+  await expect(page.getByText(/edited@example\.com/)).toBeVisible();
+});
+
+test('bulk add creates every job in the array', async ({ page }) => {
+  await page.goto('/queue/send-emails?status=waiting');
+  const beforeCount = await page.getByTestId('job-row').count();
+
+  await page.getByRole('button', { name: 'Add job' }).click();
+  await page.getByTestId('add-job-mode-bulk').click();
+  await page.getByLabel(/Jobs — JSON array/).fill(
+    JSON.stringify([
+      { name: 'bulk-1', data: { source: 'e2e-bulk' } },
+      { name: 'bulk-2', data: { source: 'e2e-bulk' } },
+      { name: 'bulk-3', data: { source: 'e2e-bulk' } },
+    ]),
+  );
+  await page.getByRole('dialog').getByRole('button', { name: 'Add jobs' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+
+  await page.goto('/queue/send-emails?status=waiting');
+  await expect(page.getByTestId('job-row')).toHaveCount(beforeCount + 3);
+});
+
+test('drain queue removes waiting jobs via the danger zone menu', async ({ page }) => {
+  await page.goto('/queue/sync-contacts?status=waiting');
+  await expect(page.getByTestId('job-row').first()).toBeVisible();
+
+  await page.getByLabel('Queue actions').click();
+  await page.getByRole('button', { name: 'Drain queue…' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Drain queue' }).click();
+
+  await expect(page.getByText(/No waiting jobs|No jobs yet/)).toBeVisible();
+});
+
+test('obliterate queue requires typing the queue name before the confirm button enables', async ({
+  page,
+}) => {
+  await page.goto('/queue/process-videos');
+  await page.getByLabel('Queue actions').click();
+  await page.getByRole('button', { name: 'Obliterate queue…' }).click();
+
+  const dialog = page.getByRole('dialog');
+  const confirmButton = dialog.getByRole('button', { name: 'Obliterate queue' });
+  await expect(confirmButton).toBeDisabled();
+
+  await dialog.getByLabel('Queue name confirmation').fill('process-videos');
+  await expect(confirmButton).toBeEnabled();
+  await confirmButton.click();
+
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByText('No jobs yet')).toBeVisible();
+});

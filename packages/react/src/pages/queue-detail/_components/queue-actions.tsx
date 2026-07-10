@@ -1,7 +1,9 @@
 import { Button, ConfirmDialog, MenuItem, Popover } from '@bullwatch/ui';
 import {
   ArrowUpCircle,
+  Droplets,
   Eraser,
+  Flame,
   MoreHorizontal,
   Pause,
   Play,
@@ -11,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useCleanQueue } from '../../../hooks/use-clean-queue';
+import { useDrainQueue } from '../../../hooks/use-drain-queue';
 import { useEmptyQueue } from '../../../hooks/use-empty-queue';
 import { usePauseQueue } from '../../../hooks/use-pause-queue';
 import { usePromoteQueueJobs } from '../../../hooks/use-promote-queue-jobs';
@@ -18,8 +21,9 @@ import { useResumeQueue } from '../../../hooks/use-resume-queue';
 import { useRetryQueueJobs } from '../../../hooks/use-retry-queue-jobs';
 import type { AppQueue } from '../../../lib/api-types';
 import { AddJobDialog } from './add-job-dialog';
+import { ObliterateConfirmDialog } from './obliterate-confirm-dialog';
 
-type PendingConfirm = 'empty' | 'clean-completed' | 'clean-failed' | null;
+type PendingConfirm = 'empty' | 'clean-completed' | 'clean-failed' | 'drain' | null;
 
 interface QueueActionsProps {
   queue: AppQueue;
@@ -29,6 +33,7 @@ export function QueueActions(props: QueueActionsProps) {
   const { queue } = props;
   const [showingMenu, setShowingMenu] = useState(false);
   const [showingAddJob, setShowingAddJob] = useState(false);
+  const [showingObliterate, setShowingObliterate] = useState(false);
   const [pendingConfirm, setPendingConfirm] = useState<PendingConfirm>(null);
 
   const pauseQueue = usePauseQueue();
@@ -37,6 +42,7 @@ export function QueueActions(props: QueueActionsProps) {
   const cleanQueue = useCleanQueue();
   const retryQueueJobs = useRetryQueueJobs();
   const promoteQueueJobs = usePromoteQueueJobs();
+  const drainQueue = useDrainQueue();
 
   const closeMenuAnd = (action: () => void) => {
     setShowingMenu(false);
@@ -117,6 +123,18 @@ export function QueueActions(props: QueueActionsProps) {
             danger
             onClick={() => closeMenuAnd(() => setPendingConfirm('empty'))}
           />
+          <MenuItem
+            icon={Droplets}
+            label="Drain queue…"
+            danger
+            onClick={() => closeMenuAnd(() => setPendingConfirm('drain'))}
+          />
+          <MenuItem
+            icon={Flame}
+            label="Obliterate queue…"
+            danger
+            onClick={() => closeMenuAnd(() => setShowingObliterate(true))}
+          />
         </div>
       </Popover>
 
@@ -164,6 +182,22 @@ export function QueueActions(props: QueueActionsProps) {
             { onSuccess: () => setPendingConfirm(null) },
           )
         }
+      />
+      <ConfirmDialog
+        showing={pendingConfirm === 'drain'}
+        onClose={() => setPendingConfirm(null)}
+        title="Drain queue"
+        description={`Remove every waiting job from "${queue.name}". Delayed, active, completed and failed jobs are kept. This cannot be undone.`}
+        confirmText="Drain queue"
+        loading={drainQueue.isPending}
+        onConfirm={() =>
+          drainQueue.mutate(queue.name, { onSuccess: () => setPendingConfirm(null) })
+        }
+      />
+      <ObliterateConfirmDialog
+        queueName={queue.name}
+        showing={showingObliterate}
+        onClose={() => setShowingObliterate(false)}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 import { Button, ConfirmDialog, JobStatusBadge, PageHeader, Skeleton } from '@bullwatch/ui';
-import { ArrowUpCircle, RefreshCcw, RotateCcw, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowUpCircle, Pencil, RefreshCcw, RotateCcw, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Breadcrumbs } from '../../components/breadcrumbs';
 import { useJob } from '../../hooks/use-job';
@@ -8,10 +8,12 @@ import { usePromoteJob } from '../../hooks/use-promote-job';
 import { useRemoveJob } from '../../hooks/use-remove-job';
 import { useReplayJob } from '../../hooks/use-replay-job';
 import { useRetryJob } from '../../hooks/use-retry-job';
+import { AttemptsPanel } from './_components/attempts-panel';
 import { ErrorSection } from './_components/error-section';
 import { JobLogsPanel } from './_components/job-logs-panel';
 import { JsonPanel } from './_components/json-panel';
 import { PropertiesPanel } from './_components/properties-panel';
+import { ReplayJobDialog } from './_components/replay-job-dialog';
 import { TimelineWaterfall } from './_components/timeline-waterfall';
 import { TimingSidebar } from './_components/timing-sidebar';
 
@@ -19,11 +21,34 @@ export function JobDetailPage() {
   const { queueName = '', jobId = '' } = useParams();
   const navigate = useNavigate();
   const [confirmingRemove, setConfirmingRemove] = useState(false);
+  const [showingReplayDialog, setShowingReplayDialog] = useState(false);
   const { data, error } = useJob({ queueName, jobId });
   const retryJob = useRetryJob();
   const promoteJob = usePromoteJob();
   const removeJob = useRemoveJob();
   const replayJob = useReplayJob();
+
+  useEffect(() => {
+    const currentJob = data?.job;
+    if (!currentJob) {
+      return;
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) {
+        return;
+      }
+      const target = event.target as HTMLElement | null;
+      const tag = target?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable) {
+        return;
+      }
+      if (event.key.toLowerCase() === 'r') {
+        replayJob.mutate({ queueName, jobName: currentJob.name, data: currentJob.data });
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [queueName, data, replayJob]);
 
   const backLink = `/queue/${encodeURIComponent(queueName)}`;
 
@@ -104,6 +129,13 @@ export function JobDetailPage() {
               onClick={() => replayJob.mutate({ queueName, jobName: job.name, data: job.data })}
             />
             <Button
+              variant="secondary"
+              className="h-8 w-8 justify-center p-0"
+              icon={<Pencil className="size-3.5" />}
+              aria-label="Edit and resend job"
+              onClick={() => setShowingReplayDialog(true)}
+            />
+            <Button
               variant="danger-outline"
               className="h-8 text-xs"
               icon={<Trash2 className="size-3.5" />}
@@ -124,6 +156,7 @@ export function JobDetailPage() {
           {job.failed_reason && (
             <ErrorSection failedReason={job.failed_reason} stacktrace={job.stacktrace} />
           )}
+          {job.attempts > 1 && <AttemptsPanel stacktrace={job.stacktrace} />}
           <JobLogsPanel queueName={queueName} jobId={jobId} />
         </div>
 
@@ -161,6 +194,14 @@ export function JobDetailPage() {
         onConfirm={() =>
           removeJob.mutate({ queueName, jobId }, { onSuccess: () => navigate(backLink) })
         }
+      />
+
+      <ReplayJobDialog
+        queueName={queueName}
+        jobName={job.name}
+        initialData={job.data}
+        showing={showingReplayDialog}
+        onClose={() => setShowingReplayDialog(false)}
       />
     </>
   );
