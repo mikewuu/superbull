@@ -21,6 +21,9 @@ export function Sidebar() {
       </div>
 
       <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto">
+        <span className="px-2.5 pb-1.5 pt-1 text-[11px] font-medium uppercase tracking-wide text-content-muted">
+          Main
+        </span>
         <NavLink
           to="/"
           end

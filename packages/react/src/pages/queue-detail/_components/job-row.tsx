@@ -67,13 +67,17 @@ export function JobRow(props: JobRowProps) {
       <td className="max-w-64 px-3 py-2">
         <div className="flex flex-col">
           <span className="flex items-baseline gap-2">
-            <span className="truncate text-2sm font-medium text-content-emphasis">{job.name}</span>
+            <span title={job.name} className="truncate text-2sm font-medium text-content-emphasis">
+              {job.name}
+            </span>
             <span className="shrink-0 font-mono text-[11px] text-content-muted">
               #{jobId ?? '—'}
             </span>
           </span>
           {status === 'failed' && job.failed_reason && (
-            <span className="mt-0.5 truncate text-xs text-content-error">{job.failed_reason}</span>
+            <span title={job.failed_reason} className="mt-0.5 truncate text-xs text-content-error">
+              {job.failed_reason}
+            </span>
           )}
         </div>
       </td>

@@ -76,7 +76,11 @@ export function OverviewPage() {
               <StatTile
                 label="Status"
                 subline="all queues"
-                value={pausedCount > 0 ? `${pausedCount} paused` : 'Active'}
+                value={
+                  <span className="font-sans text-[19px]">
+                    {pausedCount > 0 ? `${pausedCount} paused` : 'Active'}
+                  </span>
+                }
                 icon={pausedCount > 0 ? PauseCircle : CheckCircle2}
                 tint={pausedCount > 0 ? 'amber' : 'green'}
                 accent={pausedCount > 0 ? 'warning' : 'success'}
