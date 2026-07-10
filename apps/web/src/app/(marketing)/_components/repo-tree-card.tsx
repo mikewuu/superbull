@@ -30,7 +30,7 @@ export function RepoTreeCard(): React.ReactElement {
       <div className="border-t border-white/10 px-5 py-4">
         <p className="font-mono text-xs text-white/40">LICENSE</p>
         <p className="mt-2 font-mono text-[12.5px] leading-relaxed text-white/70">
-          MIT License. Copyright (c) 2026 Mike Wu.
+          MIT License.
           <br />
           Server-adapter architecture derived from bull-board, also MIT licensed.
         </p>
