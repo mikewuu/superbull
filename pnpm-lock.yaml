@@ -565,6 +565,9 @@ importers:
       '@bullwatch/api':
         specifier: workspace:*
         version: link:../api
+      ioredis:
+        specifier: ^5.10.1
+        version: 5.10.1
     devDependencies:
       '@bullwatch/tsconfig':
         specifier: workspace:*

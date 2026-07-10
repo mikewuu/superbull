@@ -87,6 +87,24 @@ await startProxy({ queues, token: process.env.PROXY_TOKEN!, port: 4650 });
 Point the hub at it: `POST /api/sources` with `{ "name": "...", "url": "http://host:4650",
 "token": "..." }` (or use the "Add source" form, or the `add_source` MCP tool).
 
+### `bullwatch-proxy` CLI
+
+`@bullwatch/proxy` also ships a `bullwatch-proxy` bin — no code required next to your workers:
+
+```bash
+npx bullwatch-proxy --token $BULLWATCH_TOKEN --queues my-queue,other-queue \
+  --hub https://hub.example.com --hub-token $HUB_API_TOKEN
+```
+
+It connects to Redis (`--redis-host`/`--redis-port`/`--redis-password`/`--redis-db`/`--tls`,
+or the matching `REDIS_*` env vars), resolves which queues to serve — an explicit
+`--queues a,b,c` / `--queues-file path` list (entries may be `customprefix:name`), or an
+automatic `SCAN` for `${prefix}:*:meta` keys when neither is given — starts the proxy, and,
+if `--hub`/`--hub-token` are set, self-registers with the hub (`POST /api/sources/register`,
+upserted by name) and starts shipping completed/failed job events plus periodic queue
+snapshots to it (`--no-ingest` to register without shipping events). Run
+`bullwatch-proxy --help` for the full flag list.
+
 ## Hub setup
 
 ```bash
@@ -110,7 +128,16 @@ Deploys to Vercel as a normal Next.js app. `next.config.ts` already sets
 
 **Add-source flow**: visit `/`, fill in a name, the proxy's URL, and its `startProxy` token.
 The row shows live health (`GET /healthz`) and queue count (`GET /api/queues`), and links to
-that source's dashboard at `/s/[sourceId]/`.
+that source's dashboard at `/s/[sourceId]/`. A `bullwatch-proxy` started with `--hub`/
+`--hub-token` registers itself the same way — no form needed — via
+`POST /api/sources/register` (bearer `HUB_API_TOKEN`, body `{ name, url, token }`, upserted
+by `name` so re-running the same proxy updates its existing source instead of duplicating it).
+
+**Ingest**: proxies with a hub configured batch completed/failed job events and periodic
+queue snapshots (every 5s or 100 events, single 3s-delayed retry on failure) to
+`POST /api/ingest`. That endpoint is authenticated per-source — the bearer token must match
+the *source's own* `startProxy` token, not `HUB_API_TOKEN` — and stores events in Convex
+(`ingestEvents`, deduped by event `uuid`).
 
 ## MCP
 

@@ -25,17 +25,21 @@
       }
     }
   },
+  "bin": {
+    "bullwatch-proxy": "./dist/cli.js"
+  },
   "files": ["dist"],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && chmod +x dist/cli.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
-    "@bullwatch/api": "workspace:*"
+    "@bullwatch/api": "workspace:*",
+    "ioredis": "^5.10.1"
   },
   "peerDependencies": {
     "bullmq": ">=5.0.0"
