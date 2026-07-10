@@ -41,7 +41,7 @@ export function JobStatusBadge(props: JobStatusBadgeProps) {
   }
   if (status === 'delayed') {
     return (
-      <StatusBadge variant="warning" icon={Clock}>
+      <StatusBadge variant="new" icon={Clock}>
         delayed
       </StatusBadge>
     );

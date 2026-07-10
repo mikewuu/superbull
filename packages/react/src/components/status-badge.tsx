@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { cn } from '../lib/cn';
 
 const statusBadgeVariants = cva(
-  'flex max-w-fit items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium',
+  'flex max-w-fit items-center gap-1 whitespace-nowrap rounded px-1.5 py-0.5 text-[11px] font-medium',
   {
     variants: {
       variant: {
@@ -33,7 +33,7 @@ export function StatusBadge(props: StatusBadgeProps) {
 
   return (
     <span className={cn(statusBadgeVariants({ variant }), className)}>
-      {Icon && <Icon className="size-3 shrink-0" />}
+      {Icon && <Icon className="size-2.5 shrink-0" />}
       {children}
     </span>
   );

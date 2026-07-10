@@ -8,12 +8,14 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'candy border-transparent text-white',
-        secondary: 'candy-pill border-transparent text-content-emphasis',
+        primary:
+          'border-transparent bg-bg-inverted text-white hover:bg-neutral-700 active:scale-[0.98]',
+        secondary:
+          'border-border-default bg-white text-content-emphasis hover:bg-bg-muted active:scale-[0.98]',
         outline: 'border-transparent text-content-default hover:bg-bg-subtle active:scale-[0.98]',
-        danger: 'candy border-transparent text-white [--candy-color:#e5484d]',
+        danger: 'border-transparent bg-[#e5484d] text-white hover:bg-[#d43d42] active:scale-[0.98]',
         'danger-outline':
-          'border-border-subtle bg-white text-content-error hover:bg-bg-error/60 active:scale-[0.98]',
+          'border-border-default bg-white text-content-error hover:bg-bg-error/60 active:scale-[0.98]',
       },
     },
     defaultVariants: {
