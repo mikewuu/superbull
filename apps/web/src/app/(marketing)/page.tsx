@@ -19,7 +19,7 @@ const githubUrl = 'https://github.com/mikewu/superbull';
 const faqs = [
   {
     q: 'Can an agent operate my queues directly?',
-    a: "Yes. An agent with an MCP token can watch your queues, open a failed job, and read the stack trace. It can retry that job itself, or pause a queue that's failing fast — the same 8 tools you'd otherwise click through the board for.",
+    a: "Yes. An agent with an MCP token can watch your queues, open a failed job, and read the stack trace. It can retry that job itself, or pause a queue that's failing fast: the same 8 tools you'd otherwise click through the board for.",
   },
   {
     q: 'Do I need the hub to use SuperBull?',
@@ -27,7 +27,7 @@ const faqs = [
   },
   {
     q: 'Is bullmq bundled with SuperBull?',
-    a: "No — it's a peerDependency. SuperBull calls your app's own Queue instance, so retries, promotes, and removes always run against the exact BullMQ version your workers use.",
+    a: "No. It's a peerDependency. SuperBull calls your app's own Queue instance, so retries, promotes, and removes always run against the exact BullMQ version your workers use.",
   },
   {
     q: 'Does this replace bull-board?',
@@ -56,16 +56,16 @@ export default function LandingPage(): React.ReactElement {
               for BullMQ
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-content-default">
-              A dense runs table, full job timelines, one-click retries, and alerts — wired straight
+              A dense runs table, full job timelines, one-click retries, and alerts. Wired straight
               into the queues you already run.
             </p>
-            <p className="mx-auto mt-3 max-w-xl text-lg leading-8 text-content-muted">
+            <p className="mx-auto mt-3 max-w-xl text-lg leading-8 font-medium text-content-default">
               Your agent can read the stack trace and retry the job before you wake up.
             </p>
             <div className="mx-auto mt-8 max-w-lg">
               <InstallCommand />
             </div>
-            <p className="mt-4 text-2sm text-content-subtle">
+            <p className="mt-4 text-2sm text-content-muted">
               MIT licensed · your Redis, your data · no seat limits ·{' '}
               <a
                 href="/docs"
@@ -111,7 +111,7 @@ export default function LandingPage(): React.ReactElement {
         <div className="mx-auto grid max-w-5xl items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
           <Reveal>
             <div>
-              <p className="font-mono text-2sm text-content-subtle">01 — the problem</p>
+              <p className="font-mono text-2sm text-content-subtle">01 / the problem</p>
               <h2 className="mt-3 text-4xl leading-[1.08] font-semibold tracking-tight text-content-emphasis sm:text-5xl">
                 BullMQ ships the queue.
                 <br />
@@ -146,7 +146,7 @@ export default function LandingPage(): React.ReactElement {
       {/* feature deep dive */}
       <section className="px-4 py-24 sm:px-6 sm:py-28">
         <div className="mx-auto max-w-6xl">
-          <p className="font-mono text-2sm text-content-subtle">03 — what you get</p>
+          <p className="font-mono text-2sm text-content-subtle">03 / what you get</p>
 
           <div className="mt-10 space-y-24">
             <Reveal>
@@ -158,7 +158,7 @@ export default function LandingPage(): React.ReactElement {
                   <p className="mt-4 text-lg leading-8 text-content-default">
                     Every job across every queue, faceted by status, sorted by created or processed
                     time, searchable by name or id. Quick-retry inline, select a page, bulk retry,
-                    promote, or remove — the trigger.dev-style table BullMQ never shipped, plus a
+                    promote, or remove: the trigger.dev-style table BullMQ never shipped, plus a
                     cmd-K palette to jump anywhere.
                   </p>
                 </div>
@@ -206,7 +206,7 @@ export default function LandingPage(): React.ReactElement {
       {/* agent-native / mcp */}
       <section className="px-4 py-24 sm:px-6 sm:py-28">
         <div className="mx-auto max-w-6xl">
-          <p className="font-mono text-2sm text-content-subtle">04 — agent-native</p>
+          <p className="font-mono text-2sm text-content-subtle">04 / agent-native</p>
 
           <div className="mt-10 space-y-20">
             <Reveal>
@@ -234,7 +234,7 @@ export default function LandingPage(): React.ReactElement {
                   Every call above is real.
                 </h3>
                 <p className="mt-4 text-lg leading-8 text-content-default">
-                  Try the other seven tools below — same requests and responses an agent gets back.
+                  Try the other seven tools below. Same requests and responses an agent gets back.
                 </p>
               </div>
               <div className="mt-10">
@@ -245,12 +245,12 @@ export default function LandingPage(): React.ReactElement {
         </div>
       </section>
 
-      {/* alerts — the page's single dark band */}
+      {/* alerts: the page's single dark band */}
       <section className="bg-bg-inverted px-4 py-24 text-white sm:px-6 sm:py-28">
         <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1fr_1.1fr]">
           <Reveal>
             <div>
-              <p className="font-mono text-2sm text-white/40">05 — while you&apos;re away</p>
+              <p className="font-mono text-2sm text-white/40">05 / while you&apos;re away</p>
               <h2 className="mt-3 text-4xl leading-[1.08] font-semibold tracking-tight sm:text-5xl">
                 It keeps watch.
                 <br />
@@ -274,7 +274,7 @@ export default function LandingPage(): React.ReactElement {
         <div className="mx-auto grid max-w-5xl items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
           <Reveal>
             <div>
-              <p className="font-mono text-2sm text-content-subtle">06 — open source</p>
+              <p className="font-mono text-2sm text-content-subtle">06 / open source</p>
               <h2 className="mt-3 text-4xl leading-[1.08] font-semibold tracking-tight text-content-emphasis sm:text-5xl">
                 MIT licensed.
                 <br />
