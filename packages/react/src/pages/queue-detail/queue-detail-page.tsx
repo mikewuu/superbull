@@ -7,33 +7,59 @@ import { SearchInput } from '../../components/search-input';
 import { Skeleton } from '../../components/skeleton';
 import { StatusBadge } from '../../components/status-badge';
 import { useQueues } from '../../hooks/use-queues';
-import { type QueueStatus, jobStatuses } from '../../lib/api-types';
+import { type JobStatus, jobStatuses } from '../../lib/api-types';
+import { cn } from '../../lib/cn';
+import { AddJobDialog } from './_components/add-job-dialog';
 import { BulkActionsBar } from './_components/bulk-actions-bar';
+import { JobNamesTable } from './_components/job-names-table';
 import { JobTable } from './_components/job-table';
 import { MetricsChart } from './_components/metrics-chart';
 import { QueueActions } from './_components/queue-actions';
 import { QueuePagination } from './_components/queue-pagination';
 import { StatusFilter } from './_components/status-filter';
 
-function readSelectedStatus(value: string | null): QueueStatus {
-  const match = jobStatuses.find((status) => status === value);
-  return match ?? 'latest';
+type QueueDetailView = 'runs' | 'names';
+
+function readSelectedStatuses(value: string | null): JobStatus[] {
+  if (!value) {
+    return [];
+  }
+  return value
+    .split(',')
+    .filter((entry): entry is JobStatus => jobStatuses.includes(entry as JobStatus));
+}
+
+function readSelectedView(value: string | null): QueueDetailView {
+  return value === 'names' ? 'names' : 'runs';
 }
 
 export function QueueDetailPage() {
   const { queueName = '' } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [runJobName, setRunJobName] = useState<string | null>(null);
 
-  const status = readSelectedStatus(searchParams.get('status'));
+  const statuses = readSelectedStatuses(searchParams.get('status'));
   const search = searchParams.get('search') ?? '';
   const page = Number(searchParams.get('page') ?? '1');
   const sort = searchParams.get('sort') === 'asc' ? 'asc' : 'desc';
   const perPage = Number(searchParams.get('per_page') ?? '10');
+  const view = readSelectedView(searchParams.get('view'));
+
+  const changeView = (next: QueueDetailView) => {
+    setSearchParams((params) => {
+      if (next === 'runs') {
+        params.delete('view');
+      } else {
+        params.set('view', next);
+      }
+      return params;
+    });
+  };
 
   const { data: queues, error } = useQueues({
     activeQueue: queueName,
-    status,
+    status: statuses.length > 0 ? statuses.join(',') : undefined,
     page,
     sort,
     perPage,
@@ -119,82 +145,134 @@ export function QueueDetailPage() {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <StatusFilter
-            queue={queue}
-            status={status}
-            onChange={(next) => {
-              clearSelection();
-              setSearchParams((params) => {
-                params.set('status', next);
-                params.delete('page');
-                return params;
-              });
-            }}
-          />
-          <SearchInput value={search} placeholder="Search by name or id…" onChange={changeSearch} />
+          <div className="flex items-center gap-3">
+            <div className="flex gap-0.5 rounded-lg border border-border-subtle p-0.5">
+              <button
+                type="button"
+                data-testid="view-runs"
+                onClick={() => changeView('runs')}
+                className={cn('h-7 rounded-md px-3 text-2sm', {
+                  'bg-bg-inverted font-medium text-white': view === 'runs',
+                  'text-content-subtle hover:text-content-emphasis': view !== 'runs',
+                })}
+              >
+                Runs
+              </button>
+              <button
+                type="button"
+                data-testid="view-names"
+                onClick={() => changeView('names')}
+                className={cn('h-7 rounded-md px-3 text-2sm', {
+                  'bg-bg-inverted font-medium text-white': view === 'names',
+                  'text-content-subtle hover:text-content-emphasis': view !== 'names',
+                })}
+              >
+                Jobs
+              </button>
+            </div>
+            {view === 'runs' && (
+              <StatusFilter
+                queue={queue}
+                statuses={statuses}
+                onChange={(next) => {
+                  clearSelection();
+                  setSearchParams((params) => {
+                    if (next.length > 0) {
+                      params.set('status', next.join(','));
+                    } else {
+                      params.delete('status');
+                    }
+                    params.delete('page');
+                    return params;
+                  });
+                }}
+              />
+            )}
+          </div>
+          {view === 'runs' && (
+            <SearchInput
+              value={search}
+              placeholder="Search by name or id…"
+              onChange={changeSearch}
+            />
+          )}
         </div>
 
-        {selectedIds.size > 0 && (
-          <BulkActionsBar
-            queueName={queue.name}
-            selectedIds={[...selectedIds]}
-            onDone={clearSelection}
-          />
-        )}
+        {view === 'names' ? (
+          <JobNamesTable queueName={queue.name} onRun={setRunJobName} />
+        ) : (
+          <>
+            {selectedIds.size > 0 && (
+              <BulkActionsBar
+                queueName={queue.name}
+                selectedIds={[...selectedIds]}
+                onDone={clearSelection}
+              />
+            )}
 
-        <JobTable
-          queue={queue}
-          selectedStatus={status}
-          selectedIds={selectedIds}
-          sortOrder={sort}
-          onSortChange={(next) => {
-            clearSelection();
-            setSearchParams((params) => {
-              params.set('sort', next);
-              params.delete('page');
-              return params;
-            });
-          }}
-          onToggle={(jobId) =>
-            setSelectedIds((current) => {
-              const next = new Set(current);
-              if (next.has(jobId)) {
-                next.delete(jobId);
-              } else {
-                next.add(jobId);
+            <JobTable
+              queue={queue}
+              selectedStatus={statuses.length === 1 && statuses[0] ? statuses[0] : 'latest'}
+              selectedIds={selectedIds}
+              sortOrder={sort}
+              onSortChange={(next) => {
+                clearSelection();
+                setSearchParams((params) => {
+                  params.set('sort', next);
+                  params.delete('page');
+                  return params;
+                });
+              }}
+              onToggle={(jobId) =>
+                setSelectedIds((current) => {
+                  const next = new Set(current);
+                  if (next.has(jobId)) {
+                    next.delete(jobId);
+                  } else {
+                    next.add(jobId);
+                  }
+                  return next;
+                })
               }
-              return next;
-            })
-          }
-          onToggleAll={(jobIds) =>
-            setSelectedIds((current) =>
-              current.size === jobIds.length ? new Set() : new Set(jobIds),
-            )
-          }
-        />
+              onToggleAll={(jobIds) =>
+                setSelectedIds((current) =>
+                  current.size === jobIds.length ? new Set() : new Set(jobIds),
+                )
+              }
+            />
 
-        <QueuePagination
-          queue={queue}
-          status={status}
-          page={page}
-          perPage={perPage}
-          onPerPageChange={(next) => {
-            clearSelection();
-            setSearchParams((params) => {
-              params.set('per_page', String(next));
-              params.delete('page');
-              return params;
-            });
-          }}
-          onChange={(next) => {
-            clearSelection();
-            setSearchParams((params) => {
-              params.set('page', String(next));
-              return params;
-            });
-          }}
-        />
+            <QueuePagination
+              queue={queue}
+              status={statuses.length === 1 && statuses[0] ? statuses[0] : 'latest'}
+              page={page}
+              perPage={perPage}
+              onPerPageChange={(next) => {
+                clearSelection();
+                setSearchParams((params) => {
+                  params.set('per_page', String(next));
+                  params.delete('page');
+                  return params;
+                });
+              }}
+              onChange={(next) => {
+                clearSelection();
+                setSearchParams((params) => {
+                  params.set('page', String(next));
+                  return params;
+                });
+              }}
+            />
+          </>
+        )}
       </div>
+
+      <AddJobDialog
+        key={runJobName ?? 'blank'}
+        queueName={queue.name}
+        initialName={runJobName ?? undefined}
+        showing={runJobName !== null}
+        onClose={() => setRunJobName(null)}
+      />
     </>
   );
 }

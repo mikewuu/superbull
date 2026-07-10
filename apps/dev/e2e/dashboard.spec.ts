@@ -222,3 +222,48 @@ test('per-page selector shows more rows', async ({ page }) => {
   await expect(page).toHaveURL(/per_page=50/);
   await expect(page.getByTestId('job-row')).toHaveCount(24);
 });
+
+test('jobs view aggregates job names', async ({ page }) => {
+  await page.goto('/queue/send-emails');
+  await page.getByTestId('view-names').click();
+
+  const rows = page.getByTestId('job-name-row');
+  await expect(rows.first()).toBeVisible();
+  const rowCount = await rows.count();
+  expect(rowCount).toBeGreaterThanOrEqual(4);
+
+  await expect(rows.filter({ hasText: 'invoice-receipt' })).toContainText('6');
+});
+
+test('run from jobs view enqueues a prefilled job', async ({ page }) => {
+  await page.goto('/queue/send-emails');
+  await page.getByTestId('view-names').click();
+
+  const row = page.getByTestId('job-name-row').filter({ hasText: 'welcome-email' });
+  await row.hover();
+  await row.getByRole('button', { name: 'Run' }).click();
+
+  await expect(page.getByLabel('Name')).toHaveValue('welcome-email');
+  await page.getByRole('dialog').getByRole('button', { name: 'Add job' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+
+  await page.getByTestId('view-runs').click();
+  await page.getByPlaceholder('Search by name or id…').fill('welcome-email');
+  await expect(page.getByTestId('job-row').filter({ hasText: 'waiting' }).first()).toBeVisible();
+});
+
+test('multiple status filters combine with OR and clear per chip', async ({ page }) => {
+  await page.goto('/queue/process-videos');
+  await page.getByTestId('status-filter-button').click();
+  await page.getByTestId('status-tab-failed').click();
+  await page.getByTestId('status-tab-prioritized').click();
+  await page.keyboard.press('Escape');
+
+  await expect(page.getByTestId('applied-status-failed')).toBeVisible();
+  await expect(page.getByTestId('applied-status-prioritized')).toBeVisible();
+  await expect(page).toHaveURL(/status=failed%2Cprioritized|status=failed,prioritized/);
+  await expect(page.getByTestId('job-row')).toHaveCount(5);
+
+  await page.getByLabel('Remove prioritized filter').click();
+  await expect(page.getByTestId('job-row')).toHaveCount(2);
+});

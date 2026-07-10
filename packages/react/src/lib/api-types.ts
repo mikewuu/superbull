@@ -89,3 +89,14 @@ export type UIConfig = Partial<{
   board_title: string;
   polling_interval_ms: number;
 }>;
+
+export interface JobNameStats {
+  name: string;
+  completed_count: number;
+  failed_count: number;
+  pending_count: number;
+  failure_rate: number;
+  avg_duration_ms: number | null;
+  last_seen_ms: number;
+  activity: number[];
+}

@@ -4,11 +4,11 @@ import type {
   AppQueue,
   BulkJobAction,
   JobCleanStatus,
+  JobNameStats,
   JobRetryStatus,
   JobStatus,
   MetricsType,
   QueueMetrics,
-  QueueStatus,
   RedisStats,
 } from './api-types';
 import { readBasePath } from './read-base-path';
@@ -17,7 +17,7 @@ const client = axios.create({ baseURL: readBasePath() });
 
 export interface GetQueuesParams {
   activeQueue?: string;
-  status?: QueueStatus;
+  status?: string;
   page?: number;
   perPage?: number;
   sort?: 'asc' | 'desc';
@@ -67,6 +67,13 @@ export async function getQueueMetrics(args: {
     { params: { type } },
   );
   return response.data;
+}
+
+export async function getJobNames(queueName: string): Promise<JobNameStats[]> {
+  const response = await client.get<{ job_names: JobNameStats[] }>(
+    `api/queues/${encodeURIComponent(queueName)}/job-names`,
+  );
+  return response.data.job_names;
 }
 
 export async function getRedisStats(): Promise<RedisStats> {

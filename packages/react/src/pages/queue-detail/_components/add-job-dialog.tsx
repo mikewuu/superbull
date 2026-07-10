@@ -7,11 +7,12 @@ interface AddJobDialogProps {
   queueName: string;
   showing: boolean;
   onClose: () => void;
+  initialName?: string;
 }
 
 export function AddJobDialog(props: AddJobDialogProps) {
-  const { queueName, showing, onClose } = props;
-  const [name, setName] = useState('');
+  const { queueName, showing, onClose, initialName } = props;
+  const [name, setName] = useState(initialName ?? '');
   const [dataText, setDataText] = useState('{}');
   const [delayMs, setDelayMs] = useState('');
   const [dataError, setDataError] = useState('');
