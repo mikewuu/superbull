@@ -88,11 +88,13 @@ export function CommandPalette() {
               <Command.Item
                 value={currentQueue.is_paused ? 'Resume queue' : 'Pause queue'}
                 onSelect={() =>
-                  runAndClose(() =>
-                    currentQueue.is_paused
-                      ? resumeQueue.mutate(currentQueue.name)
-                      : pauseQueue.mutate(currentQueue.name),
-                  )
+                  runAndClose(() => {
+                    if (currentQueue.is_paused) {
+                      resumeQueue.mutate(currentQueue.name);
+                      return;
+                    }
+                    pauseQueue.mutate(currentQueue.name);
+                  })
                 }
                 className="flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-sm text-content-default aria-selected:bg-bg-muted aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
               >
@@ -111,19 +113,21 @@ export function CommandPalette() {
                 <Plus className="size-4 text-content-muted" />
                 Add job
               </Command.Item>
-              <Command.Item
-                value="Retry all failed"
-                disabled={(currentQueue.counts.failed ?? 0) === 0}
-                onSelect={() =>
-                  runAndClose(() =>
-                    retryQueueJobs.mutate({ queueName: currentQueue.name, status: 'failed' }),
-                  )
-                }
-                className="flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-sm text-content-default aria-selected:bg-bg-muted aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
-              >
-                <ListRestart className="size-4 text-content-muted" />
-                Retry all failed
-              </Command.Item>
+              {currentQueue.allow_retries && (
+                <Command.Item
+                  value="Retry all failed"
+                  disabled={(currentQueue.counts.failed ?? 0) === 0}
+                  onSelect={() =>
+                    runAndClose(() =>
+                      retryQueueJobs.mutate({ queueName: currentQueue.name, status: 'failed' }),
+                    )
+                  }
+                  className="flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-sm text-content-default aria-selected:bg-bg-muted aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+                >
+                  <ListRestart className="size-4 text-content-muted" />
+                  Retry all failed
+                </Command.Item>
+              )}
             </Command.Group>
           )}
         </Command.List>

@@ -84,6 +84,8 @@ export function JobTable(props: JobTableProps) {
               status={getJobStatus(job, selectedStatus)}
               selected={job.id != null && selectedIds.has(String(job.id))}
               showActions={showActions}
+              allowRetries={queue.allow_retries}
+              allowCompletedRetries={queue.allow_completed_retries}
               onToggle={onToggle}
             />
           ))}

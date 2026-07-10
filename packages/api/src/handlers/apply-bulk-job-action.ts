@@ -25,6 +25,9 @@ export async function applyBulkJobAction(req: BoardRequest): Promise<HandlerResp
   }
 
   const { action, job_ids: jobIds } = parsed.data;
+  if (action === 'retry' && !queue.allowRetries) {
+    return { status: 405, body: { error: 'retries are disabled for this queue' } };
+  }
   const found = await Promise.all(
     jobIds.map(async (jobId) => ({ jobId, job: await queue.findJob(jobId) })),
   );
@@ -37,7 +40,11 @@ export async function applyBulkJobAction(req: BoardRequest): Promise<HandlerResp
   const jobs = found.flatMap((entry) =>
     entry.job ? [{ jobId: entry.jobId, job: entry.job }] : [],
   );
-  const invalidIds = await findInvalidJobIds(action, jobs);
+  const invalidIds = await findInvalidJobIds({
+    action,
+    jobs,
+    allowCompletedRetries: queue.allowCompletedRetries,
+  });
   if (invalidIds.length > 0) {
     return {
       status: 400,
@@ -50,7 +57,12 @@ export async function applyBulkJobAction(req: BoardRequest): Promise<HandlerResp
   return { status: 204, body: {} };
 }
 
-async function findInvalidJobIds(action: BulkAction, jobs: FoundJob[]): Promise<string[]> {
+async function findInvalidJobIds(args: {
+  action: BulkAction;
+  jobs: FoundJob[];
+  allowCompletedRetries: boolean;
+}): Promise<string[]> {
+  const { action, jobs, allowCompletedRetries } = args;
   if (action === 'remove') {
     return [];
   }
@@ -61,7 +73,15 @@ async function findInvalidJobIds(action: BulkAction, jobs: FoundJob[]): Promise<
 
   if (action === 'retry') {
     return states
-      .filter(({ state }) => state !== 'failed' && state !== 'completed')
+      .filter(({ state }) => {
+        if (state === 'failed') {
+          return false;
+        }
+        if (state === 'completed') {
+          return !allowCompletedRetries;
+        }
+        return true;
+      })
       .map(({ jobId }) => jobId);
   }
 

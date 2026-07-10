@@ -93,14 +93,18 @@ export function QueueActions(props: QueueActionsProps) {
         }
       >
         <div className="flex min-w-52 flex-col">
-          <MenuItem
-            icon={RotateCcw}
-            label="Retry all failed"
-            disabled={(queue.counts.failed ?? 0) === 0}
-            onClick={() =>
-              closeMenuAnd(() => retryQueueJobs.mutate({ queueName: queue.name, status: 'failed' }))
-            }
-          />
+          {queue.allow_retries && (
+            <MenuItem
+              icon={RotateCcw}
+              label="Retry all failed"
+              disabled={(queue.counts.failed ?? 0) === 0}
+              onClick={() =>
+                closeMenuAnd(() =>
+                  retryQueueJobs.mutate({ queueName: queue.name, status: 'failed' }),
+                )
+              }
+            />
+          )}
           <MenuItem
             icon={ArrowUpCircle}
             label="Promote all delayed"

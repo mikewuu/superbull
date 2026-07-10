@@ -18,19 +18,6 @@ import { StatusFilter } from './_components/status-filter';
 
 type QueueDetailView = 'runs' | 'names';
 
-function readSelectedStatuses(value: string | null): JobStatus[] {
-  if (!value) {
-    return [];
-  }
-  return value
-    .split(',')
-    .filter((entry): entry is JobStatus => jobStatuses.includes(entry as JobStatus));
-}
-
-function readSelectedView(value: string | null): QueueDetailView {
-  return value === 'names' ? 'names' : 'runs';
-}
-
 export function QueueDetailPage() {
   const { queueName = '' } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -231,6 +218,7 @@ export function QueueDetailPage() {
               <BulkActionsBar
                 queueName={queue.name}
                 selectedIds={[...selectedIds]}
+                allowRetries={queue.allow_retries}
                 onDone={clearSelection}
               />
             )}
@@ -300,4 +288,17 @@ export function QueueDetailPage() {
       />
     </>
   );
+}
+
+function readSelectedStatuses(value: string | null): JobStatus[] {
+  if (!value) {
+    return [];
+  }
+  return value
+    .split(',')
+    .filter((entry): entry is JobStatus => jobStatuses.includes(entry as JobStatus));
+}
+
+function readSelectedView(value: string | null): QueueDetailView {
+  return value === 'names' ? 'names' : 'runs';
 }

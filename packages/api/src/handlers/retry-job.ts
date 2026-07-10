@@ -9,6 +9,9 @@ export async function retryJob(req: BoardRequest): Promise<HandlerResponse> {
   if (queue.readOnlyMode) {
     return { status: 405, body: { error: 'queue is read-only' } };
   }
+  if (!queue.allowRetries) {
+    return { status: 405, body: { error: 'retries are disabled for this queue' } };
+  }
 
   const job = await queue.findJob(jobId);
   if (!job) {
@@ -18,6 +21,9 @@ export async function retryJob(req: BoardRequest): Promise<HandlerResponse> {
   const state = await job.getState();
   if (state !== 'failed' && state !== 'completed') {
     return { status: 400, body: { error: `job is in "${state}" state and cannot be retried` } };
+  }
+  if (state === 'completed' && !queue.allowCompletedRetries) {
+    return { status: 405, body: { error: 'completed retries are disabled for this queue' } };
   }
 
   await job.retry(state);

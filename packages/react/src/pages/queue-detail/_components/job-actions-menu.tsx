@@ -10,10 +10,13 @@ interface JobActionsMenuProps {
   queueName: string;
   jobId: string;
   status: JobStatus;
+  allowRetries: boolean;
+  allowCompletedRetries: boolean;
 }
 
 export function JobActionsMenu(props: JobActionsMenuProps) {
-  const { queueName, jobId, status } = props;
+  const { queueName, jobId, status, allowRetries, allowCompletedRetries } = props;
+  const showingRetry = status === 'completed' ? allowCompletedRetries : allowRetries;
   const [showingMenu, setShowingMenu] = useState(false);
   const [confirmingRemove, setConfirmingRemove] = useState(false);
   const retryJob = useRetryJob();
@@ -42,11 +45,13 @@ export function JobActionsMenu(props: JobActionsMenuProps) {
         }
       >
         <div className="flex min-w-40 flex-col">
-          <MenuItem
-            icon={RotateCcw}
-            label="Retry"
-            onClick={() => closeMenuAnd(() => retryJob.mutate({ queueName, jobId }))}
-          />
+          {showingRetry && (
+            <MenuItem
+              icon={RotateCcw}
+              label="Retry"
+              onClick={() => closeMenuAnd(() => retryJob.mutate({ queueName, jobId }))}
+            />
+          )}
           {status === 'delayed' && (
             <MenuItem
               icon={ArrowUpCircle}

@@ -6,11 +6,12 @@ import { useBulkJobAction } from '../../../hooks/use-bulk-job-action';
 interface BulkActionsBarProps {
   queueName: string;
   selectedIds: string[];
+  allowRetries: boolean;
   onDone: () => void;
 }
 
 export function BulkActionsBar(props: BulkActionsBarProps) {
-  const { queueName, selectedIds, onDone } = props;
+  const { queueName, selectedIds, allowRetries, onDone } = props;
   const [confirmingRemove, setConfirmingRemove] = useState(false);
   const bulkAction = useBulkJobAction();
 
@@ -37,14 +38,16 @@ export function BulkActionsBar(props: BulkActionsBarProps) {
         </span>
       </div>
       <div className="flex items-center gap-2">
-        <Button
-          variant="secondary"
-          className="h-8 px-2.5 text-xs"
-          icon={<RotateCcw className="size-3.5" />}
-          text="Retry"
-          loading={bulkAction.isPending}
-          onClick={() => run('retry')}
-        />
+        {allowRetries && (
+          <Button
+            variant="secondary"
+            className="h-8 px-2.5 text-xs"
+            icon={<RotateCcw className="size-3.5" />}
+            text="Retry"
+            loading={bulkAction.isPending}
+            onClick={() => run('retry')}
+          />
+        )}
         <Button
           variant="secondary"
           className="h-8 px-2.5 text-xs"

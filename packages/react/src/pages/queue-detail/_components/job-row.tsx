@@ -13,11 +13,22 @@ interface JobRowProps {
   status: JobStatus;
   selected: boolean;
   showActions: boolean;
+  allowRetries: boolean;
+  allowCompletedRetries: boolean;
   onToggle: (jobId: string) => void;
 }
 
 export function JobRow(props: JobRowProps) {
-  const { queueName, job, status, selected, showActions, onToggle } = props;
+  const {
+    queueName,
+    job,
+    status,
+    selected,
+    showActions,
+    allowRetries,
+    allowCompletedRetries,
+    onToggle,
+  } = props;
   const navigate = useNavigate();
   const retryJob = useRetryJob();
   const jobId = job.id != null ? String(job.id) : null;
@@ -100,7 +111,7 @@ export function JobRow(props: JobRowProps) {
       {showActions && (
         <td className="px-3 py-2">
           <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-            {status === 'failed' && jobId && (
+            {status === 'failed' && allowRetries && jobId && (
               <Button
                 variant="secondary"
                 className="h-7 px-2 text-xs"
@@ -110,7 +121,15 @@ export function JobRow(props: JobRowProps) {
                 onClick={() => retryJob.mutate({ queueName, jobId })}
               />
             )}
-            {jobId && <JobActionsMenu queueName={queueName} jobId={jobId} status={status} />}
+            {jobId && (
+              <JobActionsMenu
+                queueName={queueName}
+                jobId={jobId}
+                status={status}
+                allowRetries={allowRetries}
+                allowCompletedRetries={allowCompletedRetries}
+              />
+            )}
           </div>
         </td>
       )}

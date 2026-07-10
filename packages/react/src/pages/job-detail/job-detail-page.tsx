@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router';
 import { Breadcrumbs } from '../../components/breadcrumbs';
 import { useJob } from '../../hooks/use-job';
 import { usePromoteJob } from '../../hooks/use-promote-job';
+import { useQueues } from '../../hooks/use-queues';
 import { useRemoveJob } from '../../hooks/use-remove-job';
 import { useReplayJob } from '../../hooks/use-replay-job';
 import { useRetryJob } from '../../hooks/use-retry-job';
@@ -23,6 +24,8 @@ export function JobDetailPage() {
   const [confirmingRemove, setConfirmingRemove] = useState(false);
   const [showingReplayDialog, setShowingReplayDialog] = useState(false);
   const { data, error } = useJob({ queueName, jobId });
+  const { data: queues } = useQueues({});
+  const currentQueue = queues?.find((candidate) => candidate.name === queueName);
   const retryJob = useRetryJob();
   const promoteJob = usePromoteJob();
   const removeJob = useRemoveJob();
@@ -76,6 +79,9 @@ export function JobDetailPage() {
 
   const { job, status } = data;
   const priority = getPriority(job.opts);
+  const allowedRetryFlag =
+    status === 'completed' ? currentQueue?.allow_completed_retries : currentQueue?.allow_retries;
+  const showingRetry = allowedRetryFlag !== false;
 
   return (
     <>
@@ -101,14 +107,16 @@ export function JobDetailPage() {
         }
         controls={
           <>
-            <Button
-              variant="secondary"
-              className="h-8 text-xs"
-              icon={<RotateCcw className="size-3.5" />}
-              text="Retry"
-              loading={retryJob.isPending}
-              onClick={() => retryJob.mutate({ queueName, jobId })}
-            />
+            {showingRetry && (
+              <Button
+                variant="secondary"
+                className="h-8 text-xs"
+                icon={<RotateCcw className="size-3.5" />}
+                text="Retry"
+                loading={retryJob.isPending}
+                onClick={() => retryJob.mutate({ queueName, jobId })}
+              />
+            )}
             {status === 'delayed' && (
               <Button
                 variant="secondary"
