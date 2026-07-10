@@ -66,7 +66,7 @@ export default async function StatusPage(props: StatusPageProps) {
         </div>
       )}
 
-      <p className="mt-12 text-center text-xs text-content-muted">
+      <p className="mt-12 text-xs text-content-muted">
         Updated {formatUpdatedAt(fetchedAt)} · Powered by SuperBull
       </p>
     </div>

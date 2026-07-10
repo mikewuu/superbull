@@ -94,9 +94,12 @@ export function SignInForm(props: SignInFormProps) {
               type="button"
               data-testid="signin-toggle-flow"
               onClick={() => setFlow('signUp')}
-              className="mt-4 w-full rounded-md text-center text-xs text-content-muted outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 hover:text-content-emphasis"
+              className="mt-4 w-full rounded-md text-center text-xs text-content-subtle outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
             >
-              Don&apos;t have an account? Sign up
+              Don&apos;t have an account?{' '}
+              <span className="font-medium text-content-emphasis underline underline-offset-4">
+                Sign up
+              </span>
             </button>
           )}
           {flow === 'signUp' && (
@@ -104,9 +107,12 @@ export function SignInForm(props: SignInFormProps) {
               type="button"
               data-testid="signin-toggle-flow"
               onClick={() => setFlow('signIn')}
-              className="mt-4 w-full rounded-md text-center text-xs text-content-muted outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 hover:text-content-emphasis"
+              className="mt-4 w-full rounded-md text-center text-xs text-content-subtle outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
             >
-              Already have an account? Sign in
+              Already have an account?{' '}
+              <span className="font-medium text-content-emphasis underline underline-offset-4">
+                Sign in
+              </span>
             </button>
           )}
           {flow === 'signIn' && !canSignUp && (
