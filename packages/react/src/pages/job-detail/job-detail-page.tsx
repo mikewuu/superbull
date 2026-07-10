@@ -208,8 +208,8 @@ export function JobDetailPage() {
 }
 
 function getPriority(opts: object): number | undefined {
-  if ('priority' in opts && typeof (opts as { priority: unknown }).priority === 'number') {
-    return (opts as { priority: number }).priority;
+  if ('priority' in opts && typeof opts.priority === 'number') {
+    return opts.priority;
   }
   return undefined;
 }
