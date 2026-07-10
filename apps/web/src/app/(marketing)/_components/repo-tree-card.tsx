@@ -41,7 +41,7 @@ export function RepoTreeCard(): React.ReactElement {
           <p className="mt-1 text-xs text-white/40">server adapters</p>
         </div>
         <div className="px-3 py-4">
-          <p className="font-mono text-lg font-semibold text-white">320+</p>
+          <p className="font-mono text-lg font-semibold text-white">400+</p>
           <p className="mt-1 text-xs text-white/40">tests</p>
         </div>
         <div className="px-3 py-4">

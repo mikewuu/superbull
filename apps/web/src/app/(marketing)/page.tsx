@@ -67,6 +67,9 @@ export default function LandingPage(): React.ReactElement {
               read the docs
             </a>
           </p>
+          <p className="mt-2 text-2sm text-content-muted">
+            Works with Express, Fastify, Hono +6 more · BullMQ 5 · 400+ tests
+          </p>
         </div>
 
         <div className="relative mx-auto mt-16 max-w-5xl sm:mt-20">
