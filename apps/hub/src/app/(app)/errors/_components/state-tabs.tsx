@@ -1,4 +1,3 @@
-import { cn } from '@bullwatch/ui';
 import Link from 'next/link';
 import type { ErrorsTab } from '../page';
 
@@ -24,11 +23,9 @@ export function StateTabs(props: StateTabsProps) {
         <Link
           key={tab.key}
           href={`/errors?source=${activeSourceId}&state=${tab.key}`}
-          className={cn(
-            'flex items-center gap-1.5 border-b-2 px-3 py-2 text-2sm font-medium text-content-subtle transition-colors duration-150 ease-snout hover:text-content-emphasis',
-            { 'border-blue-600 text-content-emphasis': tab.key === activeTab },
-            { 'border-transparent': tab.key !== activeTab },
-          )}
+          className={`flex items-center gap-1.5 border-b-2 px-3 py-2 text-2sm font-medium text-content-subtle transition-colors duration-150 ease-snout hover:text-content-emphasis ${
+            tab.key === activeTab ? 'border-blue-600 text-content-emphasis' : 'border-transparent'
+          }`}
         >
           {tab.label}
           <span className="rounded bg-bg-subtle px-1.5 py-0.5 text-[11px] text-content-muted">
