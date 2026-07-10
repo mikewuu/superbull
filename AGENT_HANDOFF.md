@@ -1,4 +1,4 @@
-# bullwatch — Agent Handoff / Build Plan
+# superbull — Agent Handoff / Build Plan
 
 **You are continuing an in-progress build.** Read this whole file first, then continue from
 "Current status" → "Remaining work" in order. Do **atomic conventional commits** as you go
@@ -9,7 +9,7 @@ updated as you complete sections (tick the checklist at the bottom).
 
 ## What we're building
 
-`bullwatch` — a restyled, feature-rich dashboard for **BullMQ**. It borrows trigger.dev's
+`superbull` — a restyled, feature-rich dashboard for **BullMQ**. It borrows trigger.dev's
 UX (faceted filters, rich run/job detail, inline actions) but is styled in a **clean light
 theme like [dub](/Users/mike/Code/dub)** — NOT trigger.dev's dark theme. It embeds into a
 user's existing Node app via a thin **server adapter** (one per framework) and renders a
@@ -29,7 +29,7 @@ a new UI, more features, and restructured to the owner's code conventions.
    **our own REST route table** (we add filters/metrics/bulk that bull-board lacks). Not a
    drop-in import swap for bull-board.
 4. **MIT**, with attribution to bull-board (already in LICENSE + README).
-5. **Name:** `bullwatch`, npm scope `@bullwatch/*`.
+5. **Name:** `superbull`, npm scope `@superbull/*`.
 
 ---
 
@@ -113,7 +113,7 @@ Full rules in `/Users/mike/.claude/CLAUDE.md`. The load-bearing ones for this bu
 - **pnpm** workspaces + **Turborepo**. Node >=20. `packageManager: pnpm@10.30.3`.
 - **tsup** builds every library package → dual **ESM + CJS + .d.ts** (Express consumers are CJS,
   Hono/others ESM — dual output is required). Config per package: `tsup.config.ts`.
-- **Vite** builds the React UI (`@bullwatch/react`) → static assets in `dist/` incl. an
+- **Vite** builds the React UI (`@superbull/react`) → static assets in `dist/` incl. an
   `index.html`/`index.ejs` template with an injected `<base href>` + serialized UI config.
   **The SPA MUST be base-path agnostic** (mounts at arbitrary paths like `/admin/queues`) —
   use relative asset URLs + a runtime-injected `basePath`, exactly like bull-board's entry.
@@ -122,7 +122,7 @@ Full rules in `/Users/mike/.claude/CLAUDE.md`. The load-bearing ones for this bu
 - **release-it** + `@release-it-plugins/workspaces` bumps all packages in lockstep + tags
   `v${version}`; a **tag-triggered GitHub Action** runs `npm publish --provenance --access
   public` per package (guard `"private": true` packages — bull-board's loop doesn't).
-- `bullmq` is a **peerDependency** in `@bullwatch/api` (and thus everywhere) — NEVER a direct
+- `bullmq` is a **peerDependency** in `@superbull/api` (and thus everywhere) — NEVER a direct
   dep. This is what preserves version-correct mutations. Framework deps (express, fastify, …)
   are peerDeps in their adapter packages.
 
@@ -131,24 +131,24 @@ Full rules in `/Users/mike/.claude/CLAUDE.md`. The load-bearing ones for this bu
 ## Package layout (target)
 ```
 packages/
-  api/           @bullwatch/api      core: types, queue adapter, route table, handlers, createBoard
-  react/         @bullwatch/react    the SPA (Vite). Ships dist/ ; resolved at runtime by adapters
-  test-utils/    @bullwatch/test-utils  (private) contract battery + redis fixtures + ui fixture
-  express/       @bullwatch/express
-  fastify/       @bullwatch/fastify
-  hono/          @bullwatch/hono
-  koa/           @bullwatch/koa
-  h3/            @bullwatch/h3
-  hapi/          @bullwatch/hapi
-  elysia/        @bullwatch/elysia
-  bun/           @bullwatch/bun
-  nestjs/        @bullwatch/nestjs
+  api/           @superbull/api      core: types, queue adapter, route table, handlers, createBoard
+  react/         @superbull/react    the SPA (Vite). Ships dist/ ; resolved at runtime by adapters
+  test-utils/    @superbull/test-utils  (private) contract battery + redis fixtures + ui fixture
+  express/       @superbull/express
+  fastify/       @superbull/fastify
+  hono/          @superbull/hono
+  koa/           @superbull/koa
+  h3/            @superbull/h3
+  hapi/          @superbull/hapi
+  elysia/        @superbull/elysia
+  bun/           @superbull/bun
+  nestjs/        @superbull/nestjs
 tooling/
-  tsconfig/      @bullwatch/tsconfig  (done)
+  tsconfig/      @superbull/tsconfig  (done)
 ```
 Each publishable package.json: `main`/`module`/`types`/`exports` (dual), `files: ["dist"]`,
 `publishConfig.access: public`, `peerDependencies` as above, version pinned in lockstep, sibling
-`@bullwatch/*` deps referenced `workspace:*` in-repo.
+`@superbull/*` deps referenced `workspace:*` in-repo.
 
 ---
 
@@ -170,7 +170,7 @@ Filters map to `Queue.getJobs(statuses, start, end)` + client/server search on j
 ---
 
 ## Testing plan (port comprehensively — owner asked for "all the tests")
-1. **Contract battery** (`@bullwatch/test-utils`): port bull-board's `runServerAdapterContract` +
+1. **Contract battery** (`@superbull/test-utils`): port bull-board's `runServerAdapterContract` +
    `redisFixtures` (unique queue names `${prefix}-${pid}-${counter}`, obliterate on teardown) +
    `uiFixture` (minimal `dist/index.ejs`+`dist/static` stand-in so adapters test without a UI
    build). Each adapter package has `tests/contract.spec.ts` calling it. Assert: entry HTML with
@@ -184,7 +184,7 @@ Filters map to `Queue.getJobs(statuses, start, end)` + client/server search on j
    (polling, filter→query-param sync), status-pill rendering per state, table row actions,
    filter bar. Adopt trigger.dev's component-test patterns.
 4. **CI** runs all of it with a Redis service container across Node 20/22/24; a separate bun job
-   for `@bullwatch/bun`; a UI job (no Redis).
+   for `@superbull/bun`; a UI job (no Redis).
 
 ---
 
@@ -263,7 +263,7 @@ CVA, base `h-10 rounded-lg border px-3 text-sm gap-2`. Variants: primary(black),
 white), outline, success(blue), danger(red), danger-outline. Props: `text,loading,icon,shortcut,right,
 disabledTooltip`.
 
-### Deps for `@bullwatch/react`
+### Deps for `@superbull/react`
 react 19, react-dom, react-router 7 (library mode — `<BrowserRouter>`/`<Routes>`), @tanstack/react-query 5,
 @tanstack/react-table 8, @visx/* (shape,scale,axis,group,gradient,responsive,tooltip), motion (framer),
 cmdk, @radix-ui/react-{popover,tooltip,dialog}, class-variance-authority, clsx, tailwind-merge (→ `cn()`),
@@ -274,16 +274,16 @@ entry (relative assets + injected `basePath`).
 
 ## Current status (update as you go)
 - [x] Monorepo foundation: root package.json, pnpm-workspace, turbo.json, biome, gitignore,
-      LICENSE (MIT+attribution), README, `@bullwatch/tsconfig` presets. **Committed** `29bc21b`.
-- [x] `@bullwatch/api`: types (port app.d.ts/responses.d.ts, restructured), `BaseAdapter` +
+      LICENSE (MIT+attribution), README, `@superbull/tsconfig` presets. **Committed** `29bc21b`.
+- [x] `@superbull/api`: types (port app.d.ts/responses.d.ts, restructured), `BaseAdapter` +
       `BullMQAdapter`, route table, one handler per file, `createBoard` bootstrap, `formatJob`
       normalizer. tsup + package.json (bullmq peerDep). **Committed** `bbe2dc8`.
-- [x] `@bullwatch/react`: Vite SPA, base-path-agnostic entry + router, query/mutation hooks + API
+- [x] `@superbull/react`: Vite SPA, base-path-agnostic entry + router, query/mutation hooks + API
       client, overview (queue list), queue-detail (metrics charts, status filter, job table with
       inline quick-retry + bulk actions + pagination + queue controls), job-detail (data/opts/
       return-value/stacktrace/logs). Light theme on dub tokens. + vitest UI suite (26 tests).
-- [x] `@bullwatch/test-utils`: redis fixtures + contract battery + ui fixture. **Committed** `b5696b1`.
-- [x] `@bullwatch/express` (first adapter) + `tests/contract.spec.ts`. **Committed** `40f327a`.
+- [x] `@superbull/test-utils`: redis fixtures + contract battery + ui fixture. **Committed** `b5696b1`.
+- [x] `@superbull/express` (first adapter) + `tests/contract.spec.ts`. **Committed** `40f327a`.
 - [x] Port all api handler tests (`packages/api/tests/`). 52 tests against real Redis. `1397559`.
 - [x] Remaining adapters: fastify, hono, koa, h3, hapi, elysia, bun, nestjs — all 8 done, each with
       an 8-test contract suite (64 adapter tests). Fixed fastify/koa strict-TS errors along the way.
@@ -293,7 +293,7 @@ entry (relative assets + injected `basePath`).
 - [ ] Remaining before publish: end-to-end drive (mount express on a scratch app, load the UI in a
       browser, confirm actions); wire `bullmq` peerDep versions; first `npm publish` dry-run.
 - [x] Modes: proxy package + hub app (convex-only) + MCP + two-hop e2e
-- [x] bullwatch-proxy CLI (discovery, allow-list, env/docker config) + self-registration + outbound
+- [x] superbull-proxy CLI (discovery, allow-list, env/docker config) + self-registration + outbound
       batched ingest into convex ingestEvents (tasks #18/#25). Next: epics #19 analytics, #20 error
       tracking, #21 email alerts, #22 auth, #23 dashboards, #24 status page — all read ingestEvents.
 
@@ -312,13 +312,13 @@ subagents; they're mechanical) → CI → full green + e2e verify. Commit atomic
 
 Three modes, one polling architecture (hub→proxy inbound = the same REST polling, one extra hop):
 - **standalone** — what exists: embed an adapter (express/hono/…) in your app; serves UI + API.
-- **proxy** (`@bullwatch/proxy`, DONE) — headless agent next to the workers: real bullmq, JSON API
+- **proxy** (`@superbull/proxy`, DONE) — headless agent next to the workers: real bullmq, JSON API
   only, bearer-token auth (timing-safe), open /healthz, no UI. `startProxy({ queues, token, port })`.
 - **hub** (`apps/hub`, Next.js 16, port 4600, Vercel-deployable) — federates proxies. Stores
   sources (and all future hub data: ingest, error groups, alerts, users) in **Convex ONLY**
   (decision 2026-07-10: the postgres/memory adapters were removed before ever being committed).
   Bundled convex/ functions with an internalToken guard, called server-side via ConvexHttpClient
-  (sendocado pattern); convex functions tested with convex-test (edge-runtime vitest env). Per-source dashboards: hub serves the @bullwatch/react SPA at /s/[sourceId]/ and
+  (sendocado pattern); convex functions tested with convex-test (edge-runtime vitest env). Per-source dashboards: hub serves the @superbull/react SPA at /s/[sourceId]/ and
   forwards /s/[sourceId]/api/* to the proxy with the stored bearer token. Hub management REST
   (@nextastic/http buildRoute, HUB_API_TOKEN bearer) + MCP endpoint (mcp-handler at /api/mcp,
   one register-*-tool.ts per tool, snake_case tool names, withMcpAuth).
@@ -344,7 +344,7 @@ Three modes, one polling architecture (hub→proxy inbound = the same REST polli
   zod-validate the batch; dedupe by event uuid (convex index) BEFORE any accounting; write via
   convex mutation with 3-attempt exponential backoff (500/1000/2000ms) from Next after().
 - **Email**: resend singleton getResend() on RESEND_API_KEY with a dev no-op fallback
-  (superboard pattern); EMAIL_FROM env ('bullwatch <hub@...>'); templates
+  (superboard pattern); EMAIL_FROM env ('superbull <hub@...>'); templates
   src/lib/emails/templates/*.tsx via @react-email/components (inline styles, no tailwind);
   one send fn per email src/lib/email/send-<name>-email.ts rendered with @react-email/render.
   Digests/crons: vercel.json crons → /api/cron/* guarded by Bearer CRON_SECRET, per-period

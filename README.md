@@ -1,4 +1,4 @@
-# bullwatch
+# superbull
 
 A restyled, feature-rich dashboard for [BullMQ](https://docs.bullmq.io) — inspired by the
 UX of trigger.dev, styled in a clean light theme like dub. It embeds into your existing app
@@ -9,8 +9,8 @@ uses your app's own `bullmq` instance, so job actions are always version-correct
 
 ```ts
 // Express
-import { BullMQAdapter, createBoard } from '@bullwatch/api';
-import { ExpressAdapter } from '@bullwatch/express';
+import { BullMQAdapter, createBoard } from '@superbull/api';
+import { ExpressAdapter } from '@superbull/express';
 import { Queue } from 'bullmq';
 import express from 'express';
 
@@ -27,8 +27,8 @@ app.listen(3000);
 
 ```ts
 // Hono
-import { BullMQAdapter, createBoard } from '@bullwatch/api';
-import { HonoAdapter } from '@bullwatch/hono';
+import { BullMQAdapter, createBoard } from '@superbull/api';
+import { HonoAdapter } from '@superbull/hono';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { Queue } from 'bullmq';
@@ -50,7 +50,7 @@ serve({ fetch: app.fetch, port: 3000 });
 ```
  standalone                    proxy                      hub
 ┌─────────────┐        ┌─────────────────┐        ┌─────────────────┐
-│  your app   │        │  your workers   │        │  bullwatch hub  │
+│  your app   │        │  your workers   │        │  superbull hub  │
 │  + bullmq   │        │  + bullmq       │        │  (Next.js app)  │
 │  + adapter  │        │  + @bw/proxy    │◄───────│  federates N    │
 │  + UI + API │        │  (headless API) │  poll   │  proxy sources  │
@@ -65,17 +65,17 @@ serve({ fetch: app.fetch, port: 3000 });
 
 - **standalone** — mount an adapter directly in your app. Serves the UI and the REST API in
   the same process.
-- **proxy** (`@bullwatch/proxy`) — a headless agent you run next to your workers. Same REST
+- **proxy** (`@superbull/proxy`) — a headless agent you run next to your workers. Same REST
   API, no UI, bearer-token auth, an open `/healthz`. Meant to sit behind a hub.
 - **hub** (`apps/hub`) — a Next.js app that federates one or more proxies: it stores sources
-  in Convex, serves the `@bullwatch/react` SPA per source at `/s/[sourceId]/`, forwards API
+  in Convex, serves the `@superbull/react` SPA per source at `/s/[sourceId]/`, forwards API
   calls to the matching proxy, and exposes a management REST API and an MCP endpoint.
 
 ## Proxy usage
 
 ```ts
-import { BullMQAdapter } from '@bullwatch/api';
-import { startProxy } from '@bullwatch/proxy';
+import { BullMQAdapter } from '@superbull/api';
+import { startProxy } from '@superbull/proxy';
 import { Queue } from 'bullmq';
 
 const connection = { host: '127.0.0.1', port: 6379 };
@@ -87,12 +87,12 @@ await startProxy({ queues, token: process.env.PROXY_TOKEN!, port: 4650 });
 Point the hub at it: `POST /api/sources` with `{ "name": "...", "url": "http://host:4650",
 "token": "..." }` (or use the "Add source" form, or the `add_source` MCP tool).
 
-### `bullwatch-proxy` CLI
+### `superbull-proxy` CLI
 
-`@bullwatch/proxy` also ships a `bullwatch-proxy` bin — no code required next to your workers:
+`@superbull/proxy` also ships a `superbull-proxy` bin — no code required next to your workers:
 
 ```bash
-npx bullwatch-proxy --token $BULLWATCH_TOKEN --queues my-queue,other-queue \
+npx superbull-proxy --token $SUPERBULL_TOKEN --queues my-queue,other-queue \
   --hub https://hub.example.com --hub-token $HUB_API_TOKEN
 ```
 
@@ -103,7 +103,7 @@ automatic `SCAN` for `${prefix}:*:meta` keys when neither is given — starts th
 if `--hub`/`--hub-token` are set, self-registers with the hub (`POST /api/sources/register`,
 upserted by name) and starts shipping completed/failed job events plus periodic queue
 snapshots to it (`--no-ingest` to register without shipping events). Run
-`bullwatch-proxy --help` for the full flag list.
+`superbull-proxy --help` for the full flag list.
 
 ## Hub setup
 
@@ -123,12 +123,12 @@ real deployment, run `npx convex deploy` against a Convex project and copy its U
 | `HUB_API_TOKEN` | Bearer token that guards the management REST API and the MCP endpoint |
 
 Deploys to Vercel as a normal Next.js app. `next.config.ts` already sets
-`outputFileTracingIncludes` so `@bullwatch/react`'s built SPA assets ship with the
+`outputFileTracingIncludes` so `@superbull/react`'s built SPA assets ship with the
 `/s/[sourceId]/[[...rest]]` route in the standalone output.
 
 **Add-source flow**: visit `/`, fill in a name, the proxy's URL, and its `startProxy` token.
 The row shows live health (`GET /healthz`) and queue count (`GET /api/queues`), and links to
-that source's dashboard at `/s/[sourceId]/`. A `bullwatch-proxy` started with `--hub`/
+that source's dashboard at `/s/[sourceId]/`. A `superbull-proxy` started with `--hub`/
 `--hub-token` registers itself the same way — no form needed — via
 `POST /api/sources/register` (bearer `HUB_API_TOKEN`, body `{ name, url, token }`, upserted
 by `name` so re-running the same proxy updates its existing source instead of duplicating it).
@@ -163,27 +163,27 @@ pnpm build
 pnpm test              # requires a local Redis on 6379
 pnpm dev
 
-pnpm --filter @bullwatch/dev seed   # seed apps/dev's demo queues
-pnpm --filter @bullwatch/dev e2e    # standalone adapter e2e (Playwright)
-pnpm --filter @bullwatch/hub e2e    # hub two-hop e2e: convex + proxy fixture + hub (Playwright)
+pnpm --filter @superbull/dev seed   # seed apps/dev's demo queues
+pnpm --filter @superbull/dev e2e    # standalone adapter e2e (Playwright)
+pnpm --filter @superbull/hub e2e    # hub two-hop e2e: convex + proxy fixture + hub (Playwright)
 ```
 
 ## Packages
 
 | Package | Description |
 | --- | --- |
-| `@bullwatch/api` | Framework-agnostic core: queue adapter, route table, request handlers |
-| `@bullwatch/react` | The dashboard UI (React + Vite), served as static assets |
-| `@bullwatch/proxy` | Headless agent for the proxy mode — REST API only, no UI |
-| `@bullwatch/express` | Express server adapter |
-| `@bullwatch/fastify` | Fastify server adapter |
-| `@bullwatch/hono` | Hono server adapter |
-| `@bullwatch/koa` | Koa server adapter |
-| `@bullwatch/h3` | H3 server adapter |
-| `@bullwatch/hapi` | Hapi server adapter |
-| `@bullwatch/elysia` | Elysia server adapter |
-| `@bullwatch/bun` | Bun server adapter |
-| `@bullwatch/nestjs` | NestJS module |
+| `@superbull/api` | Framework-agnostic core: queue adapter, route table, request handlers |
+| `@superbull/react` | The dashboard UI (React + Vite), served as static assets |
+| `@superbull/proxy` | Headless agent for the proxy mode — REST API only, no UI |
+| `@superbull/express` | Express server adapter |
+| `@superbull/fastify` | Fastify server adapter |
+| `@superbull/hono` | Hono server adapter |
+| `@superbull/koa` | Koa server adapter |
+| `@superbull/h3` | H3 server adapter |
+| `@superbull/hapi` | Hapi server adapter |
+| `@superbull/elysia` | Elysia server adapter |
+| `@superbull/bun` | Bun server adapter |
+| `@superbull/nestjs` | NestJS module |
 | `apps/hub` | The hub: federates proxy sources, per-source dashboards, REST + MCP |
 
 ## License
