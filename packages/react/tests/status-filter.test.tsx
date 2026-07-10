@@ -30,26 +30,47 @@ function makeQueue(): AppQueue {
 }
 
 describe('StatusFilter', () => {
-  it('opens a picker with per-status counts', async () => {
-    render(<StatusFilter queue={makeQueue()} status="latest" onChange={() => {}} />);
+  it('opens a picker with per-status counts and an all-statuses total', async () => {
+    render(<StatusFilter queue={makeQueue()} statuses={[]} onChange={() => {}} />);
     await userEvent.click(screen.getByTestId('status-filter-button'));
+    expect(screen.getByTestId('status-tab-latest')).toHaveTextContent('10');
     expect(screen.getByTestId('status-tab-failed')).toHaveTextContent('4');
     expect(screen.getByTestId('status-tab-completed')).toHaveTextContent('3');
   });
 
-  it('calls onChange with the picked status', async () => {
+  it('toggles statuses into the selection without closing', async () => {
     const onChange = vi.fn();
-    render(<StatusFilter queue={makeQueue()} status="latest" onChange={onChange} />);
+    render(<StatusFilter queue={makeQueue()} statuses={['failed']} onChange={onChange} />);
     await userEvent.click(screen.getByTestId('status-filter-button'));
-    await userEvent.click(screen.getByTestId('status-tab-failed'));
-    expect(onChange).toHaveBeenCalledWith('failed');
+    await userEvent.click(screen.getByTestId('status-tab-completed'));
+    expect(onChange).toHaveBeenCalledWith(['failed', 'completed']);
+    expect(screen.getByTestId('status-tab-latest')).toBeVisible();
   });
 
-  it('shows a removable applied pill for a concrete status', async () => {
+  it('deselects an already-selected status', async () => {
     const onChange = vi.fn();
-    render(<StatusFilter queue={makeQueue()} status="failed" onChange={onChange} />);
-    expect(screen.getByTestId('applied-status')).toHaveTextContent('failed');
-    await userEvent.click(screen.getByLabelText('Clear status filter'));
-    expect(onChange).toHaveBeenCalledWith('latest');
+    render(<StatusFilter queue={makeQueue()} statuses={['failed']} onChange={onChange} />);
+    await userEvent.click(screen.getByTestId('status-filter-button'));
+    await userEvent.click(screen.getByTestId('status-tab-failed'));
+    expect(onChange).toHaveBeenCalledWith([]);
+  });
+
+  it('renders a removable chip per selected status', async () => {
+    const onChange = vi.fn();
+    render(
+      <StatusFilter queue={makeQueue()} statuses={['failed', 'completed']} onChange={onChange} />,
+    );
+    expect(screen.getByTestId('applied-status-failed')).toHaveTextContent('failed');
+    expect(screen.getByTestId('applied-status-completed')).toHaveTextContent('completed');
+    await userEvent.click(screen.getByLabelText('Remove failed filter'));
+    expect(onChange).toHaveBeenCalledWith(['completed']);
+  });
+
+  it('clears everything via all statuses', async () => {
+    const onChange = vi.fn();
+    render(<StatusFilter queue={makeQueue()} statuses={['failed']} onChange={onChange} />);
+    await userEvent.click(screen.getByTestId('status-filter-button'));
+    await userEvent.click(screen.getByTestId('status-tab-latest'));
+    expect(onChange).toHaveBeenCalledWith([]);
   });
 });

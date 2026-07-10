@@ -1,30 +1,33 @@
 import { Check, ChevronDown, ListFilter, X } from 'lucide-react';
 import { useState } from 'react';
 import { Popover } from '../../../components/popover';
-import type { AppQueue, JobStatus, QueueStatus } from '../../../lib/api-types';
+import { type AppQueue, type JobStatus, jobStatuses } from '../../../lib/api-types';
 import { cn } from '../../../lib/cn';
 
 interface StatusFilterProps {
   queue: AppQueue;
-  status: QueueStatus;
-  onChange: (status: QueueStatus) => void;
+  statuses: JobStatus[];
+  onChange: (statuses: JobStatus[]) => void;
 }
 
 export function StatusFilter(props: StatusFilterProps) {
-  const { queue, status, onChange } = props;
+  const { queue, statuses, onChange } = props;
   const [showing, setShowing] = useState(false);
-  const options: QueueStatus[] = [
-    'latest',
-    ...queue.statuses.filter((value) => value !== 'latest'),
-  ];
+  const options = queue.statuses.filter(
+    (value): value is JobStatus => value !== 'latest' && jobStatuses.includes(value as JobStatus),
+  );
+  const totalCount = Object.values(queue.counts).reduce((total, value) => total + value, 0);
 
-  const pick = (next: QueueStatus) => {
-    setShowing(false);
-    onChange(next);
+  const toggle = (status: JobStatus) => {
+    if (statuses.includes(status)) {
+      onChange(statuses.filter((value) => value !== status));
+    } else {
+      onChange([...statuses, status]);
+    }
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <Popover
         showing={showing}
         onShowingChange={setShowing}
@@ -32,7 +35,7 @@ export function StatusFilter(props: StatusFilterProps) {
           <button
             type="button"
             data-testid="status-filter-button"
-            className="candy-pill flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-2sm text-content-default transition-transform duration-150 ease-snout"
+            className="flex h-8 items-center gap-1.5 rounded-lg border border-border-default bg-white px-2.5 text-2sm text-content-default hover:bg-bg-muted"
           >
             <ListFilter className="size-3.5 text-content-muted" />
             Status
@@ -41,53 +44,69 @@ export function StatusFilter(props: StatusFilterProps) {
         }
       >
         <div className="flex min-w-52 flex-col">
+          <button
+            type="button"
+            data-testid="status-tab-latest"
+            onClick={() => {
+              setShowing(false);
+              onChange([]);
+            }}
+            className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-2sm text-content-default hover:bg-bg-muted"
+          >
+            <span className="flex size-4 items-center justify-center">
+              {statuses.length === 0 && <Check className="size-3.5 text-content-emphasis" />}
+            </span>
+            <span className="flex-1">All statuses</span>
+            <span className="font-mono text-xs tabular-nums text-content-muted">
+              {totalCount.toLocaleString()}
+            </span>
+          </button>
           {options.map((option) => {
-            const isActive = option === status;
-            const count = option === 'latest' ? null : (queue.counts[option as JobStatus] ?? 0);
+            const isSelected = statuses.includes(option);
+            const count = queue.counts[option] ?? 0;
             return (
               <button
                 key={option}
                 type="button"
                 data-testid={`status-tab-${option}`}
-                onClick={() => pick(option)}
+                onClick={() => toggle(option)}
                 className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-2sm text-content-default hover:bg-bg-muted"
               >
                 <span className="flex size-4 items-center justify-center">
-                  {isActive && <Check className="size-3.5 text-content-emphasis" />}
+                  {isSelected && <Check className="size-3.5 text-content-emphasis" />}
                 </span>
-                <span className="flex-1">{option === 'latest' ? 'All statuses' : option}</span>
-                {count !== null && (
-                  <span
-                    className={cn('font-mono text-xs text-content-muted', {
-                      'text-content-error': option === 'failed' && count > 0,
-                    })}
-                  >
-                    {count.toLocaleString()}
-                  </span>
-                )}
+                <span className="flex-1">{option}</span>
+                <span
+                  className={cn('font-mono text-xs tabular-nums text-content-muted', {
+                    'text-content-error': option === 'failed' && count > 0,
+                  })}
+                >
+                  {count.toLocaleString()}
+                </span>
               </button>
             );
           })}
         </div>
       </Popover>
 
-      {status !== 'latest' && (
+      {statuses.map((status) => (
         <span
-          data-testid="applied-status"
+          key={status}
+          data-testid={`applied-status-${status}`}
           className="flex h-8 items-center gap-1.5 rounded-lg bg-bg-subtle px-2.5 text-2sm text-content-emphasis"
         >
           <span className="text-content-muted">Status:</span>
           {status}
           <button
             type="button"
-            aria-label="Clear status filter"
-            onClick={() => onChange('latest')}
+            aria-label={`Remove ${status} filter`}
+            onClick={() => onChange(statuses.filter((value) => value !== status))}
             className="rounded p-0.5 text-content-muted hover:text-content-emphasis"
           >
             <X className="size-3" />
           </button>
         </span>
-      )}
+      ))}
     </div>
   );
 }

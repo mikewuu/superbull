@@ -11,9 +11,14 @@ import {
   jobStatuses,
 } from '../types';
 
+const statusListSchema = z
+  .string()
+  .transform((value) => value.split(',').filter(Boolean))
+  .pipe(z.array(z.enum(['latest', ...jobStatuses])));
+
 const querySchema = z.object({
   active_queue: z.string().optional(),
-  status: z.enum(['latest', ...jobStatuses]).optional(),
+  status: statusListSchema.optional(),
   page: z.coerce.number().int().positive().default(1),
   per_page: z.coerce.number().int().positive().max(100).default(10),
   sort: z.enum(['asc', 'desc']).default('desc'),
@@ -46,10 +51,13 @@ async function toAppQueue(
   const isPaused = await queue.isPaused();
   const workerCount = await queue.getWorkerCount();
   const oldestWaitingTimestamp = await queue.findOldestWaitingJobTimestamp();
+  const selectedStatuses = (query.status ?? []).filter(
+    (value): value is JobStatus => value !== 'latest',
+  );
   const statuses =
-    !isActiveQueue || !query.status || query.status === 'latest'
+    !isActiveQueue || selectedStatuses.length === 0
       ? queue.getJobStatuses()
-      : [query.status];
+      : selectedStatuses;
   const { jobs, pagination } = await getJobPage({
     queue,
     statuses,
@@ -134,12 +142,13 @@ function getPagination(
   page: number,
   perPage: number,
 ): Pagination {
-  const [firstStatus] = statuses;
+  const isFiltered = statuses.length < jobStatuses.length;
 
-  if (statuses.length === 1 && firstStatus) {
+  if (isFiltered) {
+    const total = statuses.reduce((sum, status) => sum + (counts[status] ?? 0), 0);
     const start = (page - 1) * perPage;
     return {
-      page_count: Math.ceil(counts[firstStatus] / perPage),
+      page_count: Math.max(1, Math.ceil(total / perPage)),
       range: { start, end: start + perPage - 1 },
     };
   }
