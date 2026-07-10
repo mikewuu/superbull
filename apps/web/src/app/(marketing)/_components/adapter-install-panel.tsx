@@ -170,25 +170,25 @@ export function AdapterInstallPanel(): React.ReactElement {
 
   return (
     <div className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl bg-bg-inverted shadow-[0_20px_50px_-20px_rgba(0,0,0,0.45)] ring-1 ring-black/10">
-      <div className="flex flex-wrap gap-1 border-b border-white/10 px-3 pt-3 pb-2">
-        {adapterIds.map((adapterId) => (
-          <button
-            key={adapterId}
-            type="button"
-            onClick={() => setId(adapterId)}
-            className={cn('rounded-md px-2.5 py-1 text-xs font-medium transition-colors', {
-              'bg-white/10 text-white': id === adapterId,
-              'text-white/40 hover:text-white/70': id !== adapterId,
-            })}
-          >
-            {adapters[adapterId].label}
-          </button>
-        ))}
-      </div>
-      <div className="relative min-w-0 flex-1">
-        <div className="absolute top-3 right-3">
-          <CopyButton text={active.code} />
+      <div className="flex items-start justify-between gap-2 border-b border-white/10 px-3 pt-3 pb-2">
+        <div className="flex flex-wrap gap-1">
+          {adapterIds.map((adapterId) => (
+            <button
+              key={adapterId}
+              type="button"
+              onClick={() => setId(adapterId)}
+              className={cn('rounded-md px-2.5 py-1 text-xs font-medium transition-colors', {
+                'bg-white/10 text-white': id === adapterId,
+                'text-white/40 hover:text-white/70': id !== adapterId,
+              })}
+            >
+              {adapters[adapterId].label}
+            </button>
+          ))}
         </div>
+        <CopyButton text={active.code} className="shrink-0" />
+      </div>
+      <div className="min-w-0 flex-1">
         <pre className="overflow-x-auto p-5 font-mono text-[12.5px] leading-relaxed text-white/85">
           {active.code}
         </pre>
