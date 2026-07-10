@@ -1,0 +1,25 @@
+{
+  "name": "@superbull/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 4700",
+    "build": "next build",
+    "start": "next start -p 4700",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^16.2.10",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@superbull/tsconfig": "workspace:*",
+    "@tailwindcss/postcss": "^4.3.2",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "tailwindcss": "^4.3.2",
+    "typescript": "^5.7.2"
+  }
+}
