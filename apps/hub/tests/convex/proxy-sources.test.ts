@@ -128,6 +128,59 @@ describe('proxySources', () => {
     ).rejects.toThrow();
   });
 
+  it('upsertByName inserts a new source when the name is unknown', async () => {
+    const t = makeTestClient();
+
+    const created = await t.mutation(api.proxySources.upsertByName, {
+      internalToken: INTERNAL_TOKEN,
+      name: 'proxy-upsert',
+      url: 'https://proxy-upsert.example.com',
+      token: 'secret',
+    });
+
+    expect(created).toMatchObject({
+      name: 'proxy-upsert',
+      url: 'https://proxy-upsert.example.com',
+    });
+    const sources = await t.query(api.proxySources.list, { internalToken: INTERNAL_TOKEN });
+    expect(sources).toHaveLength(1);
+  });
+
+  it('upsertByName patches the existing source with the same name', async () => {
+    const t = makeTestClient();
+
+    const created = await t.mutation(api.proxySources.upsertByName, {
+      internalToken: INTERNAL_TOKEN,
+      name: 'proxy-upsert',
+      url: 'https://old.example.com',
+      token: 'old-token',
+    });
+    const updated = await t.mutation(api.proxySources.upsertByName, {
+      internalToken: INTERNAL_TOKEN,
+      name: 'proxy-upsert',
+      url: 'https://new.example.com',
+      token: 'new-token',
+    });
+
+    expect(updated._id).toBe(created._id);
+    expect(updated).toMatchObject({ url: 'https://new.example.com', token: 'new-token' });
+    const sources = await t.query(api.proxySources.list, { internalToken: INTERNAL_TOKEN });
+    expect(sources).toHaveLength(1);
+  });
+
+  it('upsertByName throws with the wrong internal token', async () => {
+    const t = makeTestClient();
+
+    await expect(
+      t.mutation(api.proxySources.upsertByName, {
+        internalToken: 'wrong-token',
+        name: 'proxy-upsert',
+        url: 'https://proxy-upsert.example.com',
+        token: 'secret',
+      }),
+    ).rejects.toThrow();
+  });
+
   it('remove throws with the wrong internal token', async () => {
     const t = makeTestClient();
 

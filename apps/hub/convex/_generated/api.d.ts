@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as ingest from "../ingest.js";
 import type * as proxySources from "../proxySources.js";
 
 import type {
@@ -17,6 +18,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  ingest: typeof ingest;
   proxySources: typeof proxySources;
 }>;
 

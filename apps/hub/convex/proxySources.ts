@@ -44,6 +44,37 @@ export const create = mutation({
   },
 });
 
+export const upsertByName = mutation({
+  args: { internalToken: v.string(), name: v.string(), url: v.string(), token: v.string() },
+  handler: async (ctx, args) => {
+    guardInternalToken(args.internalToken);
+    const existing = await ctx.db
+      .query('proxySources')
+      .withIndex('by_name', (q) => q.eq('name', args.name))
+      .unique();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, { url: args.url, token: args.token });
+      const patched = await ctx.db.get(existing._id);
+      if (!patched) {
+        throw new Error('failed to upsert proxy source');
+      }
+      return patched;
+    }
+
+    const id = await ctx.db.insert('proxySources', {
+      name: args.name,
+      url: args.url,
+      token: args.token,
+    });
+    const created = await ctx.db.get(id);
+    if (!created) {
+      throw new Error('failed to upsert proxy source');
+    }
+    return created;
+  },
+});
+
 export const remove = mutation({
   args: { internalToken: v.string(), id: v.string() },
   handler: async (ctx, args) => {
