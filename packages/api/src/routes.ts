@@ -4,6 +4,7 @@ import { cleanQueue } from './handlers/clean-queue';
 import { emptyQueue } from './handlers/empty-queue';
 import { getJob } from './handlers/get-job';
 import { getJobLogs } from './handlers/get-job-logs';
+import { getQueueJobNames } from './handlers/get-queue-job-names';
 import { getQueueMetrics } from './handlers/get-queue-metrics';
 import { getQueues } from './handlers/get-queues';
 import { getRedisStats } from './handlers/get-redis-stats';
@@ -30,6 +31,7 @@ export const appRoutes: AppRouteDefs = {
     { method: 'get', route: '/api/redis/stats', handler: getRedisStats },
     { method: 'get', route: '/api/queues', handler: getQueues },
     { method: 'get', route: '/api/queues/:queueName/metrics', handler: getQueueMetrics },
+    { method: 'get', route: '/api/queues/:queueName/job-names', handler: getQueueJobNames },
     { method: 'post', route: '/api/queues/:queueName/add', handler: addJob },
     { method: 'post', route: '/api/queues/:queueName/jobs/bulk', handler: applyBulkJobAction },
     { method: 'put', route: '/api/queues/:queueName/pause', handler: pauseQueue },
