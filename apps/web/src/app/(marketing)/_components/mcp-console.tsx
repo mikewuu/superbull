@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '../../../lib/cn';
 
 type ToolId =
@@ -65,19 +65,46 @@ const tools: Record<ToolId, { desc: string; request: string; response: string }>
 };
 
 const toolIds = Object.keys(tools) as ToolId[];
+const cycleDelayMs = 4000;
 
 export function McpConsole(): React.ReactElement {
   const [id, setId] = useState<ToolId>('get_queue');
+  const [isPaused, setIsPaused] = useState(false);
+  const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
   const active = tools[id];
 
+  useEffect(() => {
+    if (isPaused || hasUserSelectedTab) {
+      return;
+    }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+    const timer = setInterval(() => {
+      setId((current) => toolIds[(toolIds.indexOf(current) + 1) % toolIds.length] as ToolId);
+    }, cycleDelayMs);
+    return () => clearInterval(timer);
+  }, [isPaused, hasUserSelectedTab]);
+
+  function selectTab(toolId: ToolId) {
+    setHasUserSelectedTab(true);
+    setId(toolId);
+  }
+
   return (
-    <div className="overflow-hidden rounded-2xl border border-border-subtle bg-bg-default">
+    <div
+      className="overflow-hidden rounded-2xl border border-border-subtle bg-bg-default"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onFocus={() => setIsPaused(true)}
+      onBlur={() => setIsPaused(false)}
+    >
       <div className="flex flex-wrap gap-1 border-b border-border-subtle px-3 pt-3 pb-2">
         {toolIds.map((toolId) => (
           <button
             key={toolId}
             type="button"
-            onClick={() => setId(toolId)}
+            onClick={() => selectTab(toolId)}
             className={cn('rounded-md px-2.5 py-1 font-mono text-xs transition-colors', {
               'bg-bg-inverted text-white': id === toolId,
               'text-content-subtle hover:text-content-emphasis': id !== toolId,

@@ -39,7 +39,10 @@ export function AlertTranscript(): React.ReactElement {
         </div>
         <p className="mt-4 text-white/40">
           $ mail -s &quot;SuperBull daily digest&quot; you@example.com
-          <span className="cursor-blink">_</span>
+          <span
+            aria-hidden="true"
+            className="cursor-blink ml-1 inline-block h-[1.1em] w-[0.55em] translate-y-[0.15em] bg-white/90 align-baseline"
+          />
         </p>
       </div>
     </div>
