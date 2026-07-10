@@ -35,14 +35,19 @@ export function QueueLink(props: QueueLinkProps) {
           </span>
           <span className="min-w-0 flex-1 truncate">{queue.display_name || queue.name}</span>
           <span
+            aria-label={failedCount > 0 ? `${failedCount} failed` : undefined}
+            title={failedCount > 0 ? `${failedCount} failed` : undefined}
             className={cn(
-              'flex min-w-6 items-center justify-center rounded-md px-1.5 py-0.5 font-mono text-[11px] tabular-nums',
+              'flex min-w-6 items-center justify-center gap-1 rounded-md px-1.5 py-0.5 font-mono text-[11px] tabular-nums',
               {
                 'bg-bg-error text-content-error': failedCount > 0,
                 'bg-bg-subtle text-content-muted': failedCount === 0,
               },
             )}
           >
+            {failedCount > 0 && (
+              <span aria-hidden="true" className="size-1 shrink-0 rounded-full bg-content-error" />
+            )}
             {failedCount > 0 ? failedCount : backlogCount}
           </span>
         </>
