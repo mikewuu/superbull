@@ -17,11 +17,15 @@ describe('createBoard queue registry', () => {
   beforeEach(async () => {
     queueA = new Queue('RegistryTestA', { connection });
     queueB = new Queue('RegistryTestB', { connection });
+    await queueA.obliterate({ force: true }).catch(() => undefined);
+    await queueB.obliterate({ force: true }).catch(() => undefined);
     testBoard = await startTestBoard([new BullMQAdapter(queueA)]);
   });
 
   afterEach(async () => {
     await testBoard.close();
+    await queueA.obliterate({ force: true }).catch(() => undefined);
+    await queueB.obliterate({ force: true }).catch(() => undefined);
     await queueA.close();
     await queueB.close();
   });
