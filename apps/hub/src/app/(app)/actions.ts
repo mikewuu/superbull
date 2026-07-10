@@ -6,6 +6,7 @@ import { deleteSource } from '../../lib/sources/delete-source';
 
 export interface CreateSourceActionState {
   error: string | null;
+  ok?: boolean;
 }
 
 export async function createSourceAction(
@@ -22,7 +23,7 @@ export async function createSourceAction(
 
   await createSource({ name, url, token });
   revalidatePath('/');
-  return { error: null };
+  return { error: null, ok: true };
 }
 
 export async function deleteSourceAction(sourceId: string): Promise<void> {

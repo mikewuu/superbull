@@ -12,12 +12,13 @@ export default async function SourcesPage() {
 
   return (
     <>
-      <PageHeader title="Sources" subtitle="Remote bullwatch proxies this hub federates." />
+      <PageHeader
+        title="Sources"
+        subtitle="Remote bullwatch proxies this hub federates."
+        controls={<AddSourceForm />}
+      />
       <div className="flex w-full flex-col gap-4 px-4 py-4 lg:px-6">
-        <div className="grid gap-5 md:grid-cols-[1fr_320px]">
-          <SourcesTable rows={rows} />
-          <AddSourceForm />
-        </div>
+        <SourcesTable rows={rows} />
       </div>
     </>
   );

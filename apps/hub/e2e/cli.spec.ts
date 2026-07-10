@@ -1,7 +1,9 @@
-import { type ChildProcess, execFileSync, spawn } from 'node:child_process';
+import { type ChildProcess, spawn } from 'node:child_process';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
 import { Queue, Worker } from 'bullmq';
+import { ConvexHttpClient } from 'convex/browser';
+import { makeFunctionReference } from 'convex/server';
 
 const hubDir = process.cwd();
 const cliPath = path.resolve(hubDir, '../../packages/proxy/dist/cli.js');
@@ -59,7 +61,7 @@ test('the ingest loop reports new job completions to convex', async () => {
   worker = new Worker('hub-e2e', async () => ({ ok: true }), { connection });
   await worker.waitUntilReady();
 
-  const before = countBySource(sourceId);
+  const before = await countBySource(sourceId);
 
   const queue = new Queue('hub-e2e', { connection });
   await queue.addBulk([
@@ -73,18 +75,11 @@ test('the ingest loop reports new job completions to convex', async () => {
     .toBeGreaterThan(before);
 });
 
-function countBySource(id: string): number {
-  const output = execFileSync(
-    'npx',
-    [
-      'convex',
-      'run',
-      'ingest:countBySource',
-      JSON.stringify({ internalToken: 'e2e-internal', sourceId: id }),
-    ],
-    { cwd: hubDir, encoding: 'utf8' },
-  );
-  return Number(output.trim());
+async function countBySource(id: string): Promise<number> {
+  const client = new ConvexHttpClient('http://127.0.0.1:3210');
+  const reference = makeFunctionReference<'query'>('ingest:countBySource');
+  const count = await client.query(reference, { internalToken: 'e2e-internal', sourceId: id });
+  return Number(count);
 }
 
 async function waitForHealthz(url: string): Promise<void> {

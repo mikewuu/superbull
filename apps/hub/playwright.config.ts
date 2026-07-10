@@ -1,4 +1,15 @@
+import { existsSync, renameSync } from 'node:fs';
 import { defineConfig } from '@playwright/test';
+
+// convex dev latches onto .env.local's cloud deployment; the e2e run must get
+// the anonymous local backend, so the file is stashed before servers boot and
+// restored in global teardown.
+function stashEnvLocal(): void {
+  if (existsSync('.env.local')) {
+    renameSync('.env.local', '.env.local.e2e-stash');
+  }
+}
+stashEnvLocal();
 
 const convexUrl = 'http://127.0.0.1:3210';
 const proxyPort = 4655;
@@ -16,6 +27,7 @@ export default defineConfig({
     viewport: { width: 1440, height: 900 },
   },
   globalSetup: './e2e/global-setup.ts',
+  globalTeardown: './e2e/global-teardown.ts',
   webServer: [
     {
       command: 'CONVEX_AGENT_MODE=anonymous npx convex dev',

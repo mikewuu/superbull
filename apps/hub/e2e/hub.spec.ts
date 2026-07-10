@@ -15,6 +15,7 @@ test('adds a source via the form and shows online health with the queue count', 
   await removeLeftoverSources(request);
 
   await page.goto('/');
+  await page.getByTestId('add-source-open').click();
   await page.getByTestId('add-source-name').fill('E2E Proxy');
   await page.getByTestId('add-source-url').fill('http://127.0.0.1:4655');
   await page.getByTestId('add-source-token').fill('e2e-proxy-token');
