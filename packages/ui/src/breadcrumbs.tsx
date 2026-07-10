@@ -17,15 +17,6 @@ interface BreadcrumbsProps {
   renderLink?: (props: RenderLinkProps) => ReactNode;
 }
 
-function defaultRenderLink(props: RenderLinkProps) {
-  const { to, className, children } = props;
-  return (
-    <a href={to} className={className}>
-      {children}
-    </a>
-  );
-}
-
 export function Breadcrumbs(props: BreadcrumbsProps) {
   const { items, renderLink = defaultRenderLink } = props;
 
@@ -47,5 +38,14 @@ export function Breadcrumbs(props: BreadcrumbsProps) {
         </Fragment>
       ))}
     </span>
+  );
+}
+
+function defaultRenderLink(props: RenderLinkProps) {
+  const { to, className, children } = props;
+  return (
+    <a href={to} className={className}>
+      {children}
+    </a>
   );
 }
