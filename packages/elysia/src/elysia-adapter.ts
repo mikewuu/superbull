@@ -68,6 +68,12 @@ export class ElysiaAdapter implements IServerAdapter {
           if (response.status === 204) {
             return new Response(null, { status: 204 });
           }
+          if (response.contentType) {
+            return new Response(String(response.body), {
+              status: response.status || 200,
+              headers: { 'content-type': response.contentType },
+            });
+          }
           return new Response(JSON.stringify(response.body), {
             status: response.status || 200,
             headers: { 'content-type': 'application/json' },

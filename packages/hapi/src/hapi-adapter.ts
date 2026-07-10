@@ -131,6 +131,12 @@ export class HapiAdapter implements IServerAdapter {
                 if (response.status === 204) {
                   return h.response().code(204);
                 }
+                if (response.contentType) {
+                  return h
+                    .response(String(response.body))
+                    .type(response.contentType)
+                    .code(response.status || 200);
+                }
                 return h.response(response.body).code(response.status || 200);
               } catch (error) {
                 const response = errorHandler(

@@ -129,6 +129,12 @@ export class KoaAdapter implements IServerAdapter {
           ctx.status = 204;
           return;
         }
+        if (response.contentType) {
+          ctx.status = response.status || 200;
+          ctx.type = response.contentType;
+          ctx.body = String(response.body);
+          return;
+        }
         ctx.status = response.status || 200;
         ctx.body = response.body;
       } catch (error) {

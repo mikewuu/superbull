@@ -87,6 +87,13 @@ export function runServerAdapterContract(
         expect(await queue.queue.isPaused()).toBe(true);
       });
 
+      it('GET /api/prometheus returns plain text, not JSON-quoted text', async () => {
+        const res = await harness.request({ method: 'get', path: `${prefix}/api/prometheus` });
+        expect(res.status).toBe(200);
+        expect(res.headers['content-type']).toMatch(/text\/plain/);
+        expect(res.text.startsWith('"')).toBe(false);
+      });
+
       it('returns a structured 404 for an unknown queue', async () => {
         const res = await harness.request({
           method: 'put',

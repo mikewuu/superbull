@@ -127,7 +127,7 @@ export class HonoAdapter implements IServerAdapter {
       const requestBody = route.method === 'get' ? {} : await readJsonBody(c);
 
       try {
-        const { status, body } = await route.handler({
+        const { status, body, contentType } = await route.handler({
           queues: boardQueues,
           uiConfig: this.uiConfig,
           query: c.req.query(),
@@ -138,6 +138,10 @@ export class HonoAdapter implements IServerAdapter {
 
         if (status === 204) {
           return c.body(null, 204);
+        }
+        if (contentType) {
+          c.header('content-type', contentType);
+          return c.body(String(body), status ?? 200);
         }
         return c.json(body, status ?? 200);
       } catch (error) {

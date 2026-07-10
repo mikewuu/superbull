@@ -19,6 +19,7 @@ import {
   readBody,
   sendNoContent,
   serveStatic,
+  setResponseHeader,
   setResponseStatus,
 } from 'h3';
 import type { H3Event } from 'h3';
@@ -167,6 +168,11 @@ export class H3Adapter implements IServerAdapter {
 
           if (response.status === 204) {
             return sendNoContent(event, 204);
+          }
+          if (response.contentType) {
+            setResponseStatus(event, response.status || 200);
+            setResponseHeader(event, 'content-type', response.contentType);
+            return String(response.body);
           }
           setResponseStatus(event, response.status || 200);
           return response.body;

@@ -150,6 +150,13 @@ export class FastifyAdapter implements IServerAdapter {
           return reply.status(204).send();
         }
 
+        if (response.contentType) {
+          return reply
+            .status(response.status || 200)
+            .type(response.contentType)
+            .send(String(response.body));
+        }
+
         return reply.status(response.status || 200).send(response.body);
       },
     });
