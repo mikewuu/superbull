@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { cn } from '../_lib/cn';
 import { docsNav } from '../_lib/nav';
+import { docsSearchIndex } from '../_lib/search-index';
 
 export function DocsNavLinks(props: { onNavigate?: () => void }) {
   const { onNavigate } = props;
@@ -16,7 +17,13 @@ export function DocsNavLinks(props: { onNavigate?: () => void }) {
     ? docsNav
         .map((group) => ({
           ...group,
-          items: group.items.filter((item) => item.label.toLowerCase().includes(normalizedQuery)),
+          items: group.items.filter((item) => {
+            if (item.label.toLowerCase().includes(normalizedQuery)) {
+              return true;
+            }
+            const entry = docsSearchIndex.find((indexed) => indexed.href === item.href);
+            return entry ? entry.text.includes(normalizedQuery) : false;
+          }),
         }))
         .filter((group) => group.items.length > 0)
     : docsNav;
