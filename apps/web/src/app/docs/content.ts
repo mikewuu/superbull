@@ -24,6 +24,13 @@ is the SPA served by every standalone adapter and by the hub's per-source dashbo
 `;
 
 export const quickstartContent = `
+## Let your agent run it
+
+SuperBull isn't only for humans watching a dashboard. Point an agent at the
+hub's MCP server and it can watch your queues, open a failed job and read its
+stack trace, retry the job, or pause a queue that's failing fast — no clicking
+through a UI. See [MCP](/docs/mcp) to connect one.
+
 ## Quickstart
 
 Mount the Express adapter against one queue:

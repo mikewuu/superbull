@@ -20,6 +20,10 @@ Standalone and proxy are not mutually exclusive with hub — a hub federates pro
 (and can forward to a standalone board's API too), so most setups start with
 standalone or proxy and add a hub later.
 
+Rather have an agent do this instead of clicking through a UI? See
+[MCP](/docs/mcp) — the hub's MCP server lets an agent watch queues and fix
+failed jobs directly.
+
 ## 2. Install
 
 Every mode needs \`@superbull/api\` and \`bullmq\`. Standalone additionally needs one
