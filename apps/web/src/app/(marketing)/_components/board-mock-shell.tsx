@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { cn } from '../../../lib/cn';
 
 const queues = [
@@ -39,8 +40,14 @@ export function BoardMockShell(): React.ReactElement {
     <div className="flex h-[520px] text-content-default sm:h-[560px]">
       <aside className="hidden w-48 shrink-0 flex-col border-r border-border-subtle bg-bg-muted p-4 sm:flex">
         <div className="flex items-center gap-2 text-2sm font-semibold text-content-emphasis">
-          <span className="h-6 w-6 rounded-md bg-brand" />
-          superbull
+          <Image
+            src="/landing/logos/logo-mark.webp"
+            alt=""
+            width={44}
+            height={22}
+            className="h-5 w-auto"
+          />
+          SuperBull
         </div>
         <p className="mt-6 text-xs font-semibold tracking-[0.12em] text-content-muted uppercase">
           Main
