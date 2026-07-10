@@ -1,0 +1,51 @@
+{
+  "name": "@bullwatch/proxy",
+  "version": "0.0.0",
+  "description": "Headless bullwatch agent — exposes the queue API for a remote hub, no UI",
+  "keywords": ["bullmq", "dashboard", "monitoring", "queue", "redis", "proxy", "agent"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikewu/bullwatch.git",
+    "directory": "packages/proxy"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": ["dist"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@bullwatch/api": "workspace:*"
+  },
+  "peerDependencies": {
+    "bullmq": ">=5.0.0"
+  },
+  "devDependencies": {
+    "@bullwatch/tsconfig": "workspace:*",
+    "@types/node": "^22.10.2",
+    "bullmq": "^5.34.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
