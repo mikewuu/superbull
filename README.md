@@ -93,7 +93,7 @@ Point the hub at it: `POST /api/sources` with `{ "name": "...", "url": "http://h
 
 ```bash
 npx superbull-proxy --token $SUPERBULL_TOKEN --queues my-queue,other-queue \
-  --hub https://hub.example.com --hub-token $HUB_API_TOKEN
+  --hub https://hub.example.com --hub-token $SUPERBULL_API_TOKEN
 ```
 
 It connects to Redis (`--redis-host`/`--redis-port`/`--redis-password`/`--redis-db`/`--tls`,
@@ -120,7 +120,7 @@ real deployment, run `npx convex deploy` against a Convex project and copy its U
 | --- | --- |
 | `NEXT_PUBLIC_CONVEX_URL` | The Convex deployment the hub reads/writes sources against |
 | `CONVEX_INTERNAL_TOKEN` | Shared secret the hub sends with every Convex call; the deployment checks it against its own env var of the same name (`npx convex env set CONVEX_INTERNAL_TOKEN ...`) |
-| `HUB_API_TOKEN` | Bearer token that guards the management REST API and the MCP endpoint |
+| `SUPERBULL_API_TOKEN` | Bearer token that guards the management REST API and the MCP endpoint |
 
 Deploys to Vercel as a normal Next.js app. `next.config.ts` already sets
 `outputFileTracingIncludes` so `@superbull/react`'s built SPA assets ship with the
@@ -130,20 +130,20 @@ Deploys to Vercel as a normal Next.js app. `next.config.ts` already sets
 The row shows live health (`GET /healthz`) and queue count (`GET /api/queues`), and links to
 that source's dashboard at `/s/[sourceId]/`. A `superbull-proxy` started with `--hub`/
 `--hub-token` registers itself the same way — no form needed — via
-`POST /api/sources/register` (bearer `HUB_API_TOKEN`, body `{ name, url, token }`, upserted
+`POST /api/sources/register` (bearer `SUPERBULL_API_TOKEN`, body `{ name, url, token }`, upserted
 by `name` so re-running the same proxy updates its existing source instead of duplicating it).
 
 **Ingest**: proxies with a hub configured batch completed/failed job events and periodic
 queue snapshots (every 5s or 100 events, single 3s-delayed retry on failure) to
 `POST /api/ingest`. That endpoint is authenticated per-source — the bearer token must match
-the *source's own* `startProxy` token, not `HUB_API_TOKEN` — and stores events in Convex
+the *source's own* `startProxy` token, not `SUPERBULL_API_TOKEN` — and stores events in Convex
 (`ingestEvents`, deduped by event `uuid`).
 
 ## MCP
 
 Endpoint: `POST /api/mcp` (streamable HTTP, `mcp-handler` + `@modelcontextprotocol/sdk`).
-Auth: `Authorization: Bearer <HUB_API_TOKEN>` — timing-safe compared, required on every call;
-an unset `HUB_API_TOKEN` rejects all requests.
+Auth: `Authorization: Bearer <SUPERBULL_API_TOKEN>` — timing-safe compared, required on every call;
+an unset `SUPERBULL_API_TOKEN` rejects all requests.
 
 | Tool | Effect |
 | --- | --- |

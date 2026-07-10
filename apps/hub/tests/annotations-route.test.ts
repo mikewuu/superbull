@@ -8,7 +8,7 @@ interface FakeAnnotation {
   ts: number;
 }
 
-const HUB_API_TOKEN = 'test-token';
+const SUPERBULL_API_TOKEN = 'test-token';
 
 const { annotations } = vi.hoisted(() => {
   return { annotations: [] as FakeAnnotation[] };
@@ -46,7 +46,7 @@ vi.mock('../src/lib/deploy-annotations/list-deploy-annotations', () => {
 beforeEach(() => {
   vi.resetModules();
   annotations.length = 0;
-  vi.stubEnv('HUB_API_TOKEN', HUB_API_TOKEN);
+  vi.stubEnv('SUPERBULL_API_TOKEN', SUPERBULL_API_TOKEN);
 });
 
 afterEach(() => {
@@ -58,7 +58,7 @@ function authedRequest(
   init: { method?: string; headers?: HeadersInit; body?: string } = {},
 ): NextRequest {
   const headers = new Headers(init.headers);
-  headers.set('authorization', `Bearer ${HUB_API_TOKEN}`);
+  headers.set('authorization', `Bearer ${SUPERBULL_API_TOKEN}`);
   return new NextRequest(url, { method: init.method, headers, body: init.body });
 }
 

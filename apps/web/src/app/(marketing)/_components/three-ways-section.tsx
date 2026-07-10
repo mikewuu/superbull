@@ -2,13 +2,13 @@ import { AdapterInstallPanel } from './adapter-install-panel';
 import { CopyButton } from './copy-button';
 
 const runCommand =
-  'npx superbull-proxy \\\n  -n "my-app" -t $SUPERBULL_TOKEN \\\n  --queues my-queue,other-queue \\\n  --hub https://hub.example.com --hub-token $HUB_API_TOKEN';
+  'npx superbull-proxy \\\n  -n "my-app" -t $SUPERBULL_TOKEN \\\n  --queues my-queue,other-queue \\\n  --hub https://hub.example.com --hub-token $SUPERBULL_API_TOKEN';
 
 const healthzCommand = 'curl -s http://localhost:9700/healthz';
 const healthzResponse = '{ "ok": true, "queues": 2, "uptime": "6h 12m" }';
 
 const registerCommand =
-  'curl https://hub.example.com/api/sources \\\n  -H "Authorization: Bearer $HUB_API_TOKEN" \\\n  -d \'{"name":"my-app","url":"https://proxy.example.com","token":"..."}\'';
+  'curl https://hub.example.com/api/sources \\\n  -H "Authorization: Bearer $SUPERBULL_API_TOKEN" \\\n  -d \'{"name":"my-app","url":"https://proxy.example.com","token":"..."}\'';
 
 export function ThreeWaysSection(): React.ReactElement {
   return (

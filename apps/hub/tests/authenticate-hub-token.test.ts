@@ -11,7 +11,7 @@ afterEach(() => {
 
 describe('authenticateHubToken', () => {
   it('passes the request through when the bearer token matches', async () => {
-    vi.stubEnv('HUB_API_TOKEN', 'secret-token');
+    vi.stubEnv('SUPERBULL_API_TOKEN', 'secret-token');
     const { authenticateHubToken } = await import('../src/lib/auth/authenticate-hub-token');
 
     const req = { headers: new Headers({ authorization: 'Bearer secret-token' }) };
@@ -20,7 +20,7 @@ describe('authenticateHubToken', () => {
   });
 
   it('throws unauthorized when the bearer token does not match', async () => {
-    vi.stubEnv('HUB_API_TOKEN', 'secret-token');
+    vi.stubEnv('SUPERBULL_API_TOKEN', 'secret-token');
     const { authenticateHubToken } = await import('../src/lib/auth/authenticate-hub-token');
 
     const req = { headers: new Headers({ authorization: 'Bearer wrong-token' }) };
@@ -29,7 +29,7 @@ describe('authenticateHubToken', () => {
   });
 
   it('throws unauthorized when the authorization header is missing', async () => {
-    vi.stubEnv('HUB_API_TOKEN', 'secret-token');
+    vi.stubEnv('SUPERBULL_API_TOKEN', 'secret-token');
     const { authenticateHubToken } = await import('../src/lib/auth/authenticate-hub-token');
 
     const req = { headers: new Headers() };
@@ -37,8 +37,8 @@ describe('authenticateHubToken', () => {
     expect(() => authenticateHubToken(req)).toThrow();
   });
 
-  it('fails closed with a 500 body when HUB_API_TOKEN is unset', async () => {
-    vi.stubEnv('HUB_API_TOKEN', undefined);
+  it('fails closed with a 500 body when SUPERBULL_API_TOKEN is unset', async () => {
+    vi.stubEnv('SUPERBULL_API_TOKEN', undefined);
     const { authenticateHubToken } = await import('../src/lib/auth/authenticate-hub-token');
 
     const req = { headers: new Headers({ authorization: 'Bearer anything' }) };
@@ -47,6 +47,6 @@ describe('authenticateHubToken', () => {
     expect(result).toBeInstanceOf(NextResponse);
     const response = result as NextResponse;
     expect(response.status).toBe(500);
-    expect(await response.json()).toEqual({ error: 'HUB_API_TOKEN is not configured' });
+    expect(await response.json()).toEqual({ error: 'SUPERBULL_API_TOKEN is not configured' });
   });
 });

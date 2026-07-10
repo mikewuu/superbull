@@ -83,7 +83,7 @@ export default defineConfig({
       env: {
         NEXT_PUBLIC_CONVEX_URL: convexUrl,
         CONVEX_INTERNAL_TOKEN: 'e2e-internal',
-        HUB_API_TOKEN: 'e2e-hub-token',
+        SUPERBULL_API_TOKEN: 'e2e-hub-token',
       },
     },
   ],

@@ -128,8 +128,8 @@ describe('POST /api/ingest', () => {
     expect(response.status).toBe(401);
   });
 
-  it('is not guarded by HUB_API_TOKEN — a correct source token is enough', async () => {
-    vi.stubEnv('HUB_API_TOKEN', 'some-other-hub-token');
+  it('is not guarded by SUPERBULL_API_TOKEN — a correct source token is enough', async () => {
+    vi.stubEnv('SUPERBULL_API_TOKEN', 'some-other-hub-token');
     const route = await import('../src/app/api/ingest/route');
 
     const response = await route.POST(request({ source_id: 'source-1', events: [] }), {

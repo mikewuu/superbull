@@ -16,7 +16,7 @@ npx @convex-dev/auth   # generates and sets JWT_PRIVATE_KEY / JWKS on the deploy
 \`\`\`
 
 Then set the app's own env (see [Configuration](/docs/configuration) for the full
-list): \`NEXT_PUBLIC_CONVEX_URL\`, \`CONVEX_INTERNAL_TOKEN\`, \`HUB_API_TOKEN\`. Deploy
+list): \`NEXT_PUBLIC_CONVEX_URL\`, \`CONVEX_INTERNAL_TOKEN\`, \`SUPERBULL_API_TOKEN\`. Deploy
 the Next app anywhere that runs Next 16 (\`npm run dev\` binds port 4600 locally).
 There's no platform cron config — the alert/digest jobs need
 \`apps/hub/src/scripts/start-queue-worker.ts\` running as its own long-lived
@@ -37,7 +37,7 @@ to. Register one with the management REST API or the \`add_source\` MCP tool (se
 
 \`\`\`bash
 curl -X POST https://your-hub.example.com/api/sources \\
-  -H "Authorization: Bearer $HUB_API_TOKEN" \\
+  -H "Authorization: Bearer $SUPERBULL_API_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{"name":"payments-prod","url":"https://proxy.internal:4650","token":"<proxy bearer token>"}'
 \`\`\`
@@ -48,7 +48,7 @@ by \`name\` so restarts don't create duplicates.
 
 ## Management REST API
 
-Every route below is authenticated with \`Authorization: Bearer $HUB_API_TOKEN\`
+Every route below is authenticated with \`Authorization: Bearer $SUPERBULL_API_TOKEN\`
 (timing-safe compare), except \`/api/health\` and \`/api/ingest\` (see below).
 `;
 
@@ -82,7 +82,7 @@ export const ingestSection = `
 ## Ingest
 
 \`POST /api/ingest\` is authenticated differently — with the **source's own token**
-(the one you registered it with), not \`HUB_API_TOKEN\`:
+(the one you registered it with), not \`SUPERBULL_API_TOKEN\`:
 
 \`\`\`
 POST /api/ingest

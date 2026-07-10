@@ -34,7 +34,7 @@ export const flagRows = [
   ['--queues <a,b,c>', 'SUPERBULL_QUEUES', 'undefined', 'Comma-separated queue names'],
   ['--queues-file <path>', '(none)', 'undefined', 'Newline-separated queue names file'],
   ['--hub <url>', 'SUPERBULL_HUB_URL', 'undefined', 'Hub URL to self-register with'],
-  ['--hub-token <token>', 'SUPERBULL_HUB_TOKEN', 'undefined', "Hub's HUB_API_TOKEN"],
+  ['--hub-token <token>', 'SUPERBULL_HUB_TOKEN', 'undefined', "Hub's SUPERBULL_API_TOKEN"],
   ['--advertise-url <url>', '(none)', 'http://<hostname>:<port>', 'URL advertised to the hub'],
   ['--no-ingest', '(none)', 'ingest enabled', 'Disable outbound event ingest to the hub'],
   ['--help', '—', '—', 'Print usage and exit'],

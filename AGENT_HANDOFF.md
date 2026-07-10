@@ -320,7 +320,7 @@ Three modes, one polling architecture (hub→proxy inbound = the same REST polli
   Bundled convex/ functions with an internalToken guard, called server-side via ConvexHttpClient
   (sendocado pattern); convex functions tested with convex-test (edge-runtime vitest env). Per-source dashboards: hub serves the @superbull/react SPA at /s/[sourceId]/ and
   forwards /s/[sourceId]/api/* to the proxy with the stored bearer token. Hub management REST
-  (@nextastic/http buildRoute, HUB_API_TOKEN bearer) + MCP endpoint (mcp-handler at /api/mcp,
+  (@nextastic/http buildRoute, SUPERBULL_API_TOKEN bearer) + MCP endpoint (mcp-handler at /api/mcp,
   one register-*-tool.ts per tool, snake_case tool names, withMcpAuth).
 - SSE deliberately parked: conflicts with Vercel serverless; polling stays, hooks transport-swappable.
 

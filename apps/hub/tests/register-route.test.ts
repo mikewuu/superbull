@@ -9,7 +9,7 @@ interface FakeSource {
   created_at: Date;
 }
 
-const HUB_API_TOKEN = 'test-token';
+const SUPERBULL_API_TOKEN = 'test-token';
 
 const { sourcesByName } = vi.hoisted(() => {
   return { sourcesByName: new Map<string, FakeSource>() };
@@ -35,7 +35,7 @@ vi.mock('../src/lib/sources/upsert-source-by-name', () => {
 beforeEach(() => {
   vi.resetModules();
   sourcesByName.clear();
-  vi.stubEnv('HUB_API_TOKEN', HUB_API_TOKEN);
+  vi.stubEnv('SUPERBULL_API_TOKEN', SUPERBULL_API_TOKEN);
 });
 
 afterEach(() => {
@@ -47,7 +47,7 @@ function authedRequest(
   init: { headers?: HeadersInit; body?: string } = {},
 ): NextRequest {
   const headers = new Headers(init.headers);
-  headers.set('authorization', `Bearer ${HUB_API_TOKEN}`);
+  headers.set('authorization', `Bearer ${SUPERBULL_API_TOKEN}`);
   return new NextRequest(url, { method: 'POST', headers, body: init.body });
 }
 

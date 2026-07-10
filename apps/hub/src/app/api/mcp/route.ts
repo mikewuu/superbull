@@ -42,7 +42,7 @@ const handler = createMcpHandler(
 );
 
 async function verifyToken(_req: Request, bearerToken?: string): Promise<AuthInfo | undefined> {
-  const token = env.HUB_API_TOKEN;
+  const token = env.SUPERBULL_API_TOKEN;
   if (!token || !bearerToken) {
     return undefined;
   }
