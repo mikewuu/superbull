@@ -9,13 +9,6 @@ export interface AlertRuleRow {
   state: 'firing' | 'resolved' | null;
 }
 
-const typeLabels: Record<AlertRule['type'], string> = {
-  failed_threshold: 'Failed threshold',
-  stuck_queue: 'Stuck queue',
-  worker_loss: 'Worker loss',
-  new_error_group: 'New error group',
-};
-
 interface AlertRulesTableProps {
   rows: AlertRuleRow[];
 }
@@ -45,7 +38,7 @@ export function AlertRulesTable(props: AlertRulesTableProps) {
               className="border-b border-border-subtle transition-colors last:border-b-0 hover:bg-bg-muted"
             >
               <td className="px-5 py-3 font-medium text-content-emphasis">
-                {typeLabels[row.rule.type]}
+                {alertTypeLabel(row.rule.type)}
               </td>
               <td className="px-4 py-3 text-content-subtle">
                 {row.sourceName}
@@ -70,7 +63,7 @@ export function AlertRulesTable(props: AlertRulesTableProps) {
                 <EnableRuleToggle ruleId={row.rule.id} isEnabled={row.rule.isEnabled} />
               </td>
               <td className="px-5 py-3 text-right">
-                <DeleteRuleButton ruleId={row.rule.id} ruleLabel={typeLabels[row.rule.type]} />
+                <DeleteRuleButton ruleId={row.rule.id} ruleLabel={alertTypeLabel(row.rule.type)} />
               </td>
             </tr>
           ))}
@@ -78,4 +71,17 @@ export function AlertRulesTable(props: AlertRulesTableProps) {
       </table>
     </div>
   );
+}
+
+function alertTypeLabel(type: AlertRule['type']): string {
+  if (type === 'failed_threshold') {
+    return 'Failed threshold';
+  }
+  if (type === 'stuck_queue') {
+    return 'Stuck queue';
+  }
+  if (type === 'worker_loss') {
+    return 'Worker loss';
+  }
+  return 'New error group';
 }

@@ -8,13 +8,6 @@ export interface AlertEmailProps {
   queueName: string | null;
 }
 
-const typeLabels: Record<AlertEmailProps['type'], string> = {
-  failed_threshold: 'Failed job threshold',
-  stuck_queue: 'Stuck queue',
-  worker_loss: 'Worker loss',
-  new_error_group: 'New error group',
-};
-
 export function AlertEmail(props: AlertEmailProps) {
   const { kind, type, summary, queueName } = props;
   const heading = kind === 'firing' ? 'Alert firing' : 'Alert resolved';
@@ -27,7 +20,7 @@ export function AlertEmail(props: AlertEmailProps) {
       <Body style={bodyStyle}>
         <Container style={containerStyle}>
           <Text style={{ ...eyebrowStyle, color: accentColor }}>{heading}</Text>
-          <Heading style={headingStyle}>{typeLabels[type]}</Heading>
+          <Heading style={headingStyle}>{alertTypeLabel(type)}</Heading>
           {queueName && <Text style={metaStyle}>Queue: {queueName}</Text>}
           <Text style={bodyTextStyle}>{summary}</Text>
           <Hr style={hrStyle} />
@@ -61,6 +54,19 @@ const eyebrowStyle = {
   textTransform: 'uppercase' as const,
   margin: '0 0 8px',
 };
+
+function alertTypeLabel(type: AlertEmailProps['type']): string {
+  if (type === 'failed_threshold') {
+    return 'Failed job threshold';
+  }
+  if (type === 'stuck_queue') {
+    return 'Stuck queue';
+  }
+  if (type === 'worker_loss') {
+    return 'Worker loss';
+  }
+  return 'New error group';
+}
 
 const headingStyle = { fontSize: 18, color: '#171717', margin: '0 0 4px' };
 const metaStyle = { fontSize: 13, color: '#737373', margin: '0 0 16px' };
