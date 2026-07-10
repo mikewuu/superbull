@@ -44,6 +44,8 @@ async function toAppQueue(
   const isActiveQueue = query.active_queue === queueName;
   const counts = await queue.getJobCounts();
   const isPaused = await queue.isPaused();
+  const workerCount = await queue.getWorkerCount();
+  const oldestWaitingTimestamp = await queue.findOldestWaitingJobTimestamp();
   const statuses =
     !isActiveQueue || !query.status || query.status === 'latest'
       ? queue.getJobStatuses()
@@ -68,6 +70,9 @@ async function toAppQueue(
     allow_retries: queue.allowRetries,
     allow_completed_retries: queue.allowCompletedRetries,
     is_paused: isPaused,
+    worker_count: workerCount,
+    oldest_waiting_ms:
+      oldestWaitingTimestamp === null ? null : Math.max(0, Date.now() - oldestWaitingTimestamp),
   };
 }
 

@@ -55,6 +55,10 @@ export abstract class BaseAdapter {
     end?: number,
   ): Promise<QueueMetrics>;
 
+  public abstract getWorkerCount(): Promise<number>;
+
+  public abstract findOldestWaitingJobTimestamp(): Promise<number | null>;
+
   public abstract isPaused(): Promise<boolean>;
 
   public abstract pause(): Promise<void>;

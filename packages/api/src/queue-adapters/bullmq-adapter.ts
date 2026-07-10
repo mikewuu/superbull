@@ -80,6 +80,18 @@ export class BullMQAdapter extends BaseAdapter {
     return this.queue.isPaused();
   }
 
+  public getWorkerCount(): Promise<number> {
+    return this.queue.getWorkersCount();
+  }
+
+  public async findOldestWaitingJobTimestamp(): Promise<number | null> {
+    const [oldest] = await this.queue.getJobs(['waiting'], 0, 0, true);
+    if (!oldest) {
+      return null;
+    }
+    return oldest.timestamp ?? null;
+  }
+
   public pause(): Promise<void> {
     return this.queue.pause();
   }

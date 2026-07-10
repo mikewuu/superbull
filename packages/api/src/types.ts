@@ -115,6 +115,8 @@ export interface AppQueue {
   allow_retries: boolean;
   allow_completed_retries: boolean;
   is_paused: boolean;
+  worker_count: number;
+  oldest_waiting_ms: number | null;
 }
 
 export type UIConfig = Partial<{
