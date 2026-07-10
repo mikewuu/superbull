@@ -1,10 +1,10 @@
 import Image from 'next/image';
 import { AlertTranscript } from './_components/alert-transcript';
 import { BoardMockShell } from './_components/board-mock-shell';
-import { ChargeLoopVideo } from './_components/charge-loop-video';
 import { DiyRealityCard } from './_components/diy-reality-card';
 import { FeatureLedger } from './_components/feature-ledger';
 import { FinalCta } from './_components/final-cta';
+import { HeroAmbientVideo } from './_components/hero-ambient-video';
 import { InstallCommand } from './_components/install-command';
 import { McpConsole } from './_components/mcp-console';
 import { NavBar } from './_components/nav-bar';
@@ -40,60 +40,67 @@ export default function LandingPage(): React.ReactElement {
       <NavBar />
 
       {/* hero */}
-      <section id="install" className="scroll-mt-16 px-4 pt-16 pb-24 sm:px-6 sm:pt-20 sm:pb-28">
-        <div className="mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center rounded-full border border-border-subtle bg-bg-muted px-3 py-1 text-2sm font-semibold text-content-default">
-            Open source · MIT licensed
-          </span>
-          <h1 className="mt-6 text-5xl leading-[1.05] font-semibold tracking-tight text-content-emphasis sm:text-6xl">
-            See every job.
-            <br />
-            Fix what&apos;s stuck.
-          </h1>
-          <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-content-default">
-            SuperBull is an open-source dashboard for BullMQ: a dense runs table, full job
-            timelines, one-click retries, and alerts — wired straight into the queues you already
-            run.
-          </p>
-          <div className="mx-auto mt-8 max-w-md">
-            <InstallCommand />
+      <section
+        id="install"
+        className="relative isolate scroll-mt-16 overflow-hidden px-4 pt-16 pb-24 sm:px-6 sm:pt-20 sm:pb-28"
+      >
+        <div className="relative z-10">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center rounded-full border border-border-subtle bg-bg-muted px-3 py-1 text-2sm font-semibold text-content-default">
+              Open source · MIT licensed
+            </span>
+            <h1 className="mt-6 text-5xl leading-[1.05] font-semibold tracking-tight text-content-emphasis sm:text-6xl">
+              See every job.
+              <br />
+              Fix what&apos;s stuck.
+            </h1>
+            <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-content-default">
+              SuperBull is an open-source dashboard for BullMQ: a dense runs table, full job
+              timelines, one-click retries, and alerts — wired straight into the queues you already
+              run.
+            </p>
+            <div className="mx-auto mt-8 max-w-md">
+              <InstallCommand />
+            </div>
+            <p className="mt-4 text-2sm text-content-subtle">
+              MIT licensed · your Redis, your data · no seat limits ·{' '}
+              <a
+                href="/docs"
+                className="font-medium text-content-emphasis underline underline-offset-4"
+              >
+                read the docs
+              </a>
+            </p>
+            <p className="mt-2 text-2sm text-content-muted">
+              Works with Express, Fastify, Hono +6 more · BullMQ 5 · 400+ tests
+            </p>
           </div>
-          <p className="mt-4 text-2sm text-content-subtle">
-            MIT licensed · your Redis, your data · no seat limits ·{' '}
-            <a
-              href="/docs"
-              className="font-medium text-content-emphasis underline underline-offset-4"
-            >
-              read the docs
-            </a>
-          </p>
-          <p className="mt-2 text-2sm text-content-muted">
-            Works with Express, Fastify, Hono +6 more · BullMQ 5 · 400+ tests
-          </p>
+
+          <div className="relative mx-auto mt-16 max-w-5xl sm:mt-20">
+            <Image
+              src="/landing/mascot/bull-peek.webp"
+              alt=""
+              aria-hidden
+              width={112}
+              height={96}
+              unoptimized
+              className="bull-bob absolute -top-9 right-10 z-10 w-16 select-none sm:-top-11 sm:right-20 sm:w-20"
+            />
+            <div className="overflow-hidden rounded-2xl border border-border-subtle bg-bg-default shadow-[0_30px_80px_-30px_rgba(0,0,0,0.28)]">
+              <div className="flex items-center gap-1.5 border-b border-border-subtle bg-bg-muted px-4 py-2.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-border-default" />
+                <span className="h-2.5 w-2.5 rounded-full bg-border-default" />
+                <span className="h-2.5 w-2.5 rounded-full bg-border-default" />
+                <span className="ml-2 rounded-md bg-bg-default px-2.5 py-0.5 text-2sm text-content-subtle ring-1 ring-border-subtle">
+                  localhost:3333
+                </span>
+              </div>
+              <BoardMockShell />
+            </div>
+          </div>
         </div>
 
-        <div className="relative mx-auto mt-16 max-w-5xl sm:mt-20">
-          <Image
-            src="/landing/mascot/bull-peek.webp"
-            alt=""
-            aria-hidden
-            width={112}
-            height={96}
-            unoptimized
-            className="bull-bob absolute -top-9 right-10 z-10 w-16 select-none sm:-top-11 sm:right-20 sm:w-20"
-          />
-          <div className="overflow-hidden rounded-2xl border border-border-subtle bg-bg-default shadow-[0_30px_80px_-30px_rgba(0,0,0,0.28)]">
-            <div className="flex items-center gap-1.5 border-b border-border-subtle bg-bg-muted px-4 py-2.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-border-default" />
-              <span className="h-2.5 w-2.5 rounded-full bg-border-default" />
-              <span className="h-2.5 w-2.5 rounded-full bg-border-default" />
-              <span className="ml-2 rounded-md bg-bg-default px-2.5 py-0.5 text-2sm text-content-subtle ring-1 ring-border-subtle">
-                localhost:3333
-              </span>
-            </div>
-            <BoardMockShell />
-          </div>
-        </div>
+        <HeroAmbientVideo />
       </section>
 
       {/* problem */}
@@ -179,10 +186,14 @@ export default function LandingPage(): React.ReactElement {
                   from multiple Redis instances at once.
                 </p>
               </div>
-              <div className="mx-auto mt-10 max-w-4xl overflow-hidden rounded-2xl shadow-sm">
-                <div className="aspect-[16/9] w-full">
-                  <ChargeLoopVideo />
-                </div>
+              <div className="mx-auto mt-10 max-w-4xl overflow-hidden rounded-2xl border border-border-subtle shadow-sm">
+                <Image
+                  src="/landing/screenshots/overview.webp"
+                  alt="SuperBull overview page: throughput chart and current workload across queues"
+                  width={2000}
+                  height={1250}
+                  className="w-full"
+                />
               </div>
             </Reveal>
           </div>

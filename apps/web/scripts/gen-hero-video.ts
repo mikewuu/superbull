@@ -9,8 +9,8 @@ import { fal } from '@fal-ai/client';
 
 fal.config({ credentials: process.env.FAL_API_KEY });
 
-const sourcePath = path.join(process.cwd(), 'public/landing/raw/bull-charge-scene.png');
-const outPath = path.join(process.cwd(), 'public/landing/raw/charge-loop-raw.mp4');
+const sourcePath = path.join(process.cwd(), 'public/landing/raw/bull-hero-ambient.png');
+const outPath = path.join(process.cwd(), 'public/landing/raw/hero-ambient-loop-raw.mp4');
 
 async function main(): Promise<void> {
   console.log('→ uploading start/end frame');
@@ -20,9 +20,9 @@ async function main(): Promise<void> {
   const result = await fal.subscribe('fal-ai/kling-video/v3/pro/image-to-video', {
     input: {
       prompt:
-        'Locked-off tripod camera, the frame never moves. The charcoal-black cartoon bull keeps charging in place, dust puffs continuously from its hooves, red tile fragments keep flying outward and tumbling, the reassembling green tiles behind it pulse with a soft glow, its ears flap and its tail flicks, gentle continuous motion in every region, cinemagraph.',
+        'Locked-off tripod camera, the frame never moves and the bull never changes position. The charcoal-black cartoon bull stands calmly in place, its red cape ripples and sways gently as if in a soft breeze, its ears twitch occasionally, its tail flicks slowly side to side, a slow subtle breathing motion in its chest, otherwise still, calm ambient cinemagraph loop, quiet mood.',
       negative_prompt:
-        'camera movement, camera pan, camera zoom, cuts, text, words, watermark, frozen still image, static image',
+        'camera movement, camera pan, camera zoom, walking, running, changing position, cuts, text, words, watermark, frozen still image, static image',
       duration: '5',
       start_image_url: url,
       end_image_url: url,
