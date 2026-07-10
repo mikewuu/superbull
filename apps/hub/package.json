@@ -14,8 +14,10 @@
     "queue:worker": "tsx src/scripts/start-queue-worker.ts"
   },
   "dependencies": {
+    "@auth/core": "^0.41.2",
     "@bullwatch/react": "workspace:*",
     "@bullwatch/ui": "workspace:*",
+    "@convex-dev/auth": "^0.0.94",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "@nextastic/http": "^7.0.0",
     "@nextastic/queue": "^2.3.3",
@@ -29,6 +31,7 @@
     "@visx/shape": "^3.12.0",
     "convex": "^1.42.1",
     "date-fns": "^4.4.0",
+    "lucia": "^3.2.2",
     "lucide-react": "^0.469.0",
     "mcp-handler": "^1.1.0",
     "next": "^16.2.10",
@@ -49,6 +52,7 @@
     "@types/react-dom": "^19.0.2",
     "bullmq": "^5.34.0",
     "convex-test": "^0.0.54",
+    "jose": "^5.10.0",
     "tailwindcss": "^4.3.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
