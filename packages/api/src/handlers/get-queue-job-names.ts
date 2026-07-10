@@ -11,6 +11,8 @@ export interface JobNameStats {
   activity: number[];
 }
 
+type JobNameAccumulator = JobNameStats & { durations: number[] };
+
 const finishedScanSize = 1000;
 const pendingScanSize = 500;
 const activityBucketCount = 24;
@@ -27,85 +29,104 @@ export async function getQueueJobNames(req: BoardRequest): Promise<HandlerRespon
   const failed = await queue.getJobs(['failed'], 0, finishedScanSize - 1, false);
   const pending = await queue.getJobs(pendingStatuses, 0, pendingScanSize - 1, false);
 
-  const byName = new Map<string, JobNameStats & { durations: number[] }>();
   const now = Date.now();
-
-  const entryFor = (name: string) => {
-    const existing = byName.get(name);
-    if (existing) {
-      return existing;
-    }
-    const created = {
-      name,
-      completed_count: 0,
-      failed_count: 0,
-      pending_count: 0,
-      failure_rate: 0,
-      avg_duration_ms: null,
-      last_seen_ms: 0,
-      activity: new Array<number>(activityBucketCount).fill(0),
-      durations: [] as number[],
-    };
-    byName.set(name, created);
-    return created;
-  };
-
-  const recordActivity = (entry: JobNameStats, finishedOn: number | null | undefined) => {
-    if (!finishedOn) {
-      return;
-    }
-    const hoursAgo = Math.floor((now - finishedOn) / 3_600_000);
-    if (hoursAgo >= 0 && hoursAgo < activityBucketCount) {
-      entry.activity[hoursAgo] = (entry.activity[hoursAgo] ?? 0) + 1;
-    }
-  };
-
-  const recordLastSeen = (entry: JobNameStats, job: QueueJob) => {
-    const { timestamp } = job.toJSON();
-    if (timestamp > entry.last_seen_ms) {
-      entry.last_seen_ms = timestamp;
-    }
-  };
-
+  const byName = new Map<string, JobNameAccumulator>();
   for (const job of completed) {
-    const json = job.toJSON();
-    const entry = entryFor(json.name);
-    entry.completed_count += 1;
-    recordActivity(entry, json.finishedOn);
-    recordLastSeen(entry, job);
-    if (json.processedOn && json.finishedOn) {
-      entry.durations.push(json.finishedOn - json.processedOn);
-    }
+    recordCompleted(byName, job, now);
   }
-
   for (const job of failed) {
-    const json = job.toJSON();
-    const entry = entryFor(json.name);
-    entry.failed_count += 1;
-    recordActivity(entry, json.finishedOn);
-    recordLastSeen(entry, job);
+    recordFailed(byName, job, now);
   }
-
   for (const job of pending) {
-    const json = job.toJSON();
-    const entry = entryFor(json.name);
-    entry.pending_count += 1;
-    recordLastSeen(entry, job);
+    recordPending(byName, job);
   }
 
   const jobNames = [...byName.values()]
-    .map(({ durations, ...entry }) => {
-      const finishedCount = entry.completed_count + entry.failed_count;
-      return {
-        ...entry,
-        failure_rate: finishedCount === 0 ? 0 : entry.failed_count / finishedCount,
-        avg_duration_ms:
-          durations.length === 0
-            ? null
-            : Math.round(durations.reduce((total, value) => total + value, 0) / durations.length),
-      };
-    })
+    .map(toJobNameStats)
     .sort((a, b) => b.last_seen_ms - a.last_seen_ms);
 
   return { body: { job_names: jobNames } };
+}
+
+function entryFor(byName: Map<string, JobNameAccumulator>, name: string): JobNameAccumulator {
+  const existing = byName.get(name);
+  if (existing) {
+    return existing;
+  }
+  const created: JobNameAccumulator = {
+    name,
+    completed_count: 0,
+    failed_count: 0,
+    pending_count: 0,
+    failure_rate: 0,
+    avg_duration_ms: null,
+    last_seen_ms: 0,
+    activity: new Array<number>(activityBucketCount).fill(0),
+    durations: [],
+  };
+  byName.set(name, created);
+  return created;
+}
+
+function recordCompleted(
+  byName: Map<string, JobNameAccumulator>,
+  job: QueueJob,
+  now: number,
+): void {
+  const json = job.toJSON();
+  const entry = entryFor(byName, json.name);
+  entry.completed_count += 1;
+  recordActivity(entry, json.finishedOn, now);
+  recordLastSeen(entry, json.timestamp);
+  if (json.processedOn && json.finishedOn) {
+    entry.durations.push(json.finishedOn - json.processedOn);
+  }
+}
+
+function recordFailed(byName: Map<string, JobNameAccumulator>, job: QueueJob, now: number): void {
+  const json = job.toJSON();
+  const entry = entryFor(byName, json.name);
+  entry.failed_count += 1;
+  recordActivity(entry, json.finishedOn, now);
+  recordLastSeen(entry, json.timestamp);
+}
+
+function recordPending(byName: Map<string, JobNameAccumulator>, job: QueueJob): void {
+  const json = job.toJSON();
+  const entry = entryFor(byName, json.name);
+  entry.pending_count += 1;
+  recordLastSeen(entry, json.timestamp);
+}
+
+function recordActivity(
+  entry: JobNameStats,
+  finishedOn: number | null | undefined,
+  now: number,
+): void {
+  if (!finishedOn) {
+    return;
+  }
+  const hoursAgo = Math.floor((now - finishedOn) / 3_600_000);
+  if (hoursAgo >= 0 && hoursAgo < activityBucketCount) {
+    entry.activity[hoursAgo] = (entry.activity[hoursAgo] ?? 0) + 1;
+  }
+}
+
+function recordLastSeen(entry: JobNameStats, timestamp: number): void {
+  if (timestamp > entry.last_seen_ms) {
+    entry.last_seen_ms = timestamp;
+  }
+}
+
+function toJobNameStats(entry: JobNameAccumulator): JobNameStats {
+  const { durations, ...stats } = entry;
+  const finishedCount = stats.completed_count + stats.failed_count;
+  return {
+    ...stats,
+    failure_rate: finishedCount === 0 ? 0 : stats.failed_count / finishedCount,
+    avg_duration_ms:
+      durations.length === 0
+        ? null
+        : Math.round(durations.reduce((total, value) => total + value, 0) / durations.length),
+  };
 }
