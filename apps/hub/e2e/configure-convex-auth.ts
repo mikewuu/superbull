@@ -9,8 +9,8 @@ import { exportJWK, exportPKCS8, generateKeyPair } from 'jose';
 // their own redeploy). So this waits for a real query — and, at the end, the
 // real first sign-up — to succeed before next dev starts serving pages.
 const convexUrl = 'http://127.0.0.1:3210';
-const E2E_EMAIL = 'e2e@bullwatch.test';
-const E2E_PASSWORD = 'bullwatch-e2e-pw';
+const E2E_EMAIL = 'e2e@superbull.test';
+const E2E_PASSWORD = 'superbull-e2e-pw';
 
 async function main(): Promise<void> {
   await waitForDeployed();

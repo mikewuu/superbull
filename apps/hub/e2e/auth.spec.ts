@@ -4,8 +4,8 @@ import { expect, test } from '@playwright/test';
 // (already-authenticated) storage state with a fresh, logged-out context.
 test.use({ storageState: { cookies: [], origins: [] } });
 
-const E2E_EMAIL = 'e2e@bullwatch.test';
-const E2E_PASSWORD = 'bullwatch-e2e-pw';
+const E2E_EMAIL = 'e2e@superbull.test';
+const E2E_PASSWORD = 'superbull-e2e-pw';
 
 test('redirects to /signin when logged out', async ({ page }) => {
   await page.goto('/');
@@ -35,7 +35,7 @@ test('the server rejects a second sign-up even when the UI is bypassed', async (
       action: 'auth:signIn',
       args: {
         provider: 'password',
-        params: { flow: 'signUp', email: 'intruder@bullwatch.test', password: 'intruder-pw-123' },
+        params: { flow: 'signUp', email: 'intruder@superbull.test', password: 'intruder-pw-123' },
       },
     },
   });

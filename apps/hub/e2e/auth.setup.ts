@@ -8,8 +8,8 @@ import { expect, test as setup } from '@playwright/test';
 // authenticated storage state so the `chromium` project's tests start signed
 // in.
 const statePath = path.join(process.cwd(), 'e2e', '.auth', 'state.json');
-const E2E_EMAIL = 'e2e@bullwatch.test';
-const E2E_PASSWORD = 'bullwatch-e2e-pw';
+const E2E_EMAIL = 'e2e@superbull.test';
+const E2E_PASSWORD = 'superbull-e2e-pw';
 
 setup('sign in as the bootstrapped first user', async ({ page }) => {
   fs.mkdirSync(path.dirname(statePath), { recursive: true });

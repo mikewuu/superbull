@@ -54,7 +54,7 @@ export function runServerAdapterContract(
         });
         expect(res.status).toBe(200);
         expect(res.headers['content-type']).toMatch(/text/);
-        expect(res.text).toContain('bullwatch-static-fixture');
+        expect(res.text).toContain('superbull-static-fixture');
       });
 
       it('GET /api/queues returns the seeded queue as JSON', async () => {

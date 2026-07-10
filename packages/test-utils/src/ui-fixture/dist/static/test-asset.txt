@@ -1,1 +1,1 @@
-bullwatch-static-fixture
+superbull-static-fixture
