@@ -300,3 +300,33 @@ entry (relative assets + injected `basePath`).
 api core → test-utils → express + its contract test → port api handler tests → get that slice
 green (`pnpm test` with local Redis) → UI (dub-styled) → remaining 8 adapters (parallelize with
 subagents; they're mechanical) → CI → full green + e2e verify. Commit atomically at each step.
+
+
+---
+
+## Modes architecture (approved 2026-07-10)
+
+Three modes, one polling architecture (hub→proxy inbound = the same REST polling, one extra hop):
+- **standalone** — what exists: embed an adapter (express/hono/…) in your app; serves UI + API.
+- **proxy** (`@bullwatch/proxy`, DONE) — headless agent next to the workers: real bullmq, JSON API
+  only, bearer-token auth (timing-safe), open /healthz, no UI. `startProxy({ queues, token, port })`.
+- **hub** (`apps/hub`, Next.js 16, port 4600, Vercel-deployable) — federates proxies. Stores
+  sources (name/url/token) via a `HubDatabase` interface with adapters: `memory` (zero-config
+  default), `postgres` (kysely + @nextastic/db + node-pg-migrate, table `proxy_sources`),
+  `convex` (ConvexHttpClient + bundled convex/ functions, internalToken guard). Env-selected via
+  HUB_DATABASE. Per-source dashboards: hub serves the @bullwatch/react SPA at /s/[sourceId]/ and
+  forwards /s/[sourceId]/api/* to the proxy with the stored bearer token. Hub management REST
+  (@nextastic/http buildRoute, HUB_API_TOKEN bearer) + MCP endpoint (mcp-handler at /api/mcp,
+  one register-*-tool.ts per tool, snake_case tool names, withMcpAuth).
+- SSE deliberately parked: conflicts with Vercel serverless; polling stays, hooks transport-swappable.
+
+## Approved roadmap (tasks #13–17)
+13 free wins: GET /api/prometheus (exportPrometheusMetrics), workers panel (+processedBy), global
+   concurrency set + rate-limit state, priority-lane counts, per-attempt retry history (stacktrace
+   array), danger zone (drain/obliterate/trim) behind confirms.
+14 metrics pack (window-derived, zero consumer config): wait/run p50+p95 per queue & name, top
+   errors by failedReason, retry rate, stalled count, est. drain time.
+15 UX pack: replay-with-edited-payload, cmd-K palette (cmdk, fuzzy), created-after time filter,
+   poll-driven in-browser failure alerts, bulk add (JSON array).
+16 redaction hooks (formatter at adapter edge, prove redacted fields never hit the wire) +
+   multi-Redis test/docs.
