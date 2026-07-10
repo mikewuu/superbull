@@ -1,1 +1,1 @@
-export { type Proxy, startProxy } from './start-proxy';
+export { type RunningProxy, startProxy } from './start-proxy';

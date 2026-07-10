@@ -1,7 +1,7 @@
 import { BullMQAdapter } from '@bullwatch/api';
 import { Queue } from 'bullmq';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { type Proxy, startProxy } from '../src/start-proxy';
+import { type RunningProxy, startProxy } from '../src/start-proxy';
 
 const connection = {
   host: process.env.REDIS_HOST || 'localhost',
@@ -10,7 +10,7 @@ const connection = {
 
 describe('startProxy', () => {
   let queue: Queue;
-  let proxy: Proxy | undefined;
+  let proxy: RunningProxy | undefined;
 
   beforeEach(async () => {
     queue = new Queue('ProxyTest', { connection });

@@ -10,7 +10,7 @@ import {
   createBoard,
 } from '@bullwatch/api';
 
-export interface Proxy {
+export interface RunningProxy {
   server: Server;
   port: number;
   close: () => Promise<void>;
@@ -21,7 +21,7 @@ export async function startProxy(args: {
   token: string;
   port?: number;
   host?: string;
-}): Promise<Proxy> {
+}): Promise<RunningProxy> {
   const { queues, token, port = 0, host = '0.0.0.0' } = args;
   if (!token) {
     throw new Error('startProxy requires a non-empty token');

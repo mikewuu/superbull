@@ -21,6 +21,14 @@
     }
   },
   "files": {
-    "ignore": ["dist", ".turbo", "coverage", "node_modules", "**/*.gen.ts"]
+    "ignore": [
+      "dist",
+      ".next",
+      ".turbo",
+      "coverage",
+      "node_modules",
+      "**/*.gen.ts",
+      "convex/_generated"
+    ]
   }
 }
