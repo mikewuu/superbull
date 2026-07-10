@@ -55,9 +55,7 @@ async function toAppQueue(
     (value): value is JobStatus => value !== 'latest',
   );
   const statuses =
-    !isActiveQueue || selectedStatuses.length === 0
-      ? queue.getJobStatuses()
-      : selectedStatuses;
+    !isActiveQueue || selectedStatuses.length === 0 ? queue.getJobStatuses() : selectedStatuses;
   const { jobs, pagination } = await getJobPage({
     queue,
     statuses,
