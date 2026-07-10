@@ -72,7 +72,7 @@ export function DocsNavLinks(props: { onNavigate?: () => void }) {
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         placeholder="Search docs"
-        className="h-9 w-full rounded-md border border-border-subtle bg-bg-default px-3 text-sm text-content-default placeholder:text-content-muted focus:outline-none focus:ring-2 focus:ring-border-emphasis"
+        className="h-9 w-full rounded-lg border border-border-subtle bg-bg-default px-3 text-sm text-content-default outline-none transition-colors duration-150 ease-snout placeholder:text-content-muted focus-visible:border-border-emphasis focus-visible:ring-2 focus-visible:ring-blue-500/40"
       />
       {filteredNav.length === 0 ? (
         <p className="px-2 text-sm text-content-muted">No pages match &quot;{query}&quot;.</p>
