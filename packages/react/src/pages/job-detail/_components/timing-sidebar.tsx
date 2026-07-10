@@ -68,7 +68,11 @@ function TimingGapRow(props: {
         <span
           className={cn(
             'h-full rounded-full',
-            thick ? cn('w-[7px]', colorClassName) : 'w-px bg-border-default',
+            {
+              'w-[7px]': thick,
+              'w-px bg-border-default': !thick,
+            },
+            thick && colorClassName,
             { 'animate-pulse': pulse },
           )}
         />
