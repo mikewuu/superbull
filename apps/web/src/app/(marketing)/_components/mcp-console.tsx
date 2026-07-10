@@ -15,52 +15,53 @@ type ToolId =
 
 const tools: Record<ToolId, { desc: string; request: string; response: string }> = {
   list_queues: {
-    desc: 'Queue names, counts, and paused state for one source.',
-    request: '{ "tool": "list_queues", "arguments": { "source": "my-app" } }',
+    desc: 'Queue names, job counts, and paused state for one source.',
+    request: '{ "tool": "list_queues", "arguments": { "source_id": "src_9f2a" } }',
     response:
-      '{ "queues": [\n    { "name": "send-emails", "waiting": 5, "failed": 0 },\n    { "name": "process-videos", "waiting": 0, "failed": 0 },\n    { "name": "sync-contacts", "waiting": 0, "paused": true }\n  ] }',
+      '{ "queues": [\n    { "name": "send-emails", "counts": { "waiting": 5, "failed": 0 }, "is_paused": false },\n    { "name": "process-videos", "counts": { "waiting": 0, "failed": 0 }, "is_paused": false },\n    { "name": "sync-contacts", "counts": { "waiting": 0, "failed": 0 }, "is_paused": true }\n  ] }',
   },
   get_queue: {
     desc: "One queue's current page of jobs, filtered by status.",
     request:
-      '{ "tool": "get_queue", "arguments": {\n    "source": "my-app", "queue": "send-emails", "status": "failed" } }',
+      '{ "tool": "get_queue", "arguments": {\n    "source_id": "src_9f2a", "queue_name": "send-emails", "status": "failed" } }',
     response:
-      '{ "jobs": [\n    { "id": 41, "name": "invoice-receipt", "attempts": 3,\n      "failedReason": "smtp timeout" }\n  ], "total": 1 }',
+      '{ "queue": { "name": "send-emails", "jobs": [\n    { "id": "482", "attempts": 3,\n      "failed_reason": "connect ECONNREFUSED 127.0.0.1:587",\n      "is_failed": true } ] } }',
   },
   retry_job: {
     desc: 'Retry a failed or completed job.',
     request:
-      '{ "tool": "retry_job", "arguments": { "source": "my-app", "queue": "send-emails", "id": 41 } }',
-    response: '{ "id": 41, "status": "waiting" }',
+      '{ "tool": "retry_job", "arguments": {\n    "source_id": "src_9f2a", "queue_name": "send-emails", "job_id": "482" } }',
+    response: '{ "retried": true, "job_id": "482" }',
   },
   pause_queue: {
     desc: "Stop a queue's processing.",
     request:
-      '{ "tool": "pause_queue", "arguments": { "source": "my-app", "queue": "process-videos" } }',
-    response: '{ "queue": "process-videos", "paused": true }',
+      '{ "tool": "pause_queue", "arguments": { "source_id": "src_9f2a", "queue_name": "process-videos" } }',
+    response: '{ "paused": true, "queue_name": "process-videos" }',
   },
   resume_queue: {
     desc: 'Resume a paused queue.',
     request:
-      '{ "tool": "resume_queue", "arguments": { "source": "my-app", "queue": "sync-contacts" } }',
-    response: '{ "queue": "sync-contacts", "paused": false }',
+      '{ "tool": "resume_queue", "arguments": { "source_id": "src_9f2a", "queue_name": "sync-contacts" } }',
+    response: '{ "resumed": true, "queue_name": "sync-contacts" }',
   },
   list_sources: {
     desc: 'List the proxy sources the hub federates, without their bearer tokens.',
     request: '{ "tool": "list_sources", "arguments": {} }',
     response:
-      '{ "sources": [\n    { "name": "my-app", "url": "https://proxy.example.com", "queues": 3 }\n  ] }',
+      '{ "sources": [\n    { "id": "src_9f2a", "name": "my-app", "url": "https://proxy.example.com",\n      "created_at": "2026-03-02T18:04:00.000Z" } ] }',
   },
   add_source: {
     desc: 'Register a remote proxy; stores its token, never returns it.',
     request:
       '{ "tool": "add_source", "arguments": {\n    "name": "my-app", "url": "https://proxy.example.com", "token": "..." } }',
-    response: '{ "name": "my-app", "url": "https://proxy.example.com" }',
+    response:
+      '{ "id": "src_9f2a", "name": "my-app", "url": "https://proxy.example.com",\n  "created_at": "2026-03-02T18:04:00.000Z" }',
   },
   remove_source: {
     desc: 'Remove a proxy source the hub federates.',
-    request: '{ "tool": "remove_source", "arguments": { "name": "my-app" } }',
-    response: '{ "name": "my-app", "removed": true }',
+    request: '{ "tool": "remove_source", "arguments": { "source_id": "src_9f2a" } }',
+    response: '{ "removed": true, "source_id": "src_9f2a" }',
   },
 };
 

@@ -44,10 +44,6 @@
     filter: none;
   }
 
-  .bull-bob {
-    animation: bull-bob 4.5s ease-in-out infinite;
-  }
-
   .cursor-blink {
     animation: cursor-blink 1s steps(2, jump-none) infinite;
   }
@@ -57,16 +53,6 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
-  }
-}
-
-@keyframes bull-bob {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
   }
 }
 
@@ -87,9 +73,6 @@
     opacity: 1;
     translate: 0 0;
     filter: none;
-  }
-  .bull-bob {
-    animation: none;
   }
   .cursor-blink {
     animation: none;

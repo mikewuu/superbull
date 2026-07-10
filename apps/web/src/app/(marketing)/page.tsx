@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { AgentTranscript } from './_components/agent-transcript';
 import { AlertTranscript } from './_components/alert-transcript';
 import { BoardMockShell } from './_components/board-mock-shell';
 import { DiyRealityCard } from './_components/diy-reality-card';
@@ -17,6 +18,10 @@ const githubUrl = 'https://github.com/mikewu/superbull';
 
 const faqs = [
   {
+    q: 'Can an agent operate my queues directly?',
+    a: "Yes. An agent with an MCP token can watch your queues, open a failed job, and read the stack trace. It can retry that job itself, or pause a queue that's failing fast — the same 8 tools you'd otherwise click through the board for.",
+  },
+  {
     q: 'Do I need the hub to use SuperBull?',
     a: 'No. Mount an adapter in your app and you have a full board and REST API in one process. The hub is only for federating multiple proxy sources behind one login, with history, alerts, and status pages.',
   },
@@ -27,10 +32,6 @@ const faqs = [
   {
     q: 'Does this replace bull-board?',
     a: "It forks bull-board's adapter architecture (credited, MIT) and rebuilds the UI on top: faceted filters, bulk actions, a timeline waterfall, metrics, redaction hooks, and an MCP server bull-board doesn't have.",
-  },
-  {
-    q: 'Can an agent operate my queues directly?',
-    a: 'Yes. The hub exposes 8 MCP tools — list and get queues, retry a job, pause or resume — the same actions a human gets from the board, reachable by anything that speaks MCP.',
   },
 ];
 
@@ -58,6 +59,9 @@ export default function LandingPage(): React.ReactElement {
               A dense runs table, full job timelines, one-click retries, and alerts — wired straight
               into the queues you already run.
             </p>
+            <p className="mx-auto mt-3 max-w-xl text-lg leading-8 text-content-muted">
+              Your agent can read the stack trace and retry the job before you wake up.
+            </p>
             <div className="mx-auto mt-8 max-w-lg">
               <InstallCommand />
             </div>
@@ -83,7 +87,7 @@ export default function LandingPage(): React.ReactElement {
               width={112}
               height={96}
               unoptimized
-              className="bull-bob absolute -top-9 right-10 z-10 w-16 select-none sm:-top-11 sm:right-20 sm:w-20"
+              className="absolute -top-9 right-10 z-10 w-16 select-none sm:-top-11 sm:right-20 sm:w-20"
             />
             <div className="overflow-hidden rounded-2xl border border-border-subtle bg-bg-default shadow-[0_30px_80px_-30px_rgba(0,0,0,0.28)]">
               <div className="flex items-center gap-1.5 border-b border-border-subtle bg-bg-muted px-4 py-2.5">
@@ -199,12 +203,54 @@ export default function LandingPage(): React.ReactElement {
         </div>
       </section>
 
+      {/* agent-native / mcp */}
+      <section className="px-4 py-24 sm:px-6 sm:py-28">
+        <div className="mx-auto max-w-6xl">
+          <p className="font-mono text-2sm text-content-subtle">04 — agent-native</p>
+
+          <div className="mt-10 space-y-20">
+            <Reveal>
+              <div className="grid items-center gap-10 lg:grid-cols-2">
+                <div>
+                  <h2 className="text-4xl leading-[1.08] font-semibold tracking-tight text-content-emphasis sm:text-5xl">
+                    Your agent can run
+                    <br />
+                    <span className="text-content-muted">the board too.</span>
+                  </h2>
+                  <p className="mt-5 max-w-md text-lg leading-8 text-content-default">
+                    The hub exposes 8 MCP tools over one authenticated endpoint: list sources, watch
+                    queues, open a failed job, read its stack trace, retry it, or pause a queue
+                    that&apos;s failing fast. Same actions as the board, reachable by anything that
+                    speaks MCP.
+                  </p>
+                </div>
+                <AgentTranscript />
+              </div>
+            </Reveal>
+
+            <Reveal delay={120}>
+              <div className="mx-auto max-w-2xl text-center">
+                <h3 className="text-3xl font-semibold tracking-tight text-content-emphasis">
+                  Every call above is real.
+                </h3>
+                <p className="mt-4 text-lg leading-8 text-content-default">
+                  Try the other seven tools below — same requests and responses an agent gets back.
+                </p>
+              </div>
+              <div className="mt-10">
+                <McpConsole />
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
       {/* alerts — the page's single dark band */}
       <section className="bg-bg-inverted px-4 py-24 text-white sm:px-6 sm:py-28">
         <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1fr_1.1fr]">
           <Reveal>
             <div>
-              <p className="font-mono text-2sm text-white/40">04 — while you&apos;re away</p>
+              <p className="font-mono text-2sm text-white/40">05 — while you&apos;re away</p>
               <h2 className="mt-3 text-4xl leading-[1.08] font-semibold tracking-tight sm:text-5xl">
                 It keeps watch.
                 <br />
@@ -219,32 +265,6 @@ export default function LandingPage(): React.ReactElement {
           </Reveal>
           <Reveal delay={140}>
             <AlertTranscript />
-          </Reveal>
-        </div>
-      </section>
-
-      {/* agent-native / mcp */}
-      <section className="px-4 py-24 sm:px-6 sm:py-28">
-        <div className="mx-auto max-w-4xl">
-          <Reveal>
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="font-mono text-2sm text-content-subtle">05 — agent-native</p>
-              <h2 className="mt-3 text-4xl leading-[1.08] font-semibold tracking-tight text-content-emphasis sm:text-5xl">
-                Every action is a tool
-                <br />
-                <span className="text-content-muted">your agent can call.</span>
-              </h2>
-              <p className="mx-auto mt-5 max-w-xl text-lg leading-8 text-content-default">
-                The hub speaks MCP over one authenticated endpoint. Give an agent a token and it can
-                list queues, inspect one job, retry it, and pause or resume processing — the same
-                actions a human gets from the board.
-              </p>
-            </div>
-          </Reveal>
-          <Reveal delay={120}>
-            <div className="mt-12">
-              <McpConsole />
-            </div>
           </Reveal>
         </div>
       </section>
