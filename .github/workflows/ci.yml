@@ -90,7 +90,7 @@ jobs:
         run: pnpm build
 
       - name: Test bun adapter
-        run: pnpm --filter @bullwatch/bun test:bun
+        run: pnpm --filter @superbull/bun test:bun
         env:
           REDIS_HOST: localhost
           REDIS_PORT: 6379
@@ -127,10 +127,10 @@ jobs:
         run: pnpm build
 
       - name: Install Playwright chromium
-        run: pnpm --filter @bullwatch/dev exec playwright install --with-deps chromium
+        run: pnpm --filter @superbull/dev exec playwright install --with-deps chromium
 
       - name: Run e2e
-        run: pnpm --filter @bullwatch/dev e2e
+        run: pnpm --filter @superbull/dev e2e
         env:
           REDIS_HOST: localhost
           REDIS_PORT: 6379
@@ -153,10 +153,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build UI
-        run: pnpm --filter @bullwatch/react build
+        run: pnpm --filter @superbull/react build
 
       - name: Test UI
-        run: pnpm --filter @bullwatch/react test
+        run: pnpm --filter @superbull/react test
 
   test-hub:
     name: Test hub (MCP + two-hop e2e)
@@ -190,14 +190,14 @@ jobs:
         run: pnpm build
 
       - name: Unit test hub
-        run: pnpm --filter @bullwatch/hub test
+        run: pnpm --filter @superbull/hub test
 
       - name: Install Playwright chromium
-        run: pnpm --filter @bullwatch/hub exec playwright install --with-deps chromium
+        run: pnpm --filter @superbull/hub exec playwright install --with-deps chromium
 
       # convex dev downloads a local-backend binary on first run; needs network access.
       - name: Run hub e2e
-        run: pnpm --filter @bullwatch/hub e2e
+        run: pnpm --filter @superbull/hub e2e
         env:
           REDIS_HOST: localhost
           REDIS_PORT: 6379
