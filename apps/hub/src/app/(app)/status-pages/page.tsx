@@ -58,7 +58,7 @@ export default async function StatusPagesPage() {
                           /status/{row.config.slug}
                         </a>
                       ) : (
-                        '—'
+                        '-'
                       )}
                     </td>
                     <td className="px-5 py-3 text-right">

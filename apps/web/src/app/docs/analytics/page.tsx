@@ -4,7 +4,7 @@ import { DocsTable } from '../_components/docs-table';
 import { intro, mid, outro, rangeHeaders, rangeRows, seriesHeaders, seriesRows } from './content';
 
 export const metadata: Metadata = {
-  title: 'Analytics — SuperBull docs',
+  title: 'Analytics: SuperBull docs',
   description: 'Throughput, latency, totals, and heatmap series derived from ingested events.',
 };
 

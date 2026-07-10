@@ -45,7 +45,7 @@ export const rows = [
     'prefix',
     'string',
     "''",
-    "Prepended to the queue's display name in getName() — ${prefix}${queue.name}. Useful when the same queue name repeats across environments in one board.",
+    "Prepended to the queue's display name in getName(): ${prefix}${queue.name}. Useful when the same queue name repeats across environments in one board.",
   ],
   [
     'description',
@@ -66,7 +66,7 @@ export const redaction = `
 ## Redaction
 
 \`format\` runs on a job's \`data\` and \`return_value\` before they're serialized into
-\`AppJob\` — the only two fields where arbitrary user payloads reach the wire:
+\`AppJob\`. These are the only two fields where arbitrary user payloads reach the wire:
 
 \`\`\`ts
 type RedactFormatter = (field: 'data' | 'return_value', value: unknown) => unknown;
@@ -82,13 +82,13 @@ new BullMQAdapter(queue, {
 });
 \`\`\`
 
-The redacted value replaces the field entirely in the API response — nothing the
+The redacted value replaces the field entirely in the API response. Nothing the
 hook drops is sent to the browser. Apply this per-queue if only some queues carry
 sensitive payloads.
 
 ## Multi-Redis
 
-There's no dedicated "multi-Redis" option — it falls out of how queues are wrapped.
+There's no dedicated "multi-Redis" option. It falls out of how queues are wrapped.
 Each \`bullmq.Queue\` carries its own \`connection\`, and \`createBoard()\` (or
 \`startProxy()\`) just takes an array of \`BaseAdapter\`s:
 
@@ -106,12 +106,12 @@ createBoard({
 \`\`\`
 
 Give same-named queues on different Redis instances distinct \`prefix\`es so they
-don't collide in the UI — \`getName()\` is \`\${prefix}\${queue.name}\`.
+don't collide in the UI. \`getName()\` is \`\${prefix}\${queue.name}\`.
 
 ## Prometheus
 
 \`GET /api/prometheus\` (see [REST API](/docs/api)) returns \`text/plain\`, one
 Prometheus exposition block per mounted queue, from BullMQ's own
-\`queue.exportPrometheusMetrics()\` — no separate scrape config beyond pointing
+\`queue.exportPrometheusMetrics()\`. No separate scrape config beyond pointing
 Prometheus at that path.
 `;

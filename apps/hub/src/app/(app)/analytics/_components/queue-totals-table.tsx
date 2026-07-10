@@ -40,7 +40,7 @@ export function QueueTotalsTable(props: QueueTotalsTableProps) {
                 {total.failed.toLocaleString()}
               </td>
               <td className="px-5 py-3 text-right font-mono tabular-nums text-content-default">
-                {total.job_seconds === null ? '—' : formatComputeTime(total.job_seconds)}
+                {total.job_seconds === null ? '-' : formatComputeTime(total.job_seconds)}
               </td>
             </tr>
           ))}

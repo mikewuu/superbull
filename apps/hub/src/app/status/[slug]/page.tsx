@@ -20,7 +20,7 @@ export async function generateMetadata(props: StatusPageProps): Promise<Metadata
     return { robots: { index: false, follow: false } };
   }
   return {
-    title: `${page.title} — Status`,
+    title: `${page.title}: Status`,
     robots: { index: false, follow: false },
   };
 }

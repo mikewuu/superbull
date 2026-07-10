@@ -62,7 +62,7 @@ export function SourcesTable(props: SourcesTableProps) {
                 className="px-4 py-3 text-right font-mono tabular-nums text-content-default"
                 data-testid="source-queue-count"
               >
-                {row.queueCount ?? '—'}
+                {row.queueCount ?? '-'}
               </td>
               <td className="px-4 py-3 text-content-subtle">
                 {row.source.created_at.toLocaleDateString()}

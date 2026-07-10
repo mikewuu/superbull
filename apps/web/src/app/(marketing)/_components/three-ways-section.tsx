@@ -14,7 +14,7 @@ export function ThreeWaysSection(): React.ReactElement {
   return (
     <section className="border-y border-border-subtle bg-bg-muted px-4 py-24 sm:px-6 sm:py-28">
       <div className="mx-auto max-w-6xl">
-        <p className="font-mono text-2sm text-content-subtle">02 — three ways to run it</p>
+        <p className="font-mono text-2sm text-content-subtle">02 / three ways to run it</p>
         <h2 className="mt-3 text-4xl leading-[1.08] font-semibold tracking-tight text-content-emphasis sm:text-5xl">
           Embed it, proxy it,
           <br />
@@ -27,7 +27,7 @@ export function ThreeWaysSection(): React.ReactElement {
               <h3 className="text-lg font-semibold text-content-emphasis">Embed</h3>
               <p className="mt-2 text-2sm leading-6 text-content-default">
                 Mount an adapter in your own app. The board and the REST API share your process and
-                your queues — pick your framework.
+                your queues. Pick your framework.
               </p>
               <div className="mt-5 min-w-0 flex-1">
                 <AdapterInstallPanel />

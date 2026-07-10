@@ -16,7 +16,7 @@ npm install @superbull/proxy bullmq
 npx @superbull/proxy --token <token> [options]
 \`\`\`
 
-The bin is \`superbull-proxy\`. A token is the only required argument — everything
+The bin is \`superbull-proxy\`. A token is the only required argument. Everything
 else has a default or is auto-discovered.
 `;
 
@@ -37,7 +37,7 @@ export const flagRows = [
   ['--hub-token <token>', 'SUPERBULL_HUB_TOKEN', 'undefined', "Hub's SUPERBULL_API_TOKEN"],
   ['--advertise-url <url>', '(none)', 'http://<hostname>:<port>', 'URL advertised to the hub'],
   ['--no-ingest', '(none)', 'ingest enabled', 'Disable outbound event ingest to the hub'],
-  ['--help', '—', '—', 'Print usage and exit'],
+  ['--help', '-', '-', 'Print usage and exit'],
 ];
 
 export const behavior = `
@@ -52,7 +52,7 @@ Precedence: \`--queues-file\` > \`--queues\` > \`SUPERBULL_QUEUES\` > auto-disco
 
 Every route except \`GET /healthz\` (unauthenticated, always \`200 {"ok":true}\`)
 requires \`Authorization: Bearer <token>\`. The comparison is timing-safe
-(\`crypto.timingSafeEqual\`, with a length check first) — wrong or missing token
+(\`crypto.timingSafeEqual\`, with a length check first). Wrong or missing token
 returns \`401\`.
 
 ### Hub registration
@@ -61,7 +61,7 @@ If both \`--hub\` and \`--hub-token\` are set, the proxy \`POST\`s to
 \`<hub>/api/sources/register\` with \`{ name, url, token }\` (\`token\` is the proxy's
 own client-facing bearer token, so the hub can call back into it), retrying up to
 3 times with a linear backoff (\`1s, 2s\`). Registration failure is logged and
-non-fatal — the proxy keeps serving its API either way.
+non-fatal. The proxy keeps serving its API either way.
 
 ### Outbound ingest
 
@@ -96,7 +96,7 @@ console.log(\`listening on :\${proxy.port}\`);
 // later: await proxy.close();
 \`\`\`
 
-\`@superbull/proxy\` also exports the lower-level pieces the CLI composes —
+\`@superbull/proxy\` also exports the lower-level pieces the CLI composes:
 \`discoverQueueNames\`, \`registerWithHub\`, \`createIngestBatcher\`, \`startIngestLoop\`,
-and \`parseCliArgs\` — for building a custom entry point.
+and \`parseCliArgs\`, for building a custom entry point.
 `;

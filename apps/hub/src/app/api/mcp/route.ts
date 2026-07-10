@@ -13,7 +13,7 @@ import { registerRetryJobTool } from '../../../lib/mcp/register-retry-job-tool';
 
 const instructions = `superbull hub federates one or more remote superbull proxies, each fronting a BullMQ deployment.
 
-DISCOVER: list_sources shows every proxy source registered with the hub (never returns bearer tokens). add_source registers a new one — it stores the token as a credential and never returns it again; remove_source deletes one.
+DISCOVER: list_sources shows every proxy source registered with the hub (never returns bearer tokens). add_source registers a new one. It stores the token as a credential and never returns it again; remove_source deletes one.
 
 INSPECT: list_queues(source_id) gives every queue's name, job counts, and paused state. get_queue(source_id, queue_name) drills into one queue's current page of jobs; pass status to filter (e.g. "failed") and page to paginate.
 

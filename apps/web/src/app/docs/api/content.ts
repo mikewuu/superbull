@@ -3,8 +3,8 @@ export const intro = `
 
 This is the route table \`createBoard()\` mounts under whatever base path you gave
 the server adapter (\`/admin/queues\` in the earlier examples). A proxy exposes the
-same \`/api/*\` routes behind a bearer token — see [Proxy](/docs/proxy). A hub
-forwards \`/s/:sourceId/api/*\` to the matching proxy with its stored token — see
+same \`/api/*\` routes behind a bearer token. See [Proxy](/docs/proxy). A hub
+forwards \`/s/:sourceId/api/*\` to the matching proxy with its stored token. See
 [Hub](/docs/hub).
 
 Bodies and query params use snake_case. Mutations that don't return a resource
@@ -25,20 +25,20 @@ export const globalRows = [
   [
     'GET',
     '/api/redis/stats',
-    '—',
-    '{ version, mode, port, os, uptime, memory: {...}, clients: {...} } — from the first queue’s Redis INFO',
+    '-',
+    '{ version, mode, port, os, uptime, memory: {...}, clients: {...} }: from the first queue’s Redis INFO',
   ],
   [
     'GET',
     '/api/prometheus',
-    '—',
-    'text/plain — one Prometheus block per queue, joined with newlines',
+    '-',
+    'text/plain: one Prometheus block per queue, joined with newlines',
   ],
   [
     'GET',
     '/api/queues',
     'active_queue?, status? (csv), page=1, per_page=10 (max 100), sort=desc, search?',
-    '{ queues: AppQueue[] } — only active_queue gets its jobs populated',
+    '{ queues: AppQueue[] }: only active_queue gets its jobs populated',
   ],
 ];
 
@@ -48,32 +48,32 @@ export const queueRows = [
     'GET',
     '/api/queues/:queueName/metrics',
     'type=completed|failed, start=0, end=-1',
-    'QueueMetrics — native getMetrics(), or a derived fallback if empty',
+    'QueueMetrics: native getMetrics(), or a derived fallback if empty',
   ],
-  ['GET', '/api/queues/:queueName/job-names', '—', '{ job_names: JobNameStats[] }'],
-  ['GET', '/api/queues/:queueName/workers', '—', '{ workers: AppWorker[] }'],
-  ['GET', '/api/queues/:queueName/concurrency', '—', '{ global_concurrency, rate_limit_ttl_ms }'],
+  ['GET', '/api/queues/:queueName/job-names', '-', '{ job_names: JobNameStats[] }'],
+  ['GET', '/api/queues/:queueName/workers', '-', '{ workers: AppWorker[] }'],
+  ['GET', '/api/queues/:queueName/concurrency', '-', '{ global_concurrency, rate_limit_ttl_ms }'],
   ['PUT', '/api/queues/:queueName/concurrency', '{ global_concurrency: number }', '204'],
-  ['GET', '/api/queues/:queueName/priorities', '—', '{ priorities: { priority, count }[] }'],
-  ['GET', '/api/queues/:queueName/stats', '—', 'QueueStats'],
-  ['PUT', '/api/queues/:queueName/pause', '—', '204'],
-  ['PUT', '/api/queues/:queueName/resume', '—', '204'],
-  ['PUT', '/api/queues/:queueName/empty', '—', '204 — drains the queue'],
-  ['PUT', '/api/queues/:queueName/drain', '—', '204 — drains + removes delayed jobs'],
-  ['PUT', '/api/queues/:queueName/obliterate', '—', '204 — deletes the queue and all its data'],
+  ['GET', '/api/queues/:queueName/priorities', '-', '{ priorities: { priority, count }[] }'],
+  ['GET', '/api/queues/:queueName/stats', '-', 'QueueStats'],
+  ['PUT', '/api/queues/:queueName/pause', '-', '204'],
+  ['PUT', '/api/queues/:queueName/resume', '-', '204'],
+  ['PUT', '/api/queues/:queueName/empty', '-', '204: drains the queue'],
+  ['PUT', '/api/queues/:queueName/drain', '-', '204: drains + removes delayed jobs'],
+  ['PUT', '/api/queues/:queueName/obliterate', '-', '204: deletes the queue and all its data'],
   [
     'PUT',
     '/api/queues/:queueName/clean/:status',
     'status: completed|wait|waiting|active|delayed|failed',
-    '204 — 5s grace window, hardcoded',
+    '204: 5s grace window, hardcoded',
   ],
   [
     'PUT',
     '/api/queues/:queueName/retry/:status',
     'status: failed|completed',
-    '204 — retries every job in that status',
+    '204: retries every job in that status',
   ],
-  ['PUT', '/api/queues/:queueName/promote', '—', '204 — promotes every delayed job'],
+  ['PUT', '/api/queues/:queueName/promote', '-', '204: promotes every delayed job'],
   [
     'POST',
     '/api/queues/:queueName/add',
@@ -84,21 +84,21 @@ export const queueRows = [
     'POST',
     '/api/queues/:queueName/jobs/bulk',
     '{ action: retry|promote|remove, job_ids: string[] }',
-    '204 — all-or-nothing',
+    '204: all-or-nothing',
   ],
 ];
 
 export const jobHeaders = ['Method', 'Path', 'Query / body', 'Response'];
 export const jobRows = [
-  ['GET', '/api/queues/:queueName/:jobId', '—', '{ job: AppJob, status }'],
-  ['GET', '/api/queues/:queueName/:jobId/logs', '—', '{ logs: string[] }'],
-  ['PUT', '/api/queues/:queueName/:jobId/retry', '—', '204'],
-  ['PUT', '/api/queues/:queueName/:jobId/promote', '—', '204'],
+  ['GET', '/api/queues/:queueName/:jobId', '-', '{ job: AppJob, status }'],
+  ['GET', '/api/queues/:queueName/:jobId/logs', '-', '{ logs: string[] }'],
+  ['PUT', '/api/queues/:queueName/:jobId/retry', '-', '204'],
+  ['PUT', '/api/queues/:queueName/:jobId/promote', '-', '204'],
   [
     'PUT',
     '/api/queues/:queueName/:jobId/clean',
-    '—',
-    '204 — removes the job (name is legacy, calls job.remove())',
+    '-',
+    '204: removes the job (name is legacy, calls job.remove())',
   ],
   ['PATCH', '/api/queues/:queueName/:jobId/update-data', '{ data: object }', '204'],
 ];
@@ -124,9 +124,9 @@ export const jobIntro = `
 \`POST /api/queues/:queueName/jobs/bulk\` validates every \`job_id\` before applying
 anything: unknown ids 400 with \`{ error: 'jobs not found', job_ids }\`; ids not in a
 state the action allows 400 with \`{ error: 'jobs are not in a state that allows "<action>"', job_ids }\`.
-Valid states: \`remove\` — any; \`retry\` — \`failed\`, or \`completed\` when
-\`allowCompletedRetries\` is on; \`promote\` — \`delayed\` only. Matches every id or
-none run.
+Valid states: \`remove\` matches any status. \`retry\` matches \`failed\`, or
+\`completed\` when \`allowCompletedRetries\` is on. \`promote\` matches \`delayed\`
+only. Matches every id or none run.
 
 ## Response types
 

@@ -4,9 +4,9 @@ import { DocsTable } from '../_components/docs-table';
 import { headers, intro, redaction, rows } from './content';
 
 export const metadata: Metadata = {
-  title: 'Configuration — SuperBull docs',
+  title: 'Configuration: SuperBull docs',
   description:
-    'Queue adapter options — read-only mode, retries, redaction, multi-Redis, Prometheus.',
+    'Queue adapter options: read-only mode, retries, redaction, multi-Redis, Prometheus.',
 };
 
 export default function ConfigurationPage() {

@@ -1,7 +1,7 @@
 export const content = `
 # Dashboards
 
-Saved dashboards live in the hub — a named collection of cards, each pulling from
+Saved dashboards live in the hub: a named collection of cards, each pulling from
 one source's ingested data over a fixed range. There's no drag-to-resize grid
 builder; a dashboard is just an ordered list of cards you add and remove.
 
@@ -35,6 +35,6 @@ export const rows = [
 export const outro = `
 Create a dashboard, then add cards one at a time, each scoped to a source (and
 optionally a single queue within it) and a range. Deleting a dashboard removes all
-its cards with it — cards aren't independently addressable. See
+its cards with it. Cards aren't independently addressable. See
 [Analytics](/docs/analytics) for what each underlying series computes.
 `;

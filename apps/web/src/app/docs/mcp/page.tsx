@@ -4,8 +4,8 @@ import { DocsTable } from '../_components/docs-table';
 import { headers, intro, outro, rows } from './content';
 
 export const metadata: Metadata = {
-  title: 'MCP — SuperBull docs',
-  description: 'Drive SuperBull from an agent — the hub MCP server and its tools.',
+  title: 'MCP: SuperBull docs',
+  description: 'Drive SuperBull from an agent: the hub MCP server and its tools.',
 };
 
 export default function McpPage() {

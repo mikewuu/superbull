@@ -2,7 +2,7 @@ const stats = [
   { value: '9', label: 'framework adapters, one import away' },
   { value: '8', label: 'MCP tools your agent can call' },
   { value: '1', label: 'command to run the proxy, no code changes' },
-  { value: '0', label: 'seat limits — it is MIT licensed' },
+  { value: '0', label: 'seat limits, MIT licensed' },
 ];
 
 export function StatFlood(): React.ReactElement {

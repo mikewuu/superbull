@@ -4,7 +4,7 @@ import { DocsTable } from '../_components/docs-table';
 import { adapterHeaders, adapterRows, intro, perAdapter } from './content';
 
 export const metadata: Metadata = {
-  title: 'Standalone — SuperBull docs',
+  title: 'Standalone: SuperBull docs',
   description: 'Embed SuperBull in your Node app with a framework adapter.',
 };
 

@@ -17,7 +17,7 @@ import {
 } from './content';
 
 export const metadata: Metadata = {
-  title: 'REST API — SuperBull docs',
+  title: 'REST API: SuperBull docs',
   description: 'Every route mounted by createBoard(), request and response shapes.',
 };
 

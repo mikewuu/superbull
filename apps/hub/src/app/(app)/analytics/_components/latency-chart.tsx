@@ -189,13 +189,13 @@ function LatencyPlot(props: { width: number; height: number; points: LatencyPoin
           <div className="flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-candy-blue" />
             <span className="font-mono font-medium text-content-emphasis">
-              {hoverPoint.wait_p95 === null ? '—' : `${hoverPoint.wait_p95}ms`}
+              {hoverPoint.wait_p95 === null ? '-' : `${hoverPoint.wait_p95}ms`}
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-candy-yellow" />
             <span className="font-mono font-medium text-content-emphasis">
-              {hoverPoint.run_p95 === null ? '—' : `${hoverPoint.run_p95}ms`}
+              {hoverPoint.run_p95 === null ? '-' : `${hoverPoint.run_p95}ms`}
             </span>
           </div>
           <div className="mt-0.5 text-content-subtle">

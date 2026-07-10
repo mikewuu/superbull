@@ -34,7 +34,7 @@ const entries: Entry[] = [
     id: 'follow-up',
     kind: 'message',
     from: 'agent',
-    text: 'Retried. Two more failed the same way — want those retried too?',
+    text: 'Retried. Two more failed the same way. Want those retried too?',
   },
 ];
 

@@ -3,12 +3,12 @@ export const intro = `
 
 SuperBull is agent-operable: point an agent at the hub's MCP server and it can
 watch your queues, open a failed job and read its stack trace, retry the job, or
-pause a queue that's failing fast — the same actions you'd otherwise click through
+pause a queue that's failing fast: the same actions you'd otherwise click through
 a dashboard for.
 
 The hub exposes that MCP server at \`/api/mcp\` (server name \`superbull-hub\`),
 authenticated with the same \`SUPERBULL_API_TOKEN\` bearer token as the hub's
-management REST API. It's streamable-HTTP only — no SSE transport,
+management REST API. It's streamable-HTTP only. No SSE transport,
 \`maxDuration: 60\`.
 
 ## Connect your agent
@@ -37,13 +37,13 @@ Claude Desktop (\`claude_desktop_config.json\`):
 \`\`\`
 
 (Some Claude Desktop versions only accept remote servers through Settings →
-Connectors rather than a hand-edited config file — use whichever your version
+Connectors rather than a hand-edited config file. Use whichever your version
 exposes.)
 
 ## Diagnose and retry a failed job
 
 Tool instructions group the surface as **discover** (list what's registered),
-**inspect** (read queue/job state), and **act** (mutate a queue or job) — an agent
+**inspect** (read queue/job state), and **act** (mutate a queue or job). An agent
 is expected to list sources and queues before acting on one. A typical run:
 
 \`\`\`
@@ -76,7 +76,7 @@ is expected to list sources and queues before acting on one. A typical run:
 \`\`\`
 
 (\`get_queue\`'s real response also carries \`statuses\`, \`pagination\`, and
-permission flags — trimmed above for readability.)
+permission flags, trimmed above for readability.)
 
 ## Tools
 `;
@@ -86,7 +86,7 @@ export const rows = [
   [
     'list_sources',
     '{}',
-    'List every registered proxy source (id, name, url, created_at) — tokens are never returned',
+    'List every registered proxy source (id, name, url, created_at): tokens are never returned',
   ],
   [
     'add_source',
@@ -124,7 +124,7 @@ export const rows = [
 export const outro = `
 All tools that take a \`source_id\` forward the request to that source's registered
 proxy (or standalone board) URL, authenticated with the bearer token stored for it
-at \`add_source\` time — the same path \`/s/:sourceId/api/*\` on the hub's own web UI
+at \`add_source\` time. The same path \`/s/:sourceId/api/*\` on the hub's own web UI
 uses. \`status\` on \`get_queue\` accepts a comma-separated list of job statuses, same
-as the REST \`GET /api/queues\` \`status\` param — see [REST API](/docs/api).
+as the REST \`GET /api/queues\` \`status\` param. See [REST API](/docs/api).
 `;

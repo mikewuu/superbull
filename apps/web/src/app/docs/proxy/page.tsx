@@ -4,7 +4,7 @@ import { DocsTable } from '../_components/docs-table';
 import { behavior, flagHeaders, flagRows, intro } from './content';
 
 export const metadata: Metadata = {
-  title: 'Proxy — SuperBull docs',
+  title: 'Proxy: SuperBull docs',
   description: 'Run superbull-proxy as a headless agent next to your workers.',
 };
 

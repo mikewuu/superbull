@@ -34,7 +34,7 @@ export function HeatmapGrid(props: HeatmapGridProps) {
                   <div
                     // biome-ignore lint/suspicious/noArrayIndexKey: hour cells are a fixed 0-23 index
                     key={hour}
-                    title={`${weekdayLabels[weekdayIndex]} ${hour}:00 — ${count} job${count === 1 ? '' : 's'}`}
+                    title={`${weekdayLabels[weekdayIndex]} ${hour}:00: ${count} job${count === 1 ? '' : 's'}`}
                     className="h-3.5 flex-1 rounded-[2px] border border-border-muted"
                     style={{
                       backgroundColor:

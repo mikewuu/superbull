@@ -6,7 +6,7 @@ import { getHeadings } from '../_lib/get-headings';
 import { headers, ingestSection, intro, rows } from './content';
 
 export const metadata: Metadata = {
-  title: 'Hub — SuperBull docs',
+  title: 'Hub: SuperBull docs',
   description:
     'Federate multiple proxies with analytics, alerts, error tracking, and status pages.',
 };

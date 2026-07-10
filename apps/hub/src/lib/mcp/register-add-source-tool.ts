@@ -10,7 +10,7 @@ export function registerAddSourceTool(server: McpServer): void {
     {
       title: 'Add source',
       description:
-        'Register a remote superbull proxy with the hub. Stores the bearer token as a credential — the token is never returned by this or any other tool.',
+        'Register a remote superbull proxy with the hub. Stores the bearer token as a credential. The token is never returned by this or any other tool.',
       inputSchema: {
         name: z.string().min(1),
         url: z.string().url(),

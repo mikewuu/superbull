@@ -29,7 +29,7 @@ function createBoard(args: {
 }
 \`\`\`
 
-Call \`setBasePath()\` on the server adapter **before** \`createBoard()\` — most
+Call \`setBasePath()\` on the server adapter **before** \`createBoard()\`. Most
 adapters read it while wiring routes. \`createBoard()\` wires the adapter's views
 path, static path, UI config, entry route, error handler, and API routes; it
 returns a small handle for changing the mounted queue set at runtime (useful if
@@ -142,7 +142,7 @@ app.route('/admin/queues', serverAdapter.registerPlugin());
 serve({ fetch: app.fetch, port: 3000 });
 \`\`\`
 
-Hono is strict about trailing slashes — mount both \`/admin/queues\` and
+Hono is strict about trailing slashes. Mount both \`/admin/queues\` and
 \`/admin/queues/\` if you link to the board without a trailing slash elsewhere.
 
 ### Koa
@@ -166,8 +166,8 @@ app.use(serverAdapter.registerPlugin({ mount: '/admin/queues' }));
 createServer(app.callback()).listen(3000);
 \`\`\`
 
-\`registerPlugin({ mount })\` overrides the base path used for route prefixing —
-omit it to fall back to whatever \`setBasePath()\` set.
+\`registerPlugin({ mount })\` overrides the base path used for route prefixing.
+Omit it to fall back to whatever \`setBasePath()\` set.
 
 ### h3
 
@@ -268,7 +268,7 @@ npm install @superbull/api @superbull/nestjs @superbull/express @superbull/react
 \`\`\`
 
 \`BoardModule.forRoot()\` wires an adapter class (anything implementing
-\`IServerAdapter\` + \`setBasePath\` — Express or Fastify's adapters qualify; Bun's
+\`IServerAdapter\` + \`setBasePath\`. Express or Fastify's adapters qualify; Bun's
 and Elysia's don't, since they lack \`setBasePath\`):
 
 \`\`\`ts
@@ -298,5 +298,5 @@ class SomeService {
 \`\`\`
 
 \`BoardModule.forFeature(...queues)\` registers additional queues from a feature
-module — each entry is \`{ name | queue, adapter, options? }\`.
+module. Each entry is \`{ name | queue, adapter, options? }\`.
 `;

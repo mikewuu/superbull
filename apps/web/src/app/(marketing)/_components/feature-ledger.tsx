@@ -9,7 +9,7 @@ const items = [
   {
     n: '02',
     title: 'Every attempt keeps its history',
-    body: 'Logs, data, options, and the return value — for each attempt, not just the last one.',
+    body: 'Logs, data, options, and the return value stick around for each attempt, not just the last one.',
   },
   {
     n: '03',

@@ -3,7 +3,7 @@ import { DocsMarkdown } from '../_components/docs-markdown';
 import { content } from './content';
 
 export const metadata: Metadata = {
-  title: 'Getting started — SuperBull docs',
+  title: 'Getting started: SuperBull docs',
   description: 'Pick a mode, install the right packages, and open the dashboard.',
 };
 

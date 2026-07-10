@@ -3,7 +3,7 @@ export const content = `
 
 A status page is a public, unauthenticated page at \`/status/:slug\` on the hub,
 showing 90-day uptime for one source's queues, derived entirely from ingested
-events — there's no separate "incident" model to maintain by hand.
+events. There's no separate "incident" model to maintain by hand.
 
 ## Configure
 

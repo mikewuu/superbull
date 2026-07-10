@@ -2,7 +2,7 @@ const lines = [
   {
     time: '03:14:02',
     queue: 'send-emails',
-    text: '12 failed in the last hour — retry rate 38%.',
+    text: '12 failed in the last hour. Retry rate 38%.',
   },
   {
     time: '03:14:02',

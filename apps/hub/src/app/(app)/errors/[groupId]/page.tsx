@@ -46,8 +46,8 @@ export default async function ErrorGroupDetailPage(props: ErrorGroupDetailPagePr
         </div>
         <div className="candy-card grid grid-cols-2 gap-x-6 gap-y-3 rounded-lg p-5 text-2sm md:grid-cols-4">
           <MetadataRow label="Queue" value={group.queueName} />
-          <MetadataRow label="Job name" value={group.jobName ?? '—'} />
-          <MetadataRow label="Last job id" value={group.lastJobId ?? '—'} />
+          <MetadataRow label="Job name" value={group.jobName ?? '-'} />
+          <MetadataRow label="Last job id" value={group.lastJobId ?? '-'} />
           <MetadataRow label="Count" value={String(group.count)} />
           <MetadataRow label="First seen" value={new Date(group.firstSeenTs).toLocaleString()} />
           <MetadataRow label="Last seen" value={new Date(group.lastSeenTs).toLocaleString()} />
@@ -94,7 +94,7 @@ async function getDeployContext(sourceId: string, lastSeenTs: number): Promise<s
   const annotations = await listDeployAnnotations({ sourceId, toTs: lastSeenTs });
   const lastDeploy = annotations[0];
   if (!lastDeploy) {
-    return '—';
+    return '-';
   }
   const minutesEarlier = Math.round((lastSeenTs - lastDeploy.ts) / 60_000);
   return `last deploy before last occurrence: ${lastDeploy.label}, ${minutesEarlier}m earlier`;

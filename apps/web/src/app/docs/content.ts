@@ -3,18 +3,18 @@ export const introContent = `
 
 SuperBull is a dashboard for [BullMQ](https://docs.bullmq.io). It embeds into your
 existing Node app through a thin server adapter and renders a React SPA that polls
-a REST API driven by your own \`bullmq\` \`Queue\` instances — job mutations (retry,
+a REST API driven by your own \`bullmq\` \`Queue\` instances. Job mutations (retry,
 promote, remove, clean) always run against the exact BullMQ version your workers use.
 
 There are three ways to run it:
 
-- **Standalone** — mount an adapter (Express, Fastify, Hono, Koa, h3, Hapi, Elysia,
+- **Standalone**: mount an adapter (Express, Fastify, Hono, Koa, h3, Hapi, Elysia,
   Bun, or NestJS) directly in your app. Serves the UI and the REST API from that
   process. See [Standalone](/docs/standalone).
-- **Proxy** — run \`@superbull/proxy\` as a headless agent next to your workers. It
+- **Proxy**: run \`@superbull/proxy\` as a headless agent next to your workers. It
   exposes the same REST API over a bearer token, with no UI, meant to sit behind a
   hub or your own tooling. See [Proxy](/docs/proxy).
-- **Hub** — a separate Next.js app that federates multiple proxies into one place,
+- **Hub**: a separate Next.js app that federates multiple proxies into one place,
   with ingest-driven analytics, error tracking, email alerts, dashboards, and public
   status pages, all stored in Convex. See [Hub](/docs/hub).
 
@@ -28,7 +28,7 @@ export const quickstartContent = `
 
 SuperBull isn't only for humans watching a dashboard. Point an agent at the
 hub's MCP server and it can watch your queues, open a failed job and read its
-stack trace, retry the job, or pause a queue that's failing fast — no clicking
+stack trace, retry the job, or pause a queue that's failing fast. No clicking
 through a UI. See [MCP](/docs/mcp) to connect one.
 
 ## Quickstart
@@ -62,14 +62,14 @@ createServer(app).listen(3000);
 \`\`\`
 
 Open \`http://localhost:3000/admin/queues\`. Every other framework adapter follows
-the same shape — see [Standalone](/docs/standalone) for all nine.
+the same shape. See [Standalone](/docs/standalone) for all nine.
 
 ## Where to go next
 
-- New to SuperBull — start with [Getting started](/docs/getting-started).
-- Embedding in your app — [Standalone](/docs/standalone).
-- Running next to workers with no UI — [Proxy](/docs/proxy).
-- Centralizing multiple sources — [Hub](/docs/hub).
-- Every endpoint — [REST API](/docs/api).
-- Driving SuperBull from an agent — [MCP](/docs/mcp).
+- New to SuperBull: start with [Getting started](/docs/getting-started).
+- Embedding in your app: [Standalone](/docs/standalone).
+- Running next to workers with no UI: [Proxy](/docs/proxy).
+- Centralizing multiple sources: [Hub](/docs/hub).
+- Every endpoint: [REST API](/docs/api).
+- Driving SuperBull from an agent: [MCP](/docs/mcp).
 `;

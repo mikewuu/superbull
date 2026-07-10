@@ -42,7 +42,7 @@ export function DashboardCardTile(props: DashboardCardTileProps) {
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-content-subtle">
-          {cardLabel(card.type)} — {sourceName}
+          {cardLabel(card.type)}: {sourceName}
           {card.queue_name ? ` / ${card.queue_name}` : ''} · {card.range}
         </span>
         <button

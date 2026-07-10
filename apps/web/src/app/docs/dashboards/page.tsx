@@ -4,7 +4,7 @@ import { DocsTable } from '../_components/docs-table';
 import { content, headers, outro, rows } from './content';
 
 export const metadata: Metadata = {
-  title: 'Dashboards — SuperBull docs',
+  title: 'Dashboards: SuperBull docs',
   description: 'Saved dashboards of throughput, latency, totals, and heatmap cards.',
 };
 

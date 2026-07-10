@@ -4,7 +4,7 @@ import { DocsTable } from '../_components/docs-table';
 import { content, headers, outro, rows } from './content';
 
 export const metadata: Metadata = {
-  title: 'Status pages — SuperBull docs',
+  title: 'Status pages: SuperBull docs',
   description: 'Public uptime pages derived from ingested queue health.',
 };
 
