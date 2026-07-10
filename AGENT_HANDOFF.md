@@ -311,10 +311,10 @@ Three modes, one polling architecture (hub→proxy inbound = the same REST polli
 - **proxy** (`@bullwatch/proxy`, DONE) — headless agent next to the workers: real bullmq, JSON API
   only, bearer-token auth (timing-safe), open /healthz, no UI. `startProxy({ queues, token, port })`.
 - **hub** (`apps/hub`, Next.js 16, port 4600, Vercel-deployable) — federates proxies. Stores
-  sources (name/url/token) via a `HubDatabase` interface with adapters: `memory` (zero-config
-  default), `postgres` (kysely + @nextastic/db + node-pg-migrate, table `proxy_sources`),
-  `convex` (ConvexHttpClient + bundled convex/ functions, internalToken guard). Env-selected via
-  HUB_DATABASE. Per-source dashboards: hub serves the @bullwatch/react SPA at /s/[sourceId]/ and
+  sources (and all future hub data: ingest, error groups, alerts, users) in **Convex ONLY**
+  (decision 2026-07-10: the postgres/memory adapters were removed before ever being committed).
+  Bundled convex/ functions with an internalToken guard, called server-side via ConvexHttpClient
+  (sendocado pattern); convex functions tested with convex-test (edge-runtime vitest env). Per-source dashboards: hub serves the @bullwatch/react SPA at /s/[sourceId]/ and
   forwards /s/[sourceId]/api/* to the proxy with the stored bearer token. Hub management REST
   (@nextastic/http buildRoute, HUB_API_TOKEN bearer) + MCP endpoint (mcp-handler at /api/mcp,
   one register-*-tool.ts per tool, snake_case tool names, withMcpAuth).
