@@ -22,7 +22,7 @@ export function BulkActionsBar(props: BulkActionsBarProps) {
   return (
     <div
       data-testid="bulk-bar"
-      className="flex animate-fade-in items-center justify-between gap-4 rounded-xl border border-border-default bg-bg-default px-4 py-2.5 shadow-sm"
+      className="flex animate-fade-in items-center justify-between gap-4 rounded-lg border border-border-default bg-bg-default px-4 py-2.5 shadow-sm"
     >
       <div className="flex items-center gap-2">
         <button

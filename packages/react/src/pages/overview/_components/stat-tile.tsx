@@ -13,7 +13,7 @@ export function StatTile(props: StatTileProps) {
   return (
     <div
       data-testid={`stat-${label.toLowerCase().replaceAll(' ', '-')}`}
-      className="candy-card flex flex-col gap-0.5 rounded-2xl px-4 py-3"
+      className="candy-card flex flex-col gap-0.5 rounded-lg px-4 py-3"
     >
       <span className="text-[12.5px] text-content-subtle">{label}</span>
       <span

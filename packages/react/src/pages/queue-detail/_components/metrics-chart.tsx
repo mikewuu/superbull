@@ -20,7 +20,7 @@ export function MetricsChart(props: MetricsChartProps) {
   return (
     <div
       data-testid={`metrics-${type}`}
-      className="candy-card flex flex-col gap-1 rounded-2xl px-4 py-3"
+      className="candy-card flex flex-col gap-1 rounded-lg px-4 py-3"
     >
       <div className="flex items-baseline justify-between">
         <span className="text-[12.5px] text-content-subtle">

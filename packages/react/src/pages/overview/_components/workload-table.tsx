@@ -13,7 +13,7 @@ export function WorkloadTable(props: WorkloadTableProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="candy-card overflow-hidden rounded-2xl">
+    <div className="candy-card overflow-hidden rounded-lg">
       <div className="border-b border-border-subtle px-5 py-3.5 text-sm font-semibold tracking-tight text-content-emphasis">
         Current workload
       </div>

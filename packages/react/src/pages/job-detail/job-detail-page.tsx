@@ -118,7 +118,7 @@ export function JobDetailPage() {
           failed={status === 'failed'}
         />
 
-        <div className="candy-card grid grid-cols-2 gap-x-4 gap-y-4 rounded-2xl p-5 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="candy-card grid grid-cols-2 gap-x-4 gap-y-4 rounded-lg p-5 sm:grid-cols-3 lg:grid-cols-6">
           <MetaItem label="ID" value={<span className="font-mono">#{jobId}</span>} />
           <MetaItem label="Attempts" value={<span className="font-mono">{job.attempts}</span>} />
           <MetaItem
@@ -137,7 +137,7 @@ export function JobDetailPage() {
         </div>
 
         {progressPercent !== null && progressPercent > 0 && status === 'active' && (
-          <div className="candy-card flex flex-col gap-2 rounded-2xl p-5">
+          <div className="candy-card flex flex-col gap-2 rounded-lg p-5">
             <div className="flex items-baseline justify-between">
               <span className="text-2sm font-medium text-content-emphasis">Progress</span>
               <span className="font-mono text-2sm text-content-emphasis">{progressPercent}%</span>
@@ -154,7 +154,7 @@ export function JobDetailPage() {
         {job.failed_reason && (
           <section className="flex flex-col gap-2">
             <h2 className="text-2sm font-medium text-content-error">Failed reason</h2>
-            <pre className="overflow-x-auto rounded-xl border border-red-200 bg-bg-error/50 p-4 font-mono text-xs leading-5 text-content-error">
+            <pre className="overflow-x-auto rounded-lg border border-red-200 bg-bg-error/50 p-4 font-mono text-xs leading-5 text-content-error">
               {job.failed_reason}
               {job.stacktrace.length > 0 && `\n\n${job.stacktrace.join('\n')}`}
             </pre>
@@ -206,7 +206,7 @@ function JobTimeline(props: JobTimelineProps) {
   const runMs = startedAt && finishedAt ? finishedAt - startedAt : null;
 
   return (
-    <div className="candy-card flex flex-col rounded-2xl p-5">
+    <div className="candy-card flex flex-col rounded-lg p-5">
       <TimelineRow color="bg-candy-blue" label="Created" time={createdAt} />
       <TimelineGap durationMs={waitMs} label="wait" />
       <TimelineRow color="bg-candy-yellow" label="Started" time={startedAt} />

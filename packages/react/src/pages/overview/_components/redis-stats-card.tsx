@@ -9,7 +9,7 @@ export function RedisStatsCard() {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-x-8 gap-y-3 rounded-xl border border-neutral-200 bg-bg-default px-5 py-4">
+    <div className="flex flex-wrap items-center gap-x-8 gap-y-3 rounded-lg border border-neutral-200 bg-bg-default px-5 py-4">
       <div className="flex items-center gap-2 text-sm font-medium text-content-emphasis">
         <Database className="size-4 text-content-subtle" />
         Redis {stats.version}

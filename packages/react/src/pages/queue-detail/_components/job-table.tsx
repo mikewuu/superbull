@@ -20,7 +20,7 @@ export function JobTable(props: JobTableProps) {
 
   if (queue.jobs.length === 0) {
     return (
-      <div data-testid="job-table" className="candy-card rounded-2xl">
+      <div data-testid="job-table" className="candy-card rounded-lg">
         <EmptyState
           icon={Inbox}
           title={selectedStatus === 'latest' ? 'No jobs yet' : `No ${selectedStatus} jobs`}
@@ -35,7 +35,7 @@ export function JobTable(props: JobTableProps) {
   }
 
   return (
-    <div data-testid="job-table" className="candy-card overflow-x-auto rounded-2xl">
+    <div data-testid="job-table" className="candy-card overflow-x-auto rounded-lg">
       <table className="w-full border-collapse">
         <thead>
           <tr className="border-b border-border-subtle bg-bg-muted/60 text-left text-xs text-content-subtle">

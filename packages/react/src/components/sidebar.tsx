@@ -20,7 +20,7 @@ export function Sidebar() {
         </span>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto rounded-2xl bg-bg-muted p-2">
+      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto rounded-lg bg-bg-muted p-2">
         <NavLink
           to="/"
           end
@@ -43,7 +43,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="candy-card flex items-center gap-2 rounded-xl px-3 py-2.5">
+      <div className="candy-card flex items-center gap-2 rounded-lg px-3 py-2.5">
         <span className="relative flex size-2">
           <span
             className={cn('absolute inline-flex size-full animate-ping rounded-full opacity-60', {

@@ -18,7 +18,7 @@ export function OverviewPage() {
       <PageHeader title="Overview" />
       <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-4 px-3 py-5 lg:px-6">
         {error && (
-          <p className="rounded-xl border border-red-200 bg-bg-error/50 px-4 py-3 text-sm text-content-error">
+          <p className="rounded-lg border border-red-200 bg-bg-error/50 px-4 py-3 text-sm text-content-error">
             Failed to load queues: {error.message}
           </p>
         )}
@@ -51,7 +51,7 @@ export function OverviewPage() {
             {queues.length > 0 ? (
               <WorkloadTable queues={queues} />
             ) : (
-              <div className="candy-card rounded-2xl">
+              <div className="candy-card rounded-lg">
                 <EmptyState
                   icon={Inbox}
                   title="No queues registered"
