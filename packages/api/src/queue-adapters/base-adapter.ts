@@ -1,4 +1,5 @@
 import type {
+  AppWorker,
   JobCleanStatus,
   JobStatus,
   MetricsType,
@@ -7,6 +8,7 @@ import type {
   QueueJobOptions,
   QueueMetrics,
   QueueStatus,
+  RedactFormatter,
 } from '../types';
 
 export abstract class BaseAdapter {
@@ -16,6 +18,7 @@ export abstract class BaseAdapter {
   public readonly prefix: string;
   public readonly description: string;
   public readonly displayName: string;
+  public readonly format: RedactFormatter | undefined;
 
   protected constructor(options: Partial<QueueAdapterOptions> = {}) {
     this.readOnlyMode = options.readOnlyMode === true;
@@ -24,6 +27,7 @@ export abstract class BaseAdapter {
     this.prefix = options.prefix || '';
     this.description = options.description || '';
     this.displayName = options.displayName || '';
+    this.format = options.format;
   }
 
   public abstract getName(): string;
@@ -74,4 +78,20 @@ export abstract class BaseAdapter {
   public abstract getStatuses(): QueueStatus[];
 
   public abstract getJobStatuses(): JobStatus[];
+
+  public abstract getPrometheusMetrics(globalVariables?: Record<string, string>): Promise<string>;
+
+  public abstract getWorkers(): Promise<AppWorker[]>;
+
+  public abstract getGlobalConcurrency(): Promise<number | null>;
+
+  public abstract getRateLimitTtl(): Promise<number | null>;
+
+  public abstract setGlobalConcurrency(concurrency: number): Promise<void>;
+
+  public abstract getCountsPerPriority(priorities: number[]): Promise<Record<string, number>>;
+
+  public abstract drain(): Promise<void>;
+
+  public abstract obliterate(): Promise<void>;
 }

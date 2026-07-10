@@ -33,5 +33,5 @@ export async function addJob(req: BoardRequest): Promise<HandlerResponse> {
   const job = await queue.addJob(name, data, options ?? {});
   const status = await job.getState();
 
-  return { status: 201, body: { job: formatJob(job), status } };
+  return { status: 201, body: { job: formatJob(job, queue.format), status } };
 }

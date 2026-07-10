@@ -201,6 +201,11 @@ function sendResponse(res: ServerResponse, response: HandlerResponse): void {
     res.end();
     return;
   }
+  if (response.contentType) {
+    res.writeHead(response.status || 200, { 'content-type': response.contentType });
+    res.end(response.body as string);
+    return;
+  }
   res.writeHead(response.status || 200, { 'content-type': 'application/json' });
   res.end(JSON.stringify(response.body));
 }

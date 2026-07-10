@@ -1,5 +1,6 @@
 import { Queue } from 'bullmq';
 import {
+  type AppWorker,
   type JobCleanStatus,
   type JobStatus,
   type MetricsType,
@@ -118,5 +119,47 @@ export class BullMQAdapter extends BaseAdapter {
 
   public getJobStatuses(): JobStatus[] {
     return [...jobStatuses];
+  }
+
+  public getPrometheusMetrics(globalVariables?: Record<string, string>): Promise<string> {
+    return this.queue.exportPrometheusMetrics(globalVariables);
+  }
+
+  public async getWorkers(): Promise<AppWorker[]> {
+    const workers = await this.queue.getWorkers();
+    return workers.map((worker) => {
+      const ageSec = Number(worker.age);
+      return {
+        id: worker.id,
+        name: worker.rawname,
+        addr: worker.addr,
+        started_ms: Number.isFinite(ageSec) ? Date.now() - ageSec * 1000 : undefined,
+      };
+    });
+  }
+
+  public getGlobalConcurrency(): Promise<number | null> {
+    return this.queue.getGlobalConcurrency();
+  }
+
+  public async getRateLimitTtl(): Promise<number | null> {
+    const ttl = await this.queue.getRateLimitTtl();
+    return ttl < 0 ? null : ttl;
+  }
+
+  public async setGlobalConcurrency(concurrency: number): Promise<void> {
+    await this.queue.setGlobalConcurrency(concurrency);
+  }
+
+  public getCountsPerPriority(priorities: number[]): Promise<Record<string, number>> {
+    return this.queue.getCountsPerPriority(priorities);
+  }
+
+  public drain(): Promise<void> {
+    return this.queue.drain(true);
+  }
+
+  public async obliterate(): Promise<void> {
+    await this.queue.obliterate({ force: true });
   }
 }

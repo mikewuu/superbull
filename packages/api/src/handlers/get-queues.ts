@@ -69,7 +69,7 @@ async function toAppQueue(
     display_name: queue.displayName || undefined,
     description: queue.description || undefined,
     counts,
-    jobs: jobs.map(formatJob),
+    jobs: jobs.map((job) => formatJob(job, queue.format)),
     statuses: queue.getStatuses(),
     pagination,
     read_only_mode: queue.readOnlyMode,

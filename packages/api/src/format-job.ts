@@ -1,6 +1,6 @@
-import type { AppJob, QueueJob } from './types';
+import type { AppJob, QueueJob, RedactFormatter } from './types';
 
-export function formatJob(job: QueueJob): AppJob {
+export function formatJob(job: QueueJob, format?: RedactFormatter): AppJob {
   const jobJson = job.toJSON();
   const stacktrace = (jobJson.stacktrace ?? []).filter(Boolean).reverse();
 
@@ -16,8 +16,8 @@ export function formatJob(job: QueueJob): AppJob {
     stacktrace,
     delay: jobJson.delay,
     opts: jobJson.opts,
-    data: jobJson.data,
-    return_value: jobJson.returnvalue,
+    data: format ? format('data', jobJson.data) : jobJson.data,
+    return_value: format ? format('return_value', jobJson.returnvalue) : jobJson.returnvalue,
     is_failed: !!jobJson.failedReason || stacktrace.length > 0,
   };
 }

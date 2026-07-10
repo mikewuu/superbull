@@ -17,6 +17,8 @@ export type JobCleanStatus = 'completed' | 'wait' | 'active' | 'delayed' | 'fail
 export type JobRetryStatus = 'completed' | 'failed';
 export type MetricsType = 'completed' | 'failed';
 
+export type RedactFormatter = (field: 'data' | 'return_value', value: unknown) => unknown;
+
 export interface QueueAdapterOptions {
   readOnlyMode: boolean;
   allowRetries: boolean;
@@ -24,6 +26,7 @@ export interface QueueAdapterOptions {
   prefix: string;
   description: string;
   displayName: string;
+  format: RedactFormatter;
 }
 
 export type BoardQueues = Map<string, BaseAdapter>;
@@ -55,6 +58,8 @@ export interface QueueJobJson {
   processedOn?: number | null;
   delay?: number;
   timestamp: number;
+  priority: number;
+  stalledCounter: number;
   failedReason: string;
   stacktrace: string[] | null;
   data: unknown;
@@ -119,6 +124,34 @@ export interface AppQueue {
   oldest_waiting_ms: number | null;
 }
 
+export interface AppWorker {
+  id?: string;
+  name?: string;
+  addr?: string;
+  started_ms?: number;
+}
+
+export interface QueueConcurrency {
+  global_concurrency: number | null;
+  rate_limit_ttl_ms: number | null;
+}
+
+export interface QueuePriorityCount {
+  priority: number;
+  count: number;
+}
+
+export interface QueueStats {
+  wait_ms: { p50: number | null; p95: number | null };
+  run_ms: { p50: number | null; p95: number | null };
+  retry_rate: number;
+  stalled_count: number;
+  failed_count_window: number;
+  completed_count_window: number;
+  top_errors: { message: string; count: number }[];
+  est_drain_ms: number | null;
+}
+
 export type UIConfig = Partial<{
   board_title: string;
   polling_interval_ms: number;
@@ -139,6 +172,7 @@ export interface BoardRequest {
 export type HandlerResponse = {
   status?: HTTPStatus;
   body: string | object;
+  contentType?: string;
 };
 
 export type ViewResponse = {

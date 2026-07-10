@@ -15,5 +15,5 @@ export async function getJob(req: BoardRequest): Promise<HandlerResponse> {
 
   const status = await job.getState();
 
-  return { body: { job: formatJob(job), status } };
+  return { body: { job: formatJob(job, queue.format), status } };
 }

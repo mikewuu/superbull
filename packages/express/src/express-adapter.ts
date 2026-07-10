@@ -122,6 +122,14 @@ export class ExpressAdapter implements IServerAdapter {
       return;
     }
 
+    if (response.contentType) {
+      res
+        .status(response.status || 200)
+        .type(response.contentType)
+        .send(response.body);
+      return;
+    }
+
     res.status(response.status || 200).json(response.body);
   }
 }
