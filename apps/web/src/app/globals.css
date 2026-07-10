@@ -47,6 +47,10 @@
   .bull-bob {
     animation: bull-bob 4.5s ease-in-out infinite;
   }
+
+  .cursor-blink {
+    animation: cursor-blink 1.1s step-end infinite;
+  }
 }
 
 @keyframes bull-bob {
@@ -56,6 +60,17 @@
   }
   50% {
     transform: translateY(-8px);
+  }
+}
+
+@keyframes cursor-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
   }
 }
 
@@ -69,6 +84,9 @@
     filter: none;
   }
   .bull-bob {
+    animation: none;
+  }
+  .cursor-blink {
     animation: none;
   }
 }
