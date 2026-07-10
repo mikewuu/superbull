@@ -11,3 +11,6 @@ coverage
 test-results/
 .next/
 *.tsbuildinfo
+
+# generated landing-asset intermediates (fal outputs; finals live in mascot/ video/ logos/)
+apps/web/public/landing/raw/
