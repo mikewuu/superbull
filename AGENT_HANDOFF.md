@@ -330,3 +330,25 @@ Three modes, one polling architecture (hub→proxy inbound = the same REST polli
    poll-driven in-browser failure alerts, bulk add (JSON array).
 16 redaction hooks (formatter at adapter edge, prove redacted fields never hit the wire) +
    multi-Redis test/docs.
+
+
+## Hub data-platform conventions (scanned 2026-07-10, adapted to convex-only)
+
+- **Ingest (proxy→hub)**: copy datahog's transport (src/sdk/transport.ts): in-memory queue,
+  flush every 5s OR at 20 events, single 3s-delayed retry on 5xx/network; proxy-side it's Node
+  (fetch keepalive, no sendBeacon). Endpoint /api/ingest IS token-authed (per-source token) so
+  zod-validate the batch; dedupe by event uuid (convex index) BEFORE any accounting; write via
+  convex mutation with 3-attempt exponential backoff (500/1000/2000ms) from Next after().
+- **Email**: resend singleton getResend() on RESEND_API_KEY with a dev no-op fallback
+  (superboard pattern); EMAIL_FROM env ('bullwatch <hub@...>'); templates
+  src/lib/emails/templates/*.tsx via @react-email/components (inline styles, no tailwind);
+  one send fn per email src/lib/email/send-<name>-email.ts rendered with @react-email/render.
+  Digests/crons: vercel.json crons → /api/cron/* guarded by Bearer CRON_SECRET, per-period
+  dedup key in convex.
+- **Auth (task #22)**: @convex-dev/auth (sendocado/too-easy pattern) — NOT better-auth/next-auth
+  (those are the SQL-app patterns; hub is convex-only). API keys for REST/MCP: hash-then-verify
+  bearer pattern (uprank withApiAuth shape) stored in convex.
+- **Tests**: homie style adapted — colocated behavior tests hitting real infrastructure where
+  cheap (convex-test executes real functions; proxy tests hit real Redis), external clients
+  behind createXClient() factories mocked via tests/__utils__/mock-create-*.ts, vitest not jest,
+  playwright e2e with GH Actions service containers.
