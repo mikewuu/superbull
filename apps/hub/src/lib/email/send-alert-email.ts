@@ -19,7 +19,7 @@ export interface SendEmailResult {
 
 export async function sendAlertEmail(args: SendAlertEmailArgs): Promise<SendEmailResult> {
   const { to, kind, type, summary, queueName } = args;
-  const subject = `[bullwatch] ${kind === 'firing' ? 'alert firing' : 'alert resolved'}: ${summary}`;
+  const subject = `[superbull] ${kind === 'firing' ? 'alert firing' : 'alert resolved'}: ${summary}`;
   const html = await render(createElement(AlertEmail, { kind, type, summary, queueName }));
 
   const resend = getResend();
@@ -29,7 +29,7 @@ export async function sendAlertEmail(args: SendAlertEmailArgs): Promise<SendEmai
   }
 
   const { error } = await resend.emails.send({
-    from: env.EMAIL_FROM ?? 'bullwatch <alerts@resend.dev>',
+    from: env.EMAIL_FROM ?? 'superbull <alerts@resend.dev>',
     to,
     subject,
     html,

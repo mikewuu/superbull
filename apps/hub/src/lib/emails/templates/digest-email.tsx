@@ -27,7 +27,7 @@ export function DigestEmail(props: DigestEmailProps) {
   return (
     <Html>
       <Head />
-      <Preview>Daily bullwatch digest</Preview>
+      <Preview>Daily superbull digest</Preview>
       <Body style={bodyStyle}>
         <Container style={containerStyle}>
           <Heading style={headingStyle}>Daily digest</Heading>
@@ -51,7 +51,7 @@ export function DigestEmail(props: DigestEmailProps) {
               <Hr style={hrStyle} />
             </Section>
           ))}
-          <Text style={footerStyle}>bullwatch alerts</Text>
+          <Text style={footerStyle}>superbull alerts</Text>
         </Container>
       </Body>
     </Html>

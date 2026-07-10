@@ -1,5 +1,5 @@
-import { BullMQAdapter, createBoard } from '@bullwatch/api';
-import { ExpressAdapter } from '@bullwatch/express';
+import { BullMQAdapter, createBoard } from '@superbull/api';
+import { ExpressAdapter } from '@superbull/express';
 import { Queue } from 'bullmq';
 import express from 'express';
 import IORedis from 'ioredis';
@@ -43,7 +43,7 @@ async function main() {
 
   app.listen(httpPort, () => {
     const label = queueNames.length > 0 ? queueNames.join(', ') : 'none discovered';
-    console.log(`bullwatch dev → http://localhost:${httpPort}`);
+    console.log(`superbull dev → http://localhost:${httpPort}`);
     console.log(`redis ${host}:${port} · queues: ${label}`);
   });
 }

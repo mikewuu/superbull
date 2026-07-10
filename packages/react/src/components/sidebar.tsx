@@ -1,4 +1,4 @@
-import { cn } from '@bullwatch/ui';
+import { cn } from '@superbull/ui';
 import { Activity, LayoutGrid } from 'lucide-react';
 import { NavLink } from 'react-router';
 import { useQueues } from '../hooks/use-queues';
@@ -16,7 +16,7 @@ export function Sidebar() {
           <Activity className="size-4 text-content-inverted" />
         </span>
         <span className="text-2sm font-semibold tracking-tight text-content-emphasis">
-          bullwatch
+          superbull
         </span>
       </div>
 

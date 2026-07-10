@@ -1,4 +1,4 @@
-import { PageHeader } from '@bullwatch/ui';
+import { PageHeader } from '@superbull/ui';
 import { listSources } from '../../lib/sources/list-sources';
 import type { ProxySource } from '../../lib/sources/types';
 import { AddSourceForm } from './_components/add-source-form';
@@ -14,7 +14,7 @@ export default async function SourcesPage() {
     <>
       <PageHeader
         title="Sources"
-        subtitle="Remote bullwatch proxies this hub federates."
+        subtitle="Remote superbull proxies this hub federates."
         controls={<AddSourceForm />}
       />
       <div className="flex w-full flex-col gap-4 px-4 py-4 lg:px-6">

@@ -16,7 +16,7 @@ export interface SendEmailResult {
 
 export async function sendDigestEmail(args: SendDigestEmailArgs): Promise<SendEmailResult> {
   const { to, perSource } = args;
-  const subject = '[bullwatch] daily digest';
+  const subject = '[superbull] daily digest';
   const html = await render(createElement(DigestEmail, { perSource }));
 
   const resend = getResend();
@@ -26,7 +26,7 @@ export async function sendDigestEmail(args: SendDigestEmailArgs): Promise<SendEm
   }
 
   const { error } = await resend.emails.send({
-    from: env.EMAIL_FROM ?? 'bullwatch <alerts@resend.dev>',
+    from: env.EMAIL_FROM ?? 'superbull <alerts@resend.dev>',
     to,
     subject,
     html,

@@ -24,7 +24,7 @@ export function AlertEmail(props: AlertEmailProps) {
           {queueName && <Text style={metaStyle}>Queue: {queueName}</Text>}
           <Text style={bodyTextStyle}>{summary}</Text>
           <Hr style={hrStyle} />
-          <Text style={footerStyle}>bullwatch alerts</Text>
+          <Text style={footerStyle}>superbull alerts</Text>
         </Container>
       </Body>
     </Html>

@@ -11,12 +11,12 @@ describe('renderSpaEntry', () => {
     const result = renderSpaEntry({
       template,
       basePath: '/s/abc-123/',
-      title: 'proxy-a — bullwatch',
+      title: 'proxy-a — superbull',
       uiConfig: '{"board_title":"proxy-a"}',
     });
 
     expect(result).toContain('href="/s/abc-123/"');
-    expect(result).toContain('<title>proxy-a — bullwatch</title>');
+    expect(result).toContain('<title>proxy-a — superbull</title>');
     expect(result).toContain('>{"board_title":"proxy-a"}</script>');
   });
 

@@ -33,6 +33,6 @@ describe('renderEntry', () => {
 
   it('falls back to a default title', () => {
     const result = renderEntry({ basePath: '/', uiConfig: {} });
-    expect(result.params.title).toBe('bullwatch');
+    expect(result.params.title).toBe('superbull');
   });
 });

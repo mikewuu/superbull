@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Dialog } from '@bullwatch/ui';
+import { Button, Dialog } from '@superbull/ui';
 import { Plus } from 'lucide-react';
 import { useActionState, useEffect, useState } from 'react';
 import { createSourceAction } from '../actions';
@@ -31,7 +31,7 @@ export function AddSourceForm() {
           <p className="font-medium text-content-emphasis">Connect a proxy</p>
           <p className="mt-1">Run the connector next to your workers, then register it here:</p>
           <pre className="mt-2 overflow-x-auto rounded-md bg-bg-default p-2 font-mono text-[11px] text-content-default">
-            npx @bullwatch/proxy -n "My app" -t &lt;token&gt; --queues a,b
+            npx @superbull/proxy -n "My app" -t &lt;token&gt; --queues a,b
           </pre>
           <p className="mt-1">
             Or pass <span className="font-mono">--hub &lt;this hub url&gt; --hub-token</span> and it

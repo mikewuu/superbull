@@ -11,7 +11,7 @@ export function renderEntry(params: { basePath: string; uiConfig: UIConfig }): V
     params: {
       basePath,
       uiConfig,
-      title: params.uiConfig.board_title ?? 'bullwatch',
+      title: params.uiConfig.board_title ?? 'superbull',
     },
   };
 }

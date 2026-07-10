@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Bullwatch Hub',
-  description: 'Federated dashboard for bullwatch proxy sources',
+  title: 'SuperBull Hub',
+  description: 'Federated dashboard for superbull proxy sources',
 };
 
 interface RootLayoutProps {

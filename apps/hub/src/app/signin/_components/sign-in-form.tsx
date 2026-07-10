@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@bullwatch/ui';
+import { Button } from '@superbull/ui';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { useRouter } from 'next/navigation';
 import { type FormEvent, useState } from 'react';
@@ -36,7 +36,7 @@ export function SignInForm(props: SignInFormProps) {
     <div className="flex min-h-screen items-center justify-center bg-bg-default p-6">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-lg font-semibold text-content-emphasis">bullwatch hub</h1>
+          <h1 className="text-lg font-semibold text-content-emphasis">superbull hub</h1>
           <p className="mt-1 text-sm text-content-subtle">
             {flow === 'signIn' ? 'Sign in to your hub' : 'Create the first account'}
           </p>

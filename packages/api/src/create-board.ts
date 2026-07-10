@@ -18,7 +18,7 @@ export function createBoard(args: {
     .setQueues(registry.boardQueues)
     .setViewsPath(path.join(uiBasePath, 'dist'))
     .setStaticPath('/static', path.join(uiBasePath, 'dist/static'))
-    .setUIConfig({ board_title: 'bullwatch', ...options.uiConfig })
+    .setUIConfig({ board_title: 'superbull', ...options.uiConfig })
     .setEntryRoute(appRoutes.entryPoint)
     .setErrorHandler(handleError)
     .setApiRoutes(appRoutes.api);
@@ -33,7 +33,7 @@ export function createBoard(args: {
 
 function resolveUiBasePath(): string {
   const require = createRequire(import.meta.url);
-  return path.dirname(require.resolve('@bullwatch/react/package.json'));
+  return path.dirname(require.resolve('@superbull/react/package.json'));
 }
 
 function createQueueRegistry(queues: ReadonlyArray<BaseAdapter>) {

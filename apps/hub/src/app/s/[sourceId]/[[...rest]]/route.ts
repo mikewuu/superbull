@@ -34,7 +34,7 @@ export async function GET(
   const html = renderSpaEntry({
     template,
     basePath: `/s/${sourceId}/`,
-    title: `${source.name} — bullwatch`,
+    title: `${source.name} — superbull`,
     uiConfig: JSON.stringify({ board_title: source.name }),
   });
 
@@ -45,7 +45,7 @@ export async function GET(
 }
 
 function getReactDistDir(): string {
-  return path.join(process.cwd(), 'node_modules', '@bullwatch/react', 'dist');
+  return path.join(process.cwd(), 'node_modules', '@superbull/react', 'dist');
 }
 
 async function getEntryTemplate(distDir: string): Promise<string> {

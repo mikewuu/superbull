@@ -11,7 +11,7 @@ import { registerRemoveSourceTool } from '../../../lib/mcp/register-remove-sourc
 import { registerResumeQueueTool } from '../../../lib/mcp/register-resume-queue-tool';
 import { registerRetryJobTool } from '../../../lib/mcp/register-retry-job-tool';
 
-const instructions = `bullwatch hub federates one or more remote bullwatch proxies, each fronting a BullMQ deployment.
+const instructions = `superbull hub federates one or more remote superbull proxies, each fronting a BullMQ deployment.
 
 DISCOVER: list_sources shows every proxy source registered with the hub (never returns bearer tokens). add_source registers a new one — it stores the token as a credential and never returns it again; remove_source deletes one.
 
@@ -31,7 +31,7 @@ const handler = createMcpHandler(
     registerResumeQueueTool(server);
   },
   {
-    serverInfo: { name: 'bullwatch-hub', version: '0.1.0' },
+    serverInfo: { name: 'superbull-hub', version: '0.1.0' },
     instructions,
   },
   {
