@@ -30,7 +30,8 @@
       "**/*.gen.ts",
       "next-env.d.ts",
       "**/convex/_generated",
-      "**/.convex"
+      "**/.convex",
+      "**/e2e/.auth"
     ]
   }
 }
