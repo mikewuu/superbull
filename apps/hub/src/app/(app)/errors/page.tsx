@@ -9,8 +9,8 @@ import { StateTabs } from './_components/state-tabs';
 
 export const dynamic = 'force-dynamic';
 
-const ERRORS_TABS = ['open', 'regressions', 'resolved', 'ignored'] as const;
-export type ErrorsTab = (typeof ERRORS_TABS)[number];
+const errorsTabs = ['open', 'regressions', 'resolved', 'ignored'] as const;
+export type ErrorsTab = (typeof errorsTabs)[number];
 
 interface ErrorsPageProps {
   searchParams: Promise<{ source?: string; state?: string }>;
@@ -64,7 +64,7 @@ export default async function ErrorsPage(props: ErrorsPageProps) {
 }
 
 function isErrorsTab(value: string | undefined): value is ErrorsTab {
-  return ERRORS_TABS.includes(value as ErrorsTab);
+  return errorsTabs.includes(value as ErrorsTab);
 }
 
 function filterGroupsByTab(groups: ErrorGroup[], tab: ErrorsTab): ErrorGroup[] {

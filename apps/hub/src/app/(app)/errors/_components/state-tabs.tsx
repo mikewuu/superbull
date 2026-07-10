@@ -8,7 +8,7 @@ interface StateTabsProps {
   counts: Record<ErrorsTab, number>;
 }
 
-const TABS: Array<{ key: ErrorsTab; label: string }> = [
+const tabs: Array<{ key: ErrorsTab; label: string }> = [
   { key: 'open', label: 'Open' },
   { key: 'regressions', label: 'Regressions' },
   { key: 'resolved', label: 'Resolved' },
@@ -20,7 +20,7 @@ export function StateTabs(props: StateTabsProps) {
 
   return (
     <div className="flex items-center gap-1 border-b border-border-subtle">
-      {TABS.map((tab) => (
+      {tabs.map((tab) => (
         <Link
           key={tab.key}
           href={`/errors?source=${activeSourceId}&state=${tab.key}`}

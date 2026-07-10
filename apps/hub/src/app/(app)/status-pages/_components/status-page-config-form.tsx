@@ -7,7 +7,7 @@ import { saveStatusPageConfigAction } from '../actions';
 
 const initialState = { error: null };
 
-const SLUG_PATTERN = /^[a-z0-9-]{3,50}$/;
+const slugPattern = /^[a-z0-9-]{3,50}$/;
 
 interface StatusPageConfigFormProps {
   sourceId: string;
@@ -19,7 +19,7 @@ export function StatusPageConfigForm(props: StatusPageConfigFormProps) {
   const [state, formAction, pending] = useActionState(saveStatusPageConfigAction, initialState);
   const [slug, setSlug] = useState(config?.slug ?? '');
 
-  const slugInvalid = slug.length > 0 && !SLUG_PATTERN.test(slug);
+  const slugInvalid = slug.length > 0 && !slugPattern.test(slug);
 
   return (
     <div className="candy-card rounded-lg p-4">
