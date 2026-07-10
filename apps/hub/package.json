@@ -11,7 +11,8 @@
     "e2e": "playwright test",
     "convex:dev": "convex dev",
     "convex:codegen": "convex codegen",
-    "queue:worker": "tsx src/scripts/start-queue-worker.ts"
+    "queue:worker": "tsx src/scripts/start-queue-worker.ts",
+    "seed:status-page": "tsx --env-file=.env.local src/scripts/seed-status-page.ts"
   },
   "dependencies": {
     "@auth/core": "^0.41.2",

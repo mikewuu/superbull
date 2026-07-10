@@ -27,6 +27,7 @@ export async function generateMetadata(props: StatusPageProps): Promise<Metadata
 
 export default async function StatusPage(props: StatusPageProps) {
   const { slug } = await props.params;
+  const fetchedAt = Date.now();
   const [page, uptime] = await Promise.all([
     getPublicStatusPage({ slug }),
     getPublicStatusPageUptime({ slug }),
@@ -64,6 +65,10 @@ export default async function StatusPage(props: StatusPageProps) {
           ))}
         </div>
       )}
+
+      <p className="mt-12 text-center text-xs text-content-muted">
+        Updated {formatUpdatedAt(fetchedAt)} · Powered by SuperBull
+      </p>
     </div>
   );
 }
@@ -101,4 +106,12 @@ function formatRate(rate: number | null): string {
     return 'No data yet';
   }
   return `${(rate * 100).toFixed(2)}%`;
+}
+
+function formatUpdatedAt(fetchedAtMs: number): string {
+  const minutes = Math.max(0, Math.round((Date.now() - fetchedAtMs) / 60_000));
+  if (minutes < 1) {
+    return 'just now';
+  }
+  return `${minutes}m ago`;
 }
