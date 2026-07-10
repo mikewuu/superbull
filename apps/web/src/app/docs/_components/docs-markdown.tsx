@@ -63,16 +63,24 @@ const components = {
   ),
   pre: (props: ComponentPropsWithoutRef<'pre'>) => (
     <pre
-      className="mt-5 overflow-x-auto rounded-lg border border-border-subtle bg-bg-inverted p-4 text-[13px] leading-6 text-neutral-100 [&_code]:bg-transparent [&_code]:p-0 [&_code]:text-inherit"
+      className="mt-5 overflow-x-auto rounded-lg border border-border-subtle bg-bg-inverted p-4 text-[13px] leading-6 text-neutral-100"
       {...props}
     />
   ),
-  code: (props: ComponentPropsWithoutRef<'code'>) => (
-    <code
-      className="rounded border border-border-subtle bg-bg-subtle px-1.5 py-0.5 font-mono text-[0.85em] text-content-emphasis"
-      {...props}
-    />
-  ),
+  code: (props: ComponentPropsWithoutRef<'code'>) => {
+    const isBlockCode =
+      (props.className ?? '').startsWith('language-') ||
+      getPlainText(props.children).includes('\n');
+    if (isBlockCode) {
+      return <code {...props} />;
+    }
+    return (
+      <code
+        className="rounded border border-border-subtle bg-bg-subtle px-1.5 py-0.5 font-mono text-[0.85em] text-content-emphasis"
+        {...props}
+      />
+    );
+  },
   blockquote: (props: ComponentPropsWithoutRef<'blockquote'>) => (
     <blockquote
       className="mt-5 border-l-2 border-border-emphasis pl-4 text-sm leading-7 text-content-subtle"
