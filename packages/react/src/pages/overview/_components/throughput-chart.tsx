@@ -12,9 +12,6 @@ interface ThroughputChartProps {
   deltaPercent: number | null;
 }
 
-const completedColor = 'text-candy-green';
-const failedColor = 'text-[#e5484d]';
-
 export function ThroughputChart(props: ThroughputChartProps) {
   const { completedBuckets, failedBuckets, deltaPercent } = props;
   const completed = completedBuckets.slice(0, 60).reverse();
@@ -136,7 +133,7 @@ function ThroughputPlot(props: {
           to="currentColor"
           fromOpacity={0.15}
           toOpacity={0}
-          className={completedColor}
+          className="text-candy-green"
         />
 
         {Array.from({ length: gridLineCount }, (_, index) => {
@@ -166,7 +163,7 @@ function ThroughputPlot(props: {
           );
         })}
 
-        <g className={completedColor}>
+        <g className="text-candy-green">
           <AreaClosed
             data={completed}
             x={(_, index) => xScale(index)}
@@ -187,7 +184,7 @@ function ThroughputPlot(props: {
           />
         </g>
 
-        <g className={failedColor}>
+        <g className="text-[#e5484d]">
           <LinePath
             data={failed}
             x={(_, index) => xScale(index)}
@@ -216,7 +213,7 @@ function ThroughputPlot(props: {
                 cx={xScale(hoverIndex)}
                 cy={yScale(hoverCompleted)}
                 r={3.5}
-                className={completedColor}
+                className="text-candy-green"
                 fill="currentColor"
                 stroke="#fff"
                 strokeWidth={1.5}
@@ -227,7 +224,7 @@ function ThroughputPlot(props: {
                 cx={xScale(hoverIndex)}
                 cy={yScale(hoverFailed)}
                 r={3.5}
-                className={failedColor}
+                className="text-[#e5484d]"
                 fill="currentColor"
                 stroke="#fff"
                 strokeWidth={1.5}

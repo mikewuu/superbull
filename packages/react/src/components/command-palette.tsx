@@ -8,11 +8,6 @@ import { useResumeQueue } from '../hooks/use-resume-queue';
 import { useRetryQueueJobs } from '../hooks/use-retry-queue-jobs';
 import { AddJobDialog } from '../pages/queue-detail/_components/add-job-dialog';
 
-const itemClassName =
-  'flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-sm text-content-default aria-selected:bg-bg-muted aria-disabled:cursor-not-allowed aria-disabled:opacity-50';
-const groupClassName =
-  'px-1.5 py-1 text-[11px] font-medium uppercase tracking-wide text-content-muted [&_[cmdk-group-items]]:mt-1';
-
 export function CommandPalette() {
   const [showing, setShowing] = useState(false);
   const [showingAddJob, setShowingAddJob] = useState(false);
@@ -58,11 +53,14 @@ export function CommandPalette() {
             No results.
           </Command.Empty>
 
-          <Command.Group heading="Navigate" className={groupClassName}>
+          <Command.Group
+            heading="Navigate"
+            className="px-1.5 py-1 text-[11px] font-medium uppercase tracking-wide text-content-muted [&_[cmdk-group-items]]:mt-1"
+          >
             <Command.Item
               value="Overview"
               onSelect={() => runAndClose(() => navigate('/'))}
-              className={itemClassName}
+              className="flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-sm text-content-default aria-selected:bg-bg-muted aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
             >
               <LayoutGrid className="size-4 text-content-muted" />
               Overview
@@ -74,7 +72,7 @@ export function CommandPalette() {
                 onSelect={() =>
                   runAndClose(() => navigate(`/queue/${encodeURIComponent(queue.name)}`))
                 }
-                className={itemClassName}
+                className="flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-sm text-content-default aria-selected:bg-bg-muted aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
               >
                 <span className="size-1.5 rounded-full bg-content-muted" />
                 Go to {queue.name}
@@ -83,7 +81,10 @@ export function CommandPalette() {
           </Command.Group>
 
           {currentQueue && (
-            <Command.Group heading="This queue" className={groupClassName}>
+            <Command.Group
+              heading="This queue"
+              className="px-1.5 py-1 text-[11px] font-medium uppercase tracking-wide text-content-muted [&_[cmdk-group-items]]:mt-1"
+            >
               <Command.Item
                 value={currentQueue.is_paused ? 'Resume queue' : 'Pause queue'}
                 onSelect={() =>
@@ -93,7 +94,7 @@ export function CommandPalette() {
                       : pauseQueue.mutate(currentQueue.name),
                   )
                 }
-                className={itemClassName}
+                className="flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-sm text-content-default aria-selected:bg-bg-muted aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
               >
                 {currentQueue.is_paused ? (
                   <Play className="size-4 text-content-muted" />
@@ -105,7 +106,7 @@ export function CommandPalette() {
               <Command.Item
                 value="Add job"
                 onSelect={() => runAndClose(() => setShowingAddJob(true))}
-                className={itemClassName}
+                className="flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-sm text-content-default aria-selected:bg-bg-muted aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
               >
                 <Plus className="size-4 text-content-muted" />
                 Add job
@@ -118,7 +119,7 @@ export function CommandPalette() {
                     retryQueueJobs.mutate({ queueName: currentQueue.name, status: 'failed' }),
                   )
                 }
-                className={itemClassName}
+                className="flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-sm text-content-default aria-selected:bg-bg-muted aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
               >
                 <ListRestart className="size-4 text-content-muted" />
                 Retry all failed
