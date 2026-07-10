@@ -28,7 +28,8 @@
       "coverage",
       "node_modules",
       "**/*.gen.ts",
-      "convex/_generated"
+      "next-env.d.ts",
+      "**/convex/_generated"
     ]
   }
 }
