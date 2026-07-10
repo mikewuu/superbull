@@ -10,22 +10,29 @@ fal.config({ credentials: process.env.FAL_API_KEY });
 
 const destDir = path.join(process.cwd(), 'public/landing/raw/logos');
 
+const flyingStyle =
+  'bold simple geometry, flat solid colors only, two colors total (near-black and crimson-red), no gradients, no outline strokes, sticker-like, centered on pure white background. No text, no letters, no watermark.';
+
 const jobs = [
   [
-    'logo-head-front',
-    'Minimal flat vector logo mark of a confident bull head, front view: geometric charcoal-black rounded head shape, two small blunt burnt-orange horns curving up symmetrically, two small dark round eyes, a small lighter-grey muzzle with a tiny burnt-orange nose ring, bold simple geometry, thick even shapes, flat solid colors only, no gradients, no outline strokes, sticker-like, centered on pure white background. No text, no letters, no watermark.',
+    'logo-fly-horizontal',
+    `Minimal flat vector logo mark: solid near-black bull silhouette in full-body horizontal flying pose like a superhero, both forelegs extended straight forward, hind legs trailing behind, small horns visible on the head, a flat crimson-red superhero cape flowing straight back from the shoulders above the body, ${flyingStyle}`,
   ],
   [
-    'logo-horns-only',
-    'Minimal modern app-icon logo mark: a single geometric charcoal-black rounded squircle shape with two small symmetric burnt-orange horns rising from the top edge, flat solid colors, no gradients, no outline strokes, clean premium abstract mark, centered on pure white background. No text, no letters, no watermark.',
+    'logo-fly-diagonal',
+    `Minimal flat vector logo mark: solid near-black bull silhouette flying at a slight upward diagonal like a superhero taking off, one foreleg punched forward and the other tucked, hind legs trailing, small horns visible, a flat crimson-red cape flowing behind and slightly below the body, ${flyingStyle}`,
   ],
   [
-    'logo-head-side',
-    'Minimal flat vector logo mark of a bull head in side profile facing right: bold geometric charcoal-black silhouette, one small blunt burnt-orange horn visible, simple rounded shapes, flat solid colors only, no gradients, no outline strokes, sticker-like, centered on pure white background. No text, no letters, no watermark.',
+    'logo-fly-bigcape',
+    `Minimal flat vector logo mark: solid near-black chunky bull silhouette in horizontal superhero flying pose, forelegs extended forward, hind legs trailing, small horns, with one large bold flat crimson-red cape shape as a single sweeping mass billowing behind the whole body, the cape as big as the bull, ${flyingStyle}`,
   ],
   [
-    'logo-chart-horns',
-    'Minimal clever logo mark: a rounded charcoal-black squircle bull head where the two horns are shaped like a small rising bar-chart, two bars of increasing height in burnt-orange, flat solid colors, no gradients, no outline strokes, centered on pure white, modern premium app icon. No text, no letters, no watermark.',
+    'logo-fly-onefist',
+    `Minimal flat vector logo mark: solid near-black bull silhouette in classic Superman flying pose, one foreleg extended straight forward like a fist, head up with small horns, body horizontal, hind legs together trailing, a flat crimson-red cape streaming behind from the shoulders in two simple points, ${flyingStyle}`,
+  ],
+  [
+    'logo-fly-compact',
+    `Minimal flat vector app-icon logo mark: extremely simplified solid near-black bull silhouette in horizontal flying pose, thick chunky rounded shapes, forelegs merged into one forward-pointing shape, hind legs merged into one trailing shape, tiny horns, no eyes no face details, one bold flat crimson-red cape as a simple triangular flag shape flowing behind, ${flyingStyle}`,
   ],
 ] as const;
 
