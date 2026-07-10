@@ -293,6 +293,9 @@ entry (relative assets + injected `basePath`).
 - [ ] Remaining before publish: end-to-end drive (mount express on a scratch app, load the UI in a
       browser, confirm actions); wire `bullmq` peerDep versions; first `npm publish` dry-run.
 - [x] Modes: proxy package + hub app (convex-only) + MCP + two-hop e2e
+- [x] bullwatch-proxy CLI (discovery, allow-list, env/docker config) + self-registration + outbound
+      batched ingest into convex ingestEvents (tasks #18/#25). Next: epics #19 analytics, #20 error
+      tracking, #21 email alerts, #22 auth, #23 dashboards, #24 status page — all read ingestEvents.
 
 **Build complete** — every package builds, typechecks, tests, and lints clean. v1 feature set
 (queue/job views, per-job + bulk actions, filters, quick-retry, metrics charts) is implemented.
