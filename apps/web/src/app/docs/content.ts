@@ -15,22 +15,22 @@ There are two ways to run it:
   \`/app/[workspaceSlug]/connectors/[connectorId]\`, alongside ingest-driven
   analytics, error tracking, email alerts, dashboards, and public status pages
   for every connector in the workspace. See [Getting started](/docs/getting-started),
-  [Connector](/docs/connector), and [Hub](/docs/hub).
+  [Connector](/docs/connector), and [Hosted app](/docs/hub).
 - **Standalone**: mount an adapter (Express, Fastify, Hono, Koa, h3, Hapi, Elysia,
   Bun, or NestJS) directly in your app. Serves the UI and the REST API from that
   process, no sign-in, no hosted app involved. See [Standalone](/docs/standalone).
 
 Both modes share the same core: \`@superbull/api\` defines the route table, the
 \`BaseAdapter\`/\`BullMQAdapter\` queue wrapper, and \`createBoard()\`; \`@superbull/react\`
-is the SPA served by every standalone adapter and by the hub's per-connector
-dashboards.
+is the SPA served by every standalone adapter and by the hosted app's
+per-connector dashboards.
 `;
 
 export const quickstartContent = `
 ## Let your agent run it
 
 SuperBull isn't only for humans watching a dashboard. Point an agent at the
-hub's MCP server and it can watch your queues, open a failed job and read its
+hosted app's MCP server and it can watch your queues, open a failed job and read its
 stack trace, retry the job, or pause a queue that's failing fast. No clicking
 through a UI. See [MCP](/docs/mcp) to connect one.
 
@@ -72,7 +72,7 @@ the same shape. See [Standalone](/docs/standalone) for all nine.
 - New to SuperBull: start with [Getting started](/docs/getting-started).
 - Embedding in your app instead: [Standalone](/docs/standalone).
 - Running the outbound agent next to workers: [Connector](/docs/connector).
-- The hosted app: workspaces, analytics, alerts, status pages: [Hub](/docs/hub).
+- The hosted app: workspaces, analytics, alerts, status pages: [Hosted app](/docs/hub).
 - Every endpoint: [REST API](/docs/api).
 - Driving SuperBull from an agent: [MCP](/docs/mcp).
 `;

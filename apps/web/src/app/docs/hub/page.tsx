@@ -6,7 +6,7 @@ import { getHeadings } from '../_lib/get-headings';
 import { headers, ingestSection, intro, rows } from './content';
 
 export const metadata: Metadata = {
-  title: 'Hub: SuperBull docs',
+  title: 'Hosted app: SuperBull docs',
   description:
     'The hosted app: workspaces, connectors, analytics, alerts, error tracking, and status pages.',
 };

@@ -21,11 +21,11 @@ export const docsNav: DocsNavGroup[] = [
     items: [
       { href: '/docs/standalone', label: 'Standalone' },
       { href: '/docs/connector', label: 'Connector' },
-      { href: '/docs/hub', label: 'Hub' },
+      { href: '/docs/hub', label: 'Hosted app' },
     ],
   },
   {
-    label: 'Hub features',
+    label: 'Hosted features',
     items: [
       { href: '/docs/alerts', label: 'Alerts' },
       { href: '/docs/status-pages', label: 'Status pages' },

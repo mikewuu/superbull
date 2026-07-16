@@ -9,19 +9,21 @@ connector, run one command.
 Sign in with Google. A personal workspace is created for you automatically on
 first sign-in, no separate signup step. From there you can invite teammates
 to that workspace, or create more workspaces for other teams or environments.
-Members hold one of three roles: **owner**, **admin**, or **member**; invite
-by email from workspace settings.
+Members hold one of three roles: **owner**, **admin**, or **member**; owners
+and admins invite by email from workspace settings, and an invite carries the
+role it was sent with. See [Hosted app](/docs/hub) for what each role can do.
 
 ## 2. Create a connector
 
 From your workspace, **Connectors → New connector** gives you a name field and,
-once submitted, a one-time enrollment token. It's shown exactly once, so copy
-it before moving on. Behind the scenes the workspace only stores a hash of it.
+once submitted, a one-time enrollment token plus the exact command to run.
+The token is shown exactly once, so copy it before moving on. Behind the
+scenes the workspace only stores a hash of it.
 
 ## 3. Run it next to your workers
 
 \`\`\`bash
-npx @superbull/connector --token <the-token-you-copied>
+npx @superbull/connector --url wss://connect.superbull.com --token <the-token-you-copied>
 \`\`\`
 
 No install step, no code changes, and nothing to expose: the connector opens
