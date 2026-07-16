@@ -1,10 +1,10 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { findConnectorByIdLegacy } from '../../src/lib/connectors/find-connector-by-id-legacy';
-import { forwardToProxy } from '../../src/lib/forwarding/forward-to-proxy';
+import { callGatewayRpc } from '../../src/lib/gateway/call-gateway-rpc';
 import { registerGetQueueTool } from '../../src/lib/mcp/register-get-queue-tool';
 
-vi.mock('../../src/lib/forwarding/forward-to-proxy', () => ({ forwardToProxy: vi.fn() }));
+vi.mock('../../src/lib/gateway/call-gateway-rpc', () => ({ callGatewayRpc: vi.fn() }));
 vi.mock('../../src/lib/connectors/find-connector-by-id-legacy', () => ({
   findConnectorByIdLegacy: vi.fn(),
 }));
@@ -55,7 +55,7 @@ describe('registerGetQueueTool', () => {
       lastDisconnectedAt: null,
       created_at: new Date(),
     });
-    vi.mocked(forwardToProxy).mockResolvedValue({
+    vi.mocked(callGatewayRpc).mockResolvedValue({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
@@ -74,7 +74,7 @@ describe('registerGetQueueTool', () => {
     const body = JSON.parse(result?.content[0]?.text ?? '{}');
 
     expect(body.queue.name).toBe('jobs');
-    const call = vi.mocked(forwardToProxy).mock.calls[0]?.[0];
+    const call = vi.mocked(callGatewayRpc).mock.calls[0]?.[0];
     expect(call?.search).toContain('active_queue=jobs');
     expect(call?.search).toContain('status=failed');
     expect(call?.search).toContain('page=2');

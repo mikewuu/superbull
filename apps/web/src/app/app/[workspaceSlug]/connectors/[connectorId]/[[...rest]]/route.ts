@@ -49,10 +49,12 @@ export async function GET(
   if (!connector) {
     return NextResponse.json({ error: 'connector not found' }, { status: 404 });
   }
-  if (!connector.url) {
+  // Never connected to the gateway yet: the dashboard would only render 502
+  // "connector disconnected" errors, so show enrollment guidance instead.
+  if (connector.lastConnectedAt === null) {
     return new NextResponse(
       renderPendingHtml(
-        `"${connector.name}" hasn't been enrolled through the legacy proxy flow yet, so its dashboard isn't reachable here.`,
+        `${escapeHtml(connector.name)} hasn't connected yet. Run the connector command from the Connectors page next to your Redis, then reload — the dashboard appears once it dials in.`,
       ),
       { status: 200, headers: { 'content-type': 'text/html', 'cache-control': 'no-store' } },
     );
@@ -73,7 +75,15 @@ export async function GET(
 }
 
 function renderPendingHtml(message: string): string {
-  return `<!doctype html><html><body style="font-family: sans-serif; padding: 2rem;"><p>${message}</p></body></html>`;
+  return `<!doctype html><html><head><title>Waiting for connector · SuperBull</title></head><body style="font-family: sans-serif; padding: 2rem; max-width: 40rem;"><h1 style="font-size: 1rem;">Waiting for the connector</h1><p style="color: #555; font-size: 0.875rem; line-height: 1.5;">${message}</p></body></html>`;
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
 }
 
 function getReactDistDir(): string {

@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { api } from '../../../../../../../../convex/_generated/api';
 import type { Id } from '../../../../../../../../convex/_generated/dataModel';
 import { findConnectorById } from '../../../../../../../lib/connectors/find-connector-by-id';
-import { forwardToProxy } from '../../../../../../../lib/forwarding/forward-to-proxy';
+import { callGatewayRpc } from '../../../../../../../lib/gateway/call-gateway-rpc';
 
 async function handle(
   req: Request,
@@ -29,19 +29,15 @@ async function handle(
   if (!connector) {
     return NextResponse.json({ error: 'connector not found' }, { status: 404 });
   }
-  if (!connector.url || !connector.token) {
-    return NextResponse.json(
-      { error: "this connector hasn't been enrolled through the legacy proxy flow" },
-      { status: 502 },
-    );
-  }
 
   const url = new URL(req.url);
   const method = req.method;
-  const body = method === 'GET' || method === 'HEAD' ? undefined : await req.text();
+  const body = method === 'GET' || method === 'HEAD' ? null : await req.text();
 
-  const result = await forwardToProxy({
-    connector: { url: connector.url, token: connector.token },
+  // 502 {"error":"connector disconnected"} and 504 {"error":"connector
+  // timeout"} come back from the gateway verbatim and are surfaced as-is.
+  const result = await callGatewayRpc({
+    connectorId: connector.id,
     method,
     path,
     search: url.search,

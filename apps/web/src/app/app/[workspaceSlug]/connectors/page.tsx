@@ -1,11 +1,15 @@
 import { PageHeader } from '@superbull/ui';
 import { listConnectors } from '../../../../lib/connectors/list-connectors';
 import type { Connector } from '../../../../lib/connectors/types';
+import { getGatewayConfig } from '../../../../lib/gateway/gateway-config';
+import { getConnectorStatusFromGateway } from '../../../../lib/gateway/get-connector-status';
 import { requireWorkspaceForSlug } from '../../../../lib/workspaces/require-workspace-for-slug';
 import { type ConnectorRow, ConnectorsTable } from './_components/connectors-table';
 import { NewConnectorDialog } from './_components/new-connector-dialog';
 
 export const dynamic = 'force-dynamic';
+
+const DEFAULT_GATEWAY_WS_URL = 'wss://connect.superbull.com';
 
 interface ConnectorsPageProps {
   params: Promise<{ workspaceSlug: string }>;
@@ -22,7 +26,9 @@ export default async function ConnectorsPage(props: ConnectorsPageProps) {
       <PageHeader
         title="Connectors"
         subtitle="Processes reporting queue activity into this workspace."
-        controls={<NewConnectorDialog workspaceSlug={workspaceSlug} />}
+        controls={
+          <NewConnectorDialog workspaceSlug={workspaceSlug} gatewayWsUrl={getGatewayWsUrl()} />
+        }
       />
       <div className="flex w-full flex-col gap-4 px-4 py-4 lg:px-6">
         <ConnectorsTable workspaceSlug={workspaceSlug} rows={rows} />
@@ -37,53 +43,39 @@ async function getConnectorRows(connectors: Connector[]): Promise<ConnectorRow[]
   );
 }
 
-// Gateway-enrolled connectors (no legacy `url`) report their own
-// connected/disconnected state via lastConnectedAt/lastDisconnectedAt
-// (convex/connectors.ts's markConnected/markDisconnected, wired to the
-// gateway in Round 3). Legacy connectors created through the old HTTP proxy
-// flow have neither field set yet, so they fall back to a naive HTTP health
-// check against their stored url — connectors with no url at all (never
-// connected, gateway path not live yet) render as "pending".
+// Live state comes from the gateway's session registry. When the gateway is
+// unreachable we fall back to the lastConnectedAt/lastDisconnectedAt stamps
+// it writes through Convex (markConnected/markDisconnected). A connector
+// that has never connected shows "pending" — it exists but its process
+// hasn't dialed in yet.
 async function getConnectorStatus(
   connector: Connector,
 ): Promise<{ status: 'online' | 'offline' | 'pending'; queueCount: number | null }> {
-  if (connector.lastConnectedAt !== null) {
-    const online =
-      connector.lastDisconnectedAt === null ||
-      connector.lastDisconnectedAt < connector.lastConnectedAt;
-    return { status: online ? 'online' : 'offline', queueCount: connector.queues?.length ?? null };
+  const live = await getConnectorStatusFromGateway(connector.id);
+  if (live?.connected) {
+    return { status: 'online', queueCount: live.queues.length };
   }
 
-  if (connector.url) {
-    const [health, queueCount] = await Promise.allSettled([
-      checkConnectorOnline(connector.url),
-      getConnectorQueueCount(connector),
-    ]);
-    return {
-      status: health.status === 'fulfilled' && health.value ? 'online' : 'offline',
-      queueCount: queueCount.status === 'fulfilled' ? queueCount.value : null,
-    };
+  const storedQueueCount = connector.queues?.length ?? null;
+  if (connector.lastConnectedAt === null) {
+    return { status: 'pending', queueCount: storedQueueCount };
   }
-
-  return { status: 'pending', queueCount: null };
+  if (live) {
+    return { status: 'offline', queueCount: storedQueueCount };
+  }
+  const online =
+    connector.lastDisconnectedAt === null ||
+    connector.lastDisconnectedAt < connector.lastConnectedAt;
+  return { status: online ? 'online' : 'offline', queueCount: storedQueueCount };
 }
 
-async function checkConnectorOnline(url: string): Promise<boolean> {
-  const response = await fetch(`${url}/healthz`, { signal: AbortSignal.timeout(2000) });
-  return response.ok;
-}
-
-async function getConnectorQueueCount(connector: Connector): Promise<number | null> {
-  if (!connector.url || !connector.token) {
-    return null;
+// The enrollment command needs the connector-facing WebSocket endpoint. In
+// production that's the published connect domain; in dev, derive it from
+// GATEWAY_URL (http://localhost:4650 -> ws://localhost:4650).
+function getGatewayWsUrl(): string {
+  const gateway = getGatewayConfig();
+  if (!gateway) {
+    return DEFAULT_GATEWAY_WS_URL;
   }
-  const response = await fetch(`${connector.url}/api/queues`, {
-    headers: { authorization: `Bearer ${connector.token}` },
-    signal: AbortSignal.timeout(2000),
-  });
-  if (!response.ok) {
-    return null;
-  }
-  const body = (await response.json()) as { queues: unknown[] };
-  return body.queues.length;
+  return gateway.url.replace(/^http/, 'ws');
 }

@@ -21,9 +21,9 @@ export function ConnectorsTable(props: ConnectorsTableProps) {
         <thead>
           <tr className="border-b border-border-subtle bg-bg-muted/60 text-left text-xs text-content-subtle">
             <th className="px-5 py-2.5 font-medium">Name</th>
-            <th className="px-4 py-2.5 font-medium">Source</th>
-            <th className="w-24 px-4 py-2.5 font-medium">Connected</th>
+            <th className="w-28 px-4 py-2.5 font-medium">Status</th>
             <th className="w-24 px-4 py-2.5 text-right font-medium">Queues</th>
+            <th className="w-28 px-4 py-2.5 font-medium">Version</th>
             <th className="w-32 px-4 py-2.5 font-medium">Added</th>
             <th className="w-16 px-5 py-2.5" />
           </tr>
@@ -32,7 +32,7 @@ export function ConnectorsTable(props: ConnectorsTableProps) {
           {rows.length === 0 && (
             <tr>
               <td colSpan={6} className="px-5 py-6 text-center text-content-muted">
-                No connectors yet.
+                No connectors yet. Create one and run the enrollment command next to your Redis.
               </td>
             </tr>
           )}
@@ -43,19 +43,12 @@ export function ConnectorsTable(props: ConnectorsTableProps) {
               className="border-b border-border-subtle transition-colors last:border-b-0 hover:bg-bg-muted"
             >
               <td className="px-5 py-3">
-                {row.connector.url ? (
-                  <a
-                    href={`/app/${workspaceSlug}/connectors/${row.connector.id}/`}
-                    className="font-medium text-content-emphasis hover:underline"
-                  >
-                    {row.connector.name}
-                  </a>
-                ) : (
-                  <span className="font-medium text-content-emphasis">{row.connector.name}</span>
-                )}
-              </td>
-              <td className="px-4 py-3 font-mono text-xs text-content-subtle">
-                {row.connector.url ?? 'gateway'}
+                <a
+                  href={`/app/${workspaceSlug}/connectors/${row.connector.id}/`}
+                  className="font-medium text-content-emphasis hover:underline"
+                >
+                  {row.connector.name}
+                </a>
               </td>
               <td className="px-4 py-3" data-testid="connector-health">
                 <span className="inline-flex items-center gap-1.5 text-content-default">
@@ -68,6 +61,9 @@ export function ConnectorsTable(props: ConnectorsTableProps) {
                 data-testid="connector-queue-count"
               >
                 {row.queueCount ?? '-'}
+              </td>
+              <td className="px-4 py-3 font-mono text-xs text-content-subtle">
+                {row.connector.version ?? '-'}
               </td>
               <td className="px-4 py-3 text-content-subtle">
                 {row.connector.created_at.toLocaleDateString()}

@@ -1,10 +1,10 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { findConnectorByIdLegacy } from '../../src/lib/connectors/find-connector-by-id-legacy';
-import { forwardToProxy } from '../../src/lib/forwarding/forward-to-proxy';
+import { callGatewayRpc } from '../../src/lib/gateway/call-gateway-rpc';
 import { registerListQueuesTool } from '../../src/lib/mcp/register-list-queues-tool';
 
-vi.mock('../../src/lib/forwarding/forward-to-proxy', () => ({ forwardToProxy: vi.fn() }));
+vi.mock('../../src/lib/gateway/call-gateway-rpc', () => ({ callGatewayRpc: vi.fn() }));
 vi.mock('../../src/lib/connectors/find-connector-by-id-legacy', () => ({
   findConnectorByIdLegacy: vi.fn(),
 }));
@@ -55,7 +55,7 @@ describe('registerListQueuesTool', () => {
       lastDisconnectedAt: null,
       created_at: new Date(),
     });
-    vi.mocked(forwardToProxy).mockResolvedValue({
+    vi.mocked(callGatewayRpc).mockResolvedValue({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
@@ -69,7 +69,7 @@ describe('registerListQueuesTool', () => {
     const body = JSON.parse(result?.content[0]?.text ?? '{}');
 
     expect(body.queues).toEqual([{ name: 'jobs', counts: { waiting: 2 }, is_paused: false }]);
-    expect(forwardToProxy).toHaveBeenCalledWith(
+    expect(callGatewayRpc).toHaveBeenCalledWith(
       expect.objectContaining({ method: 'GET', path: ['queues'] }),
     );
   });
@@ -83,6 +83,6 @@ describe('registerListQueuesTool', () => {
 
     expect(result?.isError).toBe(true);
     expect(result?.content[0]?.text).toContain('connector not found');
-    expect(forwardToProxy).not.toHaveBeenCalled();
+    expect(callGatewayRpc).not.toHaveBeenCalled();
   });
 });
