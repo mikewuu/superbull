@@ -6,6 +6,7 @@ import { cn } from '../../../lib/cn';
 type ToolId =
   | 'list_queues'
   | 'get_queue'
+  | 'get_queue_stats'
   | 'retry_job'
   | 'pause_queue'
   | 'resume_queue'
@@ -26,6 +27,13 @@ const tools: Record<ToolId, { desc: string; request: string; response: string }>
     response:
       '{ "queue": { "name": "send-emails", "jobs": [\n    { "id": "482", "attempts": 3,\n      "failed_reason": "connect ECONNREFUSED 127.0.0.1:587",\n      "is_failed": true } ] } }',
   },
+  get_queue_stats: {
+    desc: 'Wait/run percentiles, retry rate, top errors, and drain estimate for one queue.',
+    request:
+      '{ "tool": "get_queue_stats", "arguments": {\n    "connector_id": "cnn_9f2a", "queue_name": "send-emails" } }',
+    response:
+      '{ "stats": { "wait_ms": { "p50": 130, "p95": 2200 },\n    "run_ms": { "p50": 45, "p95": 310 }, "retry_rate": 0.04,\n    "top_errors": [{ "message": "connect ECONNREFUSED 127.0.0.1:587", "count": 3 }],\n    "est_drain_ms": 15000 } }',
+  },
   retry_job: {
     desc: 'Retry a failed or completed job.',
     request:
@@ -45,13 +53,13 @@ const tools: Record<ToolId, { desc: string; request: string; response: string }>
     response: '{ "resumed": true, "queue_name": "sync-contacts" }',
   },
   list_connectors: {
-    desc: 'List the connectors in the workspace, without their tokens.',
+    desc: 'List every registered connector, without their bearer tokens.',
     request: '{ "tool": "list_connectors", "arguments": {} }',
     response:
-      '{ "connectors": [\n    { "id": "cnn_9f2a", "name": "my-app", "is_connected": true,\n      "created_at": "2026-03-02T18:04:00.000Z" } ] }',
+      '{ "connectors": [\n    { "id": "cnn_9f2a", "name": "my-app", "url": "https://proxy.internal:9865",\n      "created_at": "2026-03-02T18:04:00.000Z" } ] }',
   },
   remove_connector: {
-    desc: 'Remove a connector from the workspace.',
+    desc: 'Delete a connector and its stored credential.',
     request: '{ "tool": "remove_connector", "arguments": { "connector_id": "cnn_9f2a" } }',
     response: '{ "removed": true, "connector_id": "cnn_9f2a" }',
   },
