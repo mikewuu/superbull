@@ -28,18 +28,6 @@ async function deleteConnectorChildren(ctx: MutationCtx, connectorId: Id<'connec
   await ctx.db.delete(connectorId);
 }
 
-// Oldest workspace by creation order — the transitional home for anything
-// arriving through the unauthenticated hub-token API surface (register,
-// list/create sources, DELETE by id) that predates workspaces entirely.
-// Round 3 deletes /api/sources/register and this codepath along with it.
-async function oldestWorkspaceId(ctx: MutationCtx): Promise<Id<'workspaces'>> {
-  const workspace = await ctx.db.query('workspaces').order('asc').first();
-  if (!workspace) {
-    throw new Error('no workspace exists to attach this connector to');
-  }
-  return workspace._id;
-}
-
 // ---------------------------------------------------------------------------
 // User-facing (workspace + Convex-auth scoped)
 // ---------------------------------------------------------------------------
@@ -112,11 +100,11 @@ export const removeConnector = mutation({
 });
 
 // ---------------------------------------------------------------------------
-// TRANSITIONAL — internalToken-gated, unscoped-by-user hub API surface.
-// Backs /api/sources, /api/sources/register, /api/sources/[sourceId],
-// forwardToProxy lookups, and the MCP tools running under the global
-// SUPERBULL_API_TOKEN. Round 3 deletes register/list/create/upsertByName
-// once the gateway RPC path + per-workspace API keys land.
+// TRANSITIONAL — internalToken-gated, unscoped-by-user surface backing ONLY
+// the MCP tools that still run under the global SUPERBULL_API_TOKEN (the
+// old HTTP proxy flow — /api/sources*, /api/ingest, url/token connectors —
+// is gone). Deleted once the per-workspace-API-keys-vs-global-token decision
+// lands (REWRITE_PLAN Round 3e, open with the owner).
 // ---------------------------------------------------------------------------
 
 export const list = query({
@@ -136,58 +124,6 @@ export const findById = query({
       return null;
     }
     return await ctx.db.get(id);
-  },
-});
-
-export const create = mutation({
-  args: { internalToken: v.string(), name: v.string(), url: v.string(), token: v.string() },
-  handler: async (ctx, args) => {
-    requireInternalToken(args.internalToken);
-    const workspaceId = await oldestWorkspaceId(ctx);
-    const id = await ctx.db.insert('connectors', {
-      workspaceId,
-      name: args.name,
-      url: args.url,
-      token: args.token,
-    });
-    const created = await ctx.db.get(id);
-    if (!created) {
-      throw new Error('failed to create connector');
-    }
-    return created;
-  },
-});
-
-export const upsertByName = mutation({
-  args: { internalToken: v.string(), name: v.string(), url: v.string(), token: v.string() },
-  handler: async (ctx, args) => {
-    requireInternalToken(args.internalToken);
-    const workspaceId = await oldestWorkspaceId(ctx);
-    const existing = await ctx.db
-      .query('connectors')
-      .withIndex('by_workspace_name', (q) => q.eq('workspaceId', workspaceId).eq('name', args.name))
-      .unique();
-
-    if (existing) {
-      await ctx.db.patch(existing._id, { url: args.url, token: args.token });
-      const patched = await ctx.db.get(existing._id);
-      if (!patched) {
-        throw new Error('failed to upsert connector');
-      }
-      return patched;
-    }
-
-    const id = await ctx.db.insert('connectors', {
-      workspaceId,
-      name: args.name,
-      url: args.url,
-      token: args.token,
-    });
-    const created = await ctx.db.get(id);
-    if (!created) {
-      throw new Error('failed to upsert connector');
-    }
-    return created;
   },
 });
 

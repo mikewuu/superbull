@@ -12,7 +12,7 @@ import type { RequestFrame, ResponseFrame } from '@superbull/protocol';
 /**
  * Builds an `executeRequest(frame) -> Promise<ResponseFrame>` function that
  * matches gateway `request` frames against @superbull/api's appRoutes, the
- * same route table the standalone dashboard and packages/proxy serve. This
+ * same route table the standalone dashboard serves over HTTP. This
  * is the connector's RPC executor: no HTTP server, no listening socket — the
  * gateway pushes `request` frames down the outbound WS connection and we
  * resolve each with a `response` frame.

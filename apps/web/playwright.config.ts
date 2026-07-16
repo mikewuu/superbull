@@ -29,7 +29,6 @@ if (isRunnerProcess) {
 }
 
 const convexUrl = 'http://127.0.0.1:3210';
-const proxyPort = 4655;
 const webPort = 4700;
 
 export default defineConfig({
@@ -65,15 +64,6 @@ export default defineConfig({
       url: convexUrl,
       timeout: 120_000,
       reuseExistingServer: false,
-    },
-    {
-      command: 'npx tsx e2e/start-e2e-proxy.ts',
-      url: `http://127.0.0.1:${proxyPort}/healthz`,
-      timeout: 30_000,
-      reuseExistingServer: false,
-      env: {
-        REDIS_PORT: process.env.REDIS_PORT ?? '6379',
-      },
     },
     {
       command: `npx tsx e2e/configure-convex-auth.ts && npx next dev -p ${webPort}`,

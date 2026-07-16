@@ -105,46 +105,23 @@ describe('connectors (user-facing, workspace-scoped)', () => {
   });
 });
 
-describe('connectors (TRANSITIONAL internalToken hub API)', () => {
-  it('create attaches the connector to the oldest workspace', async () => {
+describe('connectors (TRANSITIONAL internalToken MCP surface)', () => {
+  it('list returns every connector and findById resolves one', async () => {
     const t = makeTestClient();
-    const first = await seedWorkspace(t);
-    await seedWorkspace(t);
+    const { workspaceId } = await seedWorkspace(t);
+    const connectorId = await seedConnector(t, workspaceId, { name: 'mcp-connector' });
 
-    const created = await t.mutation(api.connectors.create, {
-      internalToken: INTERNAL_TOKEN,
-      name: 'legacy-proxy',
-      url: 'https://proxy.example.com',
-      token: 'secret',
-    });
-
-    expect(created.workspaceId).toBe(first.workspaceId);
-  });
-
-  it('upsertByName patches the existing connector by name within the oldest workspace', async () => {
-    const t = makeTestClient();
-    await seedWorkspace(t);
-
-    const created = await t.mutation(api.connectors.upsertByName, {
-      internalToken: INTERNAL_TOKEN,
-      name: 'proxy-upsert',
-      url: 'https://old.example.com',
-      token: 'old-token',
-    });
-    const updated = await t.mutation(api.connectors.upsertByName, {
-      internalToken: INTERNAL_TOKEN,
-      name: 'proxy-upsert',
-      url: 'https://new.example.com',
-      token: 'new-token',
-    });
-
-    expect(updated._id).toBe(created._id);
-    expect(updated).toMatchObject({ url: 'https://new.example.com', token: 'new-token' });
     const all = await t.query(api.connectors.list, { internalToken: INTERNAL_TOKEN });
     expect(all).toHaveLength(1);
+
+    const found = await t.query(api.connectors.findById, {
+      internalToken: INTERNAL_TOKEN,
+      id: connectorId,
+    });
+    expect(found?.name).toBe('mcp-connector');
   });
 
-  it('list/findById/create/remove reject the wrong internal token', async () => {
+  it('list/findById/remove reject the wrong internal token', async () => {
     const t = makeTestClient();
     await seedWorkspace(t);
 
@@ -153,26 +130,16 @@ describe('connectors (TRANSITIONAL internalToken hub API)', () => {
       t.query(api.connectors.findById, { internalToken: 'wrong', id: 'not-a-real-id' }),
     ).rejects.toThrow();
     await expect(
-      t.mutation(api.connectors.create, {
-        internalToken: 'wrong',
-        name: 'x',
-        url: 'https://x.example.com',
-        token: 't',
-      }),
+      t.mutation(api.connectors.remove, { internalToken: 'wrong', id: 'not-a-real-id' }),
     ).rejects.toThrow();
   });
 
   it('remove deletes the connector', async () => {
     const t = makeTestClient();
-    await seedWorkspace(t);
+    const { workspaceId } = await seedWorkspace(t);
+    const connectorId = await seedConnector(t, workspaceId);
 
-    const created = await t.mutation(api.connectors.create, {
-      internalToken: INTERNAL_TOKEN,
-      name: 'proxy-a',
-      url: 'https://proxy-a.example.com',
-      token: 'secret',
-    });
-    await t.mutation(api.connectors.remove, { internalToken: INTERNAL_TOKEN, id: created._id });
+    await t.mutation(api.connectors.remove, { internalToken: INTERNAL_TOKEN, id: connectorId });
 
     const all = await t.query(api.connectors.list, { internalToken: INTERNAL_TOKEN });
     expect(all).toHaveLength(0);

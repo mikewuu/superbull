@@ -407,10 +407,10 @@ describe('alerts.digestSummary / listAllRulesForDigest', () => {
     const t = makeTestClient();
     const { workspaceId } = await seedWorkspace(t);
     const connectorId = await seedConnector(t, workspaceId, { name: 'connector-a' });
-    await t.mutation(api.ingest.record, {
+    await t.mutation(api.ingest.recordBatch, {
       internalToken: INTERNAL_TOKEN,
       connectorId,
-      events: [{ uuid: '1', type: 'job.completed', queueName: 'q', ts: Date.now() }],
+      events: [{ uuid: '1', type: 'job.completed', queue_name: 'q', ts: Date.now() }],
     });
 
     const { perConnector } = await t.query(api.alerts.digestSummary, {

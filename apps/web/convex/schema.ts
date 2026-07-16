@@ -35,12 +35,10 @@ export default defineSchema({
     .index('by_token_hash', ['tokenHash'])
     .index('by_email', ['email']),
 
-  // Replaces proxySources. `url`/`token` are a TRANSITIONAL exception for the
-  // old HTTP proxy flow (registration, forwardToProxy, /api/ingest) so e2e
-  // stays green this round — Round 3 deletes them once the gateway RPC path
-  // replaces forwardToProxy. `tokenHash` is the new enrollment-token flow
-  // (sha256 of a one-time plaintext token minted by the Next server action
-  // and never stored).
+  // Replaces proxySources. `tokenHash` is the enrollment-token flow (sha256
+  // of a one-time plaintext token minted by the Next server action and never
+  // stored) — connectors carry no URL and no plaintext credential; the only
+  // transport is the outbound WS session they hold open to apps/gateway.
   connectors: defineTable({
     workspaceId: v.id('workspaces'),
     name: v.string(),
@@ -49,9 +47,6 @@ export default defineSchema({
     queues: v.optional(v.array(v.string())),
     lastConnectedAt: v.optional(v.number()),
     lastDisconnectedAt: v.optional(v.number()),
-    // TRANSITIONAL — Round 3 deletes these two fields.
-    url: v.optional(v.string()),
-    token: v.optional(v.string()),
   })
     .index('by_workspace', ['workspaceId'])
     .index('by_token_hash', ['tokenHash'])

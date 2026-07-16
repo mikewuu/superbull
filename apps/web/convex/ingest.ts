@@ -56,41 +56,6 @@ async function insertEvents(
   return { accepted, deduped };
 }
 
-const eventArgs = v.object({
-  uuid: v.string(),
-  type: v.string(),
-  queueName: v.string(),
-  jobName: v.optional(v.string()),
-  jobId: v.optional(v.string()),
-  ts: v.number(),
-  durationMs: v.optional(v.number()),
-  waitMs: v.optional(v.number()),
-  failedReason: v.optional(v.string()),
-  counts: v.optional(v.any()),
-  workerCount: v.optional(v.number()),
-  oldestWaitingMs: v.optional(v.number()),
-});
-
-// TRANSITIONAL — internalToken-gated, backs /api/ingest (the old HTTP proxy
-// flow, authenticated by the connector's plaintext `token` field). Round 3
-// deletes this once the gateway RPC + `recordBatch` path replaces it.
-export const record = mutation({
-  args: { internalToken: v.string(), connectorId: v.string(), events: v.array(eventArgs) },
-  handler: async (ctx, args) => {
-    requireInternalToken(args.internalToken);
-    const connectorId = ctx.db.normalizeId('connectors', args.connectorId);
-    if (!connectorId) {
-      throw new Error('unknown connector');
-    }
-    const connector = await ctx.db.get(connectorId);
-    if (!connector) {
-      throw new Error('unknown connector');
-    }
-
-    return await insertEvents(ctx, connector.workspaceId, connectorId, args.events);
-  },
-});
-
 const protocolEventArgs = v.object({
   uuid: v.string(),
   type: v.string(),
@@ -107,9 +72,8 @@ const protocolEventArgs = v.object({
 });
 
 // Gateway -> Convex contract fn (@superbull/protocol IngestEvent[], snake_case
-// in, camelCase stored — mirrors `record` above). internalToken-gated: only
-// the always-on gateway service holds CONVEX_INTERNAL_TOKEN. Wired up as the
-// live ingest path once forwardToProxy moves to gateway RPC in Round 3.
+// in, camelCase stored). internalToken-gated: only the always-on gateway
+// service holds CONVEX_INTERNAL_TOKEN. This is the sole ingest write path.
 export const recordBatch = mutation({
   args: {
     internalToken: v.string(),

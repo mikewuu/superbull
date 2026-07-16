@@ -13,23 +13,23 @@ beforeEach(() => {
   process.env.CONVEX_INTERNAL_TOKEN = INTERNAL_TOKEN;
 });
 
-describe('ingest.record error group integration', () => {
+describe('ingest.recordBatch error group integration', () => {
   it('creates an error group when a job.failed event is recorded', async () => {
     const t = makeTestClient();
     const { workspaceId, asMember } = await seedWorkspace(t);
     const connectorId = await seedConnector(t, workspaceId);
 
-    await t.mutation(api.ingest.record, {
+    await t.mutation(api.ingest.recordBatch, {
       internalToken: INTERNAL_TOKEN,
       connectorId,
       events: [
         {
           uuid: 'evt-1',
           type: 'job.failed',
-          queueName: 'emails',
-          jobId: 'job-1',
+          queue_name: 'emails',
+          job_id: 'job-1',
           ts: 100,
-          failedReason: 'SMTP timeout',
+          failed_reason: 'SMTP timeout',
         },
       ],
     });
@@ -49,10 +49,10 @@ describe('ingest.record error group integration', () => {
     const { workspaceId, asMember } = await seedWorkspace(t);
     const connectorId = await seedConnector(t, workspaceId);
 
-    await t.mutation(api.ingest.record, {
+    await t.mutation(api.ingest.recordBatch, {
       internalToken: INTERNAL_TOKEN,
       connectorId,
-      events: [{ uuid: 'evt-1', type: 'job.completed', queueName: 'emails', ts: 100 }],
+      events: [{ uuid: 'evt-1', type: 'job.completed', queue_name: 'emails', ts: 100 }],
     });
 
     const groups = await asMember.query(api.errors.listGroups, { workspaceId, connectorId });
@@ -66,17 +66,17 @@ describe('ingest.record error group integration', () => {
     const event = {
       uuid: 'evt-dup',
       type: 'job.failed',
-      queueName: 'emails',
+      queue_name: 'emails',
       ts: 100,
-      failedReason: 'SMTP timeout',
+      failed_reason: 'SMTP timeout',
     };
 
-    await t.mutation(api.ingest.record, {
+    await t.mutation(api.ingest.recordBatch, {
       internalToken: INTERNAL_TOKEN,
       connectorId,
       events: [event],
     });
-    await t.mutation(api.ingest.record, {
+    await t.mutation(api.ingest.recordBatch, {
       internalToken: INTERNAL_TOKEN,
       connectorId,
       events: [event],
@@ -92,23 +92,23 @@ describe('ingest.record error group integration', () => {
     const { workspaceId, asMember } = await seedWorkspace(t);
     const connectorId = await seedConnector(t, workspaceId);
 
-    await t.mutation(api.ingest.record, {
+    await t.mutation(api.ingest.recordBatch, {
       internalToken: INTERNAL_TOKEN,
       connectorId,
       events: [
         {
           uuid: 'evt-1',
           type: 'job.failed',
-          queueName: 'emails',
+          queue_name: 'emails',
           ts: 100,
-          failedReason: 'SMTP timeout',
+          failed_reason: 'SMTP timeout',
         },
         {
           uuid: 'evt-2',
           type: 'job.failed',
-          queueName: 'emails',
+          queue_name: 'emails',
           ts: 200,
-          failedReason: 'SMTP timeout',
+          failed_reason: 'SMTP timeout',
         },
       ],
     });

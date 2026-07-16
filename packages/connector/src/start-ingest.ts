@@ -30,8 +30,8 @@ export interface Ingest {
 /**
  * Streams job.completed/job.failed events via BullMQ QueueEvents (one
  * dedicated blocking connection per monitored queue) plus a 60s
- * queue.snapshot timer per queue, matching packages/proxy's
- * start-ingest-loop.ts semantics but event-driven instead of polling.
+ * queue.snapshot timer per queue — the event-driven replacement for the old
+ * HTTP proxy's polling ingest loop, emitting the same event shapes.
  *
  * QueueEvents cursor / Redis-reconnect note (simplification): QueueEvents
  * keeps its own in-memory read cursor for the lifetime of the instance, and

@@ -11,7 +11,7 @@ beforeEach(() => {
 
 async function recordEvents(
   t: ReturnType<typeof makeTestClient>,
-  connectorId: string,
+  connectorId: Awaited<ReturnType<typeof seedConnector>>,
   events: Array<{
     uuid: string;
     type: string;
@@ -21,10 +21,17 @@ async function recordEvents(
     waitMs?: number;
   }>,
 ) {
-  return await t.mutation(api.ingest.record, {
+  return await t.mutation(api.ingest.recordBatch, {
     internalToken: INTERNAL_TOKEN,
     connectorId,
-    events,
+    events: events.map((event) => ({
+      uuid: event.uuid,
+      type: event.type,
+      queue_name: event.queueName,
+      ts: event.ts,
+      duration_ms: event.durationMs,
+      wait_ms: event.waitMs,
+    })),
   });
 }
 
