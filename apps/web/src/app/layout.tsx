@@ -9,7 +9,7 @@ const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono'
 export const metadata: Metadata = {
   title: 'SuperBull: the BullMQ dashboard',
   description:
-    'Monitor, debug and operate BullMQ queues. Standalone board, headless proxy, or a federated hub with analytics, error tracking, email alerts and public status pages.',
+    'Monitor, debug and operate BullMQ queues. Standalone board or a hosted hub with connectors, analytics, error tracking, email alerts and public status pages.',
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
