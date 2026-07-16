@@ -1,6 +1,6 @@
 # superbull
 
-A restyled, feature-rich dashboard for [BullMQ](https://docs.bullmq.io) — inspired by the
+A restyled, feature-rich dashboard for [BullMQ](https://docs.bullmq.io), inspired by the
 UX of trigger.dev, styled in a clean light theme like dub. It embeds into your existing app
 via a thin server adapter (Express, Fastify, Hono, Koa, H3, Hapi, Elysia, Bun, NestJS) and
 uses your app's own `bullmq` instance, so job actions are always version-correct.
@@ -73,9 +73,9 @@ serve({ fetch: app.fetch, port: 3000 });
                                  └──────────────────┘
 ```
 
-- **standalone** — mount an adapter directly in your app. Serves the UI and the REST API in
+- **standalone**: mount an adapter directly in your app. Serves the UI and the REST API in
   the same process. No sign-in, no outbound connection anywhere.
-- **hosted** — sign in with Google, create a connector in your workspace, and run
+- **hosted**: sign in with Google, create a connector in your workspace, and run
   `npx @superbull/connector` next to your workers. It opens one outbound WebSocket to
   `connect.superbull.com`: no inbound port, no public URL, nothing to expose. Its dashboard
   goes live at `/app/[workspaceSlug]/connectors/[connectorId]`, alongside ingest-driven
@@ -85,75 +85,89 @@ serve({ fetch: app.fetch, port: 3000 });
 ## Connector usage
 
 ```bash
-npx @superbull/connector --token <the-one-time-token-from-your-workspace>
+npx @superbull/connector --url wss://connect.superbull.com --token <one-time-token>
 ```
 
-The bin is `superbull-connector`. Create a connector from your workspace (**Connectors → New
-connector**) to get that token — it's shown exactly once, and the workspace only ever stores
-a hash of it.
+The bin is `superbull-connector`. Create a connector from your workspace (**Connectors →
+New connector**) to get that token, plus this exact command with everything filled in. The
+token is shown exactly once, and the workspace only ever stores a hash of it.
 
 ```
-Flag                  Env var           Default
--t, --token            SUPERBULL_TOKEN   (required)
---url                  SUPERBULL_URL     wss://connect.superbull.com
--n, --name             SUPERBULL_NAME    os.hostname()
---queues a,b,c         SUPERBULL_QUEUES  auto-discovered via SCAN
---prefix               SUPERBULL_PREFIX  bull
--h, --redis-host       REDIS_HOST        127.0.0.1
--p, --redis-port       REDIS_PORT        6379
---redis-password       REDIS_PASSWORD    -
---redis-db             REDIS_DB          -
---redis-tls            REDIS_TLS=true    false
+Flag                    Env var           Default
+-u, --url               SUPERBULL_URL     (required) gateway URL, wss://connect.superbull.com
+-t, --token             SUPERBULL_TOKEN   (required) one-time enrollment token
+-n, --name              SUPERBULL_NAME    os.hostname()
+--queues a,b,c          SUPERBULL_QUEUES  auto-discovered via SCAN <prefix>:*:meta
+--prefix                SUPERBULL_PREFIX  bull
+-h, --redis-host        REDIS_HOST        127.0.0.1
+-p, --redis-port        REDIS_PORT        6379
+--redis-password        REDIS_PASSWORD    -
+--redis-db              REDIS_DB          -
+--redis-tls             REDIS_TLS=true    false
 ```
 
 Once connected, the connector streams `job.completed`/`job.failed` events (via BullMQ
-`QueueEvents`, not polling) plus a `queue.snapshot` every 60s — counts, worker count, oldest
-waiting job age — over that same WebSocket. Delivery is at-least-once: events are only
+`QueueEvents`, not polling) plus a `queue.snapshot` every 60s: counts, worker count, oldest
+waiting job age, over that same WebSocket. Delivery is at-least-once: events are only
 considered sent once the gateway acknowledges the batch, and the workspace dedupes by event
 `uuid`. If the connection drops, the connector reconnects with jittered exponential backoff
-(base 1s, cap 60s); while disconnected, dashboard and MCP actions against it fail fast with
-`"connector disconnected"` instead of queuing.
+(base 1s, cap 60s); an unauthorized token exits instead of retrying. While a connector is
+disconnected, live dashboard actions against it fail immediately instead of queuing.
 
 ## The hosted app
 
 The hosted app (`apps/web`) is a Next.js app deployed to Vercel. Sign in with Google; a
-personal workspace is created for you automatically, and you can invite teammates by email
-(roles: owner/admin/member). Everything it stores — workspaces, members, connectors, ingested
-events, alert rules, dashboards, status page configs — lives in **Convex**, not Postgres.
+personal workspace is created for you automatically, and owners/admins can invite teammates
+by email (roles: owner/admin/member). Everything it stores, from workspaces and connectors
+to ingested events, alert rules, dashboards, and status page configs, lives in **Convex**,
+not Postgres.
 
 Architecture:
 
-- **apps/web** (Vercel) — marketing, docs, the product under `/app/[workspaceSlug]/...`, and
+- **apps/web** (Vercel): marketing, docs, the product under `/app/[workspaceSlug]/...`, and
   public status pages at `/status/[slug]`.
-- **apps/gateway** (`connect.superbull.com`) — the always-on WebSocket service every connector
-  opens its one outbound connection to; relays requests from the web app to the right
-  connector and forwards its events back.
-- **Convex** — the datastore, plus `evaluateAlerts` (every 5 minutes) and `sendDigest` (daily
-  9am) crons for alert emails, no separate worker process to run.
+- **apps/gateway** (`connect.superbull.com`): the always-on WebSocket service every
+  connector opens its one outbound connection to. It authenticates connectors by token
+  hash, forwards their event batches into Convex, and exposes an internal RPC API
+  (`POST /internal/rpc`) for relaying dashboard requests to a live connector.
+- **Convex**: the datastore, plus the `evaluate alerts` (every 5 minutes) and
+  `send daily digest` (daily 09:00 UTC) crons for alert emails. No separate worker process
+  to run.
 
-Env vars:
+Env vars (names only):
 
-| Var | Purpose |
-| --- | --- |
-| `NEXT_PUBLIC_CONVEX_URL` | The Convex deployment the web app reads/writes against |
-| `CONVEX_INTERNAL_TOKEN` | Shared secret the web app and gateway send with internal Convex calls |
-| `SUPERBULL_API_TOKEN` | Bearer token that guards the management REST API and the MCP endpoint |
-| `GATEWAY_URL` / `GATEWAY_INTERNAL_TOKEN` | Where the web app reaches the gateway's internal RPC API, and its bearer token |
+| Var | Used by | Purpose |
+| --- | --- | --- |
+| `NEXT_PUBLIC_CONVEX_URL` | web | The Convex deployment the web app reads/writes against |
+| `CONVEX_INTERNAL_TOKEN` | web, gateway, Convex | Shared secret sent with internal Convex calls |
+| `SUPERBULL_API_TOKEN` | web | Bearer token guarding the management REST API and the MCP endpoint |
+| `CONVEX_URL` | gateway | The Convex deployment the gateway records events into |
+| `GATEWAY_INTERNAL_TOKEN` | gateway | Bearer token guarding the gateway's internal RPC API |
+| `PORT` | gateway | Listen port (default 4650) |
+| `RESEND_API_KEY`, `EMAIL_FROM` | Convex | Alert/digest email delivery (emails are skipped when unset) |
 
 ## MCP
 
-Endpoint: `POST /api/mcp` (streamable HTTP, `mcp-handler` + `@modelcontextprotocol/sdk`).
-Auth: `Authorization: Bearer <SUPERBULL_API_TOKEN>` — timing-safe compared, required on every call;
-an unset `SUPERBULL_API_TOKEN` rejects all requests.
+The hosted app exposes an MCP server at `POST /api/mcp` (streamable HTTP, SSE disabled).
+Auth: `Authorization: Bearer <SUPERBULL_API_TOKEN>`, timing-safe compared and required on
+every call; an unset `SUPERBULL_API_TOKEN` rejects all requests.
 
-| Tool | Effect |
+```bash
+claude mcp add --transport http superbull https://superbull.com/api/mcp \
+  --header "Authorization: Bearer $SUPERBULL_API_TOKEN"
+```
+
+14 tools, all relayed to the connector named by `connector_id`:
+
+| Group | Tools |
 | --- | --- |
-| `list_connectors` | List connectors in the workspace (no tokens) |
-| `remove_connector` | Delete a connector |
-| `list_queues` | Queue name/counts/paused state for a connector |
-| `get_queue` | One queue's current page of jobs (`status`, `page` filters) |
-| `retry_job` | Retry a failed/completed job |
-| `pause_queue` / `resume_queue` | Stop/start a queue's processing |
+| Discover | `list_connectors` (never returns enrollment tokens), `remove_connector`; create connectors in the web UI |
+| Inspect | `list_queues`, `get_queue`, `get_queue_stats`, `get_job`, `get_job_logs` |
+| Act | `add_job`, `retry_job`, `promote_job`, `remove_job`, `pause_queue`, `resume_queue`, `clean_queue` |
+
+An unknown `connector_id` returns a `"connector not found"` tool error; a disconnected
+connector fails fast (the gateway rejects the RPC rather than queuing it). See
+[/docs/mcp](https://superbull.com/docs/mcp) for per-tool inputs and examples.
 
 ## Development
 
@@ -174,7 +188,10 @@ pnpm --filter @superbull/web e2e    # hosted two-hop e2e: convex + gateway + con
 | --- | --- |
 | `@superbull/api` | Framework-agnostic core: queue adapter, route table, request handlers |
 | `@superbull/react` | The dashboard UI (React + Vite), served as static assets |
-| `@superbull/connector` | Outbound-only agent for the hosted app — one WebSocket, no inbound port |
+| `@superbull/ui` | Shared React component library used by the web app and dashboard |
+| `@superbull/protocol` | The connector ↔ gateway WebSocket frame contract (zod schemas) |
+| `@superbull/connector` | Outbound-only agent for the hosted app: one WebSocket, no inbound port |
+| `@superbull/proxy` | Legacy inbound-HTTP agent, superseded by `@superbull/connector` |
 | `@superbull/express` | Express server adapter |
 | `@superbull/fastify` | Fastify server adapter |
 | `@superbull/hono` | Hono server adapter |
@@ -184,8 +201,10 @@ pnpm --filter @superbull/web e2e    # hosted two-hop e2e: convex + gateway + con
 | `@superbull/elysia` | Elysia server adapter |
 | `@superbull/bun` | Bun server adapter |
 | `@superbull/nestjs` | NestJS module |
-| `apps/web` | The hosted app: workspaces, per-connector dashboards, REST + MCP |
-| `apps/gateway` | Always-on WebSocket service connectors connect out to |
+| `@superbull/test-utils` | Shared test helpers (private) |
+| `apps/web` | The hosted app: workspaces, per-connector dashboards, REST + MCP (private) |
+| `apps/gateway` | Always-on WebSocket service connectors connect out to (private) |
+| `apps/dev` | Local demo/e2e harness for the standalone adapters (private) |
 
 ## License
 
