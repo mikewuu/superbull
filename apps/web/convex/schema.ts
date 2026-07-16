@@ -68,7 +68,10 @@ export default defineSchema({
     workerCount: v.optional(v.number()),
     oldestWaitingMs: v.optional(v.number()),
   })
-    .index('by_uuid', ['uuid'])
+    // Dedupe is scoped per connector: uuids are minted by the connector as
+    // `${queueName}:${streamEventId}`, so two tenants monitoring same-named
+    // queues can legitimately produce identical uuids.
+    .index('by_connector_uuid', ['connectorId', 'uuid'])
     .index('by_connector_ts', ['connectorId', 'ts'])
     .index('by_connector_queue_ts', ['connectorId', 'queueName', 'ts'])
     .index('by_workspace_ts', ['workspaceId', 'ts']),

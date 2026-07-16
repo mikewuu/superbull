@@ -29,10 +29,13 @@ async function insertEvents(
   let accepted = 0;
   let deduped = 0;
   for (const event of events) {
+    // .first(), not .unique(): if duplicate rows for one (connectorId, uuid)
+    // ever land (e.g. rows inserted before dedupe was connector-scoped), the
+    // lookup must keep deduping rather than throw on every later batch.
     const existing = await ctx.db
       .query('ingestEvents')
-      .withIndex('by_uuid', (q) => q.eq('uuid', event.uuid))
-      .unique();
+      .withIndex('by_connector_uuid', (q) => q.eq('connectorId', connectorId).eq('uuid', event.uuid))
+      .first();
     if (existing) {
       deduped++;
       continue;
