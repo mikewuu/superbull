@@ -23,7 +23,10 @@ export function registerListConnectorsTool(server: McpServer): void {
           connectors: connectors.map((connector) => ({
             id: connector.id,
             name: connector.name,
-            url: connector.url,
+            is_connected:
+              connector.lastConnectedAt !== null &&
+              (connector.lastDisconnectedAt === null ||
+                connector.lastDisconnectedAt < connector.lastConnectedAt),
             created_at: connector.created_at.toISOString(),
           })),
         });

@@ -10,7 +10,6 @@ type ToolId =
   | 'pause_queue'
   | 'resume_queue'
   | 'list_connectors'
-  | 'add_connector'
   | 'remove_connector';
 
 const tools: Record<ToolId, { desc: string; request: string; response: string }> = {
@@ -50,12 +49,6 @@ const tools: Record<ToolId, { desc: string; request: string; response: string }>
     request: '{ "tool": "list_connectors", "arguments": {} }',
     response:
       '{ "connectors": [\n    { "id": "cnn_9f2a", "name": "my-app", "is_connected": true,\n      "created_at": "2026-03-02T18:04:00.000Z" } ] }',
-  },
-  add_connector: {
-    desc: 'Create a connector; returns its one-time enrollment token, shown only here.',
-    request: '{ "tool": "add_connector", "arguments": { "name": "my-app" } }',
-    response:
-      '{ "id": "cnn_9f2a", "name": "my-app", "token": "sbc_...",\n  "created_at": "2026-03-02T18:04:00.000Z" }',
   },
   remove_connector: {
     desc: 'Remove a connector from the workspace.',

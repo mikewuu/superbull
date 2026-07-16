@@ -89,11 +89,6 @@ export const rows = [
     '{}',
     'List every connector in the workspace (id, name, is_connected, created_at): tokens are never returned',
   ],
-  [
-    'add_connector',
-    '{ name: string }',
-    'Create a connector; returns its one-time enrollment token, shown only in this response',
-  ],
   ['remove_connector', '{ connector_id: string }', 'Delete a connector'],
   [
     'list_queues',

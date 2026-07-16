@@ -46,8 +46,7 @@ it was sent with. Every workspace query and mutation checks membership first
 token, shown exactly once. Paste it into \`npx @superbull/connector --token
 ...\` (see [Connector](/docs/connector)) and the dashboard for that connector
 goes live at \`/app/[workspaceSlug]/connectors/[connectorId]\` as soon as it
-connects. The same flow is available to an agent through the \`add_connector\`
-MCP tool (see [MCP](/docs/mcp)).
+connects.
 
 ## Ingest
 

@@ -17,9 +17,8 @@ auto-discovered.
 
 ## Getting a token
 
-Create a connector from your workspace (**Connectors → New connector**) or
-with the \`add_connector\` MCP tool (see [MCP](/docs/mcp)). Either way you get a
-one-time enrollment token, shown exactly once. The workspace only ever stores
+Create a connector from your workspace (**Connectors → New connector**). You
+get a one-time enrollment token, shown exactly once. The workspace only ever stores
 a hash of it, so if you lose it before pasting it into \`--token\`, delete the
 connector and create a new one.
 `;

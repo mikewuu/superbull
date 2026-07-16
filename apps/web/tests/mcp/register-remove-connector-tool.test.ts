@@ -51,8 +51,6 @@ describe('registerRemoveConnectorTool', () => {
       id: 'src_1',
       workspaceId: 'ws_1',
       name: 'proxy-a',
-      url: 'https://proxy-a.example.com',
-      token: 'secret',
       version: null,
       queues: null,
       lastConnectedAt: null,

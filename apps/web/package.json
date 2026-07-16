@@ -10,8 +10,7 @@
     "test": "vitest run",
     "e2e": "playwright test",
     "convex:dev": "convex dev",
-    "convex:codegen": "convex codegen",
-    "seed:status-page": "tsx --env-file=.env.local src/scripts/seed-status-page.ts"
+    "convex:codegen": "convex codegen"
   },
   "dependencies": {
     "@auth/core": "^0.41.2",

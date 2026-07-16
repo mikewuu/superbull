@@ -2,7 +2,6 @@ import { timingSafeEqual } from 'node:crypto';
 import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
 import { createMcpHandler, withMcpAuth } from 'mcp-handler';
 import { env } from '../../../lib/config/env';
-import { registerAddConnectorTool } from '../../../lib/mcp/register-add-connector-tool';
 import { registerGetQueueTool } from '../../../lib/mcp/register-get-queue-tool';
 import { registerListConnectorsTool } from '../../../lib/mcp/register-list-connectors-tool';
 import { registerListQueuesTool } from '../../../lib/mcp/register-list-queues-tool';
@@ -11,14 +10,14 @@ import { registerRemoveConnectorTool } from '../../../lib/mcp/register-remove-co
 import { registerResumeQueueTool } from '../../../lib/mcp/register-resume-queue-tool';
 import { registerRetryJobTool } from '../../../lib/mcp/register-retry-job-tool';
 
-// TODO(round-3+): list_connectors/add_connector/remove_connector run under
-// the single global SUPERBULL_API_TOKEN, so they see connectors across every
-// workspace on the deployment (matching the pre-multi-tenant hub API this
-// route replaces the front door for). Round 3+ should move MCP auth to
-// per-workspace API keys and scope these tools to one workspace.
-const instructions = `superbull hub federates one or more remote superbull proxies, each fronting a BullMQ deployment.
+// TODO(7.2e): list_connectors/remove_connector run under the single global
+// SUPERBULL_API_TOKEN, so they see connectors across every workspace on the
+// deployment (matching the pre-multi-tenant hub API this route replaces the
+// front door for). Pending the owner's auth-model decision, MCP auth should
+// move to per-workspace API keys and scope these tools to one workspace.
+const instructions = `superbull monitors BullMQ deployments through connectors, processes that stream queue activity into a workspace over the hosted gateway.
 
-DISCOVER: list_connectors shows every connector registered with the hub (never returns bearer tokens). add_connector registers a new one. It stores the token as a credential and never returns it again; remove_connector deletes one.
+DISCOVER: list_connectors shows every connector in the deployment (never returns enrollment tokens); create new connectors in the web UI (Connectors, New connector). remove_connector deletes one.
 
 INSPECT: list_queues(connector_id) gives every queue's name, job counts, and paused state. get_queue(connector_id, queue_name) drills into one queue's current page of jobs; pass status to filter (e.g. "failed") and page to paginate.
 
@@ -27,7 +26,6 @@ ACT: retry_job(connector_id, queue_name, job_id) retries a failed or completed j
 const handler = createMcpHandler(
   (server) => {
     registerListConnectorsTool(server);
-    registerAddConnectorTool(server);
     registerRemoveConnectorTool(server);
     registerListQueuesTool(server);
     registerGetQueueTool(server);
