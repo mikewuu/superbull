@@ -17,6 +17,7 @@ const contentTypes: Record<string, string> = {
 };
 
 let entryTemplate: string | undefined;
+let tokensCss: string | undefined;
 
 export async function GET(
   _req: Request,
@@ -53,10 +54,14 @@ export async function GET(
   // "connector disconnected" errors, so show enrollment guidance instead.
   if (connector.lastConnectedAt === null) {
     return new NextResponse(
-      renderPendingHtml(
-        `${escapeHtml(connector.name)} hasn't connected yet. Run the connector command from the Connectors page next to your Redis, then reload — the dashboard appears once it dials in.`,
-      ),
-      { status: 200, headers: { 'content-type': 'text/html', 'cache-control': 'no-store' } },
+      await renderPendingHtml({
+        connectorName: connector.name,
+        connectorsHref: `/app/${workspaceSlug}/connectors`,
+      }),
+      {
+        status: 200,
+        headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' },
+      },
     );
   }
 
@@ -70,12 +75,46 @@ export async function GET(
 
   return new NextResponse(html, {
     status: 200,
-    headers: { 'content-type': 'text/html', 'cache-control': 'no-store' },
+    headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' },
   });
 }
 
-function renderPendingHtml(message: string): string {
-  return `<!doctype html><html><head><title>Waiting for connector · SuperBull</title></head><body style="font-family: sans-serif; padding: 2rem; max-width: 40rem;"><h1 style="font-size: 1rem;">Waiting for the connector</h1><p style="color: #555; font-size: 0.875rem; line-height: 1.5;">${message}</p></body></html>`;
+// Styled with the design system's tokens.css (inlined; this route serves raw
+// HTML outside the app's CSS pipeline). Meta-refreshes every 5s so the deep
+// link swaps itself for the dashboard as soon as the connector dials in.
+async function renderPendingHtml(args: {
+  connectorName: string;
+  connectorsHref: string;
+}): Promise<string> {
+  const tokens = await getTokensCss();
+  const name = escapeHtml(args.connectorName);
+  return `<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="5">
+<title>Waiting for connector · SuperBull</title>
+<style>
+${tokens}
+body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; background: rgb(var(--bg-muted)); color: rgb(var(--content-default)); }
+main { max-width: 26rem; margin: 1rem; padding: 1.75rem; background: rgb(var(--bg-default)); border: 1px solid rgb(var(--border-subtle)); border-radius: 0.75rem; }
+.badge { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.125rem 0.5rem; border-radius: 0.25rem; background: rgb(var(--bg-attention)); color: rgb(var(--content-attention)); font-size: 0.6875rem; font-weight: 500; }
+.dot { width: 0.375rem; height: 0.375rem; border-radius: 9999px; background: rgb(var(--content-attention)); }
+h1 { margin: 0.75rem 0 0; font-size: 1rem; font-weight: 600; color: rgb(var(--content-emphasis)); }
+p { margin: 0.5rem 0 0; font-size: 0.875rem; line-height: 1.5; color: rgb(var(--content-subtle)); }
+a { display: inline-block; margin-top: 1rem; font-size: 0.875rem; font-weight: 500; color: rgb(var(--content-emphasis)); }
+</style>
+</head>
+<body>
+<main>
+<span class="badge"><span class="dot"></span>pending</span>
+<h1>Waiting for ${name} to connect</h1>
+<p>Run the connector command from the Connectors page next to your Redis. This page refreshes automatically and the dashboard appears as soon as it dials in.</p>
+<a href="${args.connectorsHref}">Back to connectors</a>
+</main>
+</body>
+</html>`;
 }
 
 function escapeHtml(value: string): string {
@@ -95,6 +134,16 @@ async function getEntryTemplate(distDir: string): Promise<string> {
     entryTemplate = await readFile(path.join(distDir, 'index.ejs'), 'utf8');
   }
   return entryTemplate;
+}
+
+async function getTokensCss(): Promise<string> {
+  if (!tokensCss) {
+    tokensCss = await readFile(
+      path.join(process.cwd(), 'node_modules', '@superbull/ui', 'src', 'styles', 'tokens.css'),
+      'utf8',
+    );
+  }
+  return tokensCss;
 }
 
 async function serveStaticAsset(distDir: string, segments: string[]): Promise<NextResponse> {

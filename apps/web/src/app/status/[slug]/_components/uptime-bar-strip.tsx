@@ -24,13 +24,13 @@ export function UptimeBarStrip(props: UptimeBarStripProps) {
 function getBarColorClass(rate: number | null): string {
   const color = getUptimeBarColor(rate);
   if (color === 'green') {
-    return 'bg-green-500';
+    return 'bg-content-success';
   }
   if (color === 'amber') {
-    return 'bg-amber-400';
+    return 'bg-content-warning';
   }
   if (color === 'red') {
-    return 'bg-red-500';
+    return 'bg-content-error';
   }
-  return 'bg-neutral-200';
+  return 'bg-bg-emphasis';
 }
