@@ -274,21 +274,16 @@ The hosted app (superbull.com) additionally exposes a small management surface
 under \`/api/...\` on the web app itself. It predates workspaces: every route
 below authenticates with a single deployment-wide bearer token
 (\`Authorization: Bearer <SUPERBULL_API_TOKEN>\`, timing-safe compared), except
-\`/api/ingest\`, which authenticates with the calling connector's own token, and
 \`/api/health\`, which is public. This surface is transitional: it still speaks
-in terms of "sources" (the pre-rewrite name for connectors), and per-workspace
-API keys are planned to replace the global token.
+in terms of "sources" (the pre-rewrite name for connectors) on the wire, and
+per-workspace API keys are planned to replace the global token. Connector
+enrollment and event ingest are not part of it: connectors are created in the
+web UI and stream events to the gateway over their WebSocket.
 `;
 
 export const hostedHeaders = ['Method', 'Path', 'Query / body', 'Response'];
 export const hostedRows = [
   ['GET', '/api/health', '-', '{ ok: true }, no auth'],
-  [
-    'POST',
-    '/api/ingest',
-    '{ source_id, events: [...] } (max 500 events; connector-token auth)',
-    '{ accepted, deduped }: events deduped by uuid',
-  ],
   [
     'GET',
     '/api/annotations',
@@ -301,15 +296,6 @@ export const hostedRows = [
     '{ source_id, label, ts | null } (null ts = now)',
     '201, the created annotation',
   ],
-  [
-    'GET',
-    '/api/sources',
-    '-',
-    '{ sources: [{ id, name, url, created_at }] }: only URL-registered (legacy proxy) connectors',
-  ],
-  ['POST', '/api/sources', '{ name, url, token }', '201, the created source'],
-  ['POST', '/api/sources/register', '{ name, url, token }', '{ source_id, name, url }: upserts by name'],
-  ['DELETE', '/api/sources/:sourceId', '-', '204, or 404 for an unknown id'],
 ];
 
 export const hostedOutro = `

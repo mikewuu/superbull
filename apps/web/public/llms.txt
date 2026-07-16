@@ -21,7 +21,7 @@
 
 - Endpoint: https://superbull.com/api/mcp (streamable HTTP)
 - Auth: `Authorization: Bearer` token, set via the `SUPERBULL_API_TOKEN` env var on the deployment
-- Tools: list_connectors, add_connector, remove_connector, list_queues, get_queue, get_queue_stats, get_job, get_job_logs, add_job, retry_job, promote_job, remove_job, pause_queue, resume_queue, clean_queue
+- Tools: list_connectors, remove_connector, list_queues, get_queue, get_queue_stats, get_job, get_job_logs, add_job, retry_job, promote_job, remove_job, pause_queue, resume_queue, clean_queue (connectors are created in the web UI)
 
 ## Packages (npm)
 
@@ -30,7 +30,6 @@
 - [@superbull/express](https://www.npmjs.com/package/@superbull/express), [@superbull/fastify](https://www.npmjs.com/package/@superbull/fastify), [@superbull/hono](https://www.npmjs.com/package/@superbull/hono), [@superbull/koa](https://www.npmjs.com/package/@superbull/koa), [@superbull/h3](https://www.npmjs.com/package/@superbull/h3), [@superbull/hapi](https://www.npmjs.com/package/@superbull/hapi), [@superbull/elysia](https://www.npmjs.com/package/@superbull/elysia), [@superbull/bun](https://www.npmjs.com/package/@superbull/bun), [@superbull/nestjs](https://www.npmjs.com/package/@superbull/nestjs): server adapters
 - [@superbull/react](https://www.npmjs.com/package/@superbull/react): the prebuilt dashboard UI served by the adapters
 - [@superbull/protocol](https://www.npmjs.com/package/@superbull/protocol): the gateway/connector WebSocket frame contract
-- [@superbull/proxy](https://www.npmjs.com/package/@superbull/proxy): legacy inbound-HTTP agent, superseded by @superbull/connector
 
 ## Source
 

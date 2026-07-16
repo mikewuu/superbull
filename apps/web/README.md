@@ -2,7 +2,7 @@
 
 Private workspace app (not published). The hosted [SuperBull](https://superbull.com) product: a Next.js app on Vercel serving the marketing site, the docs, the workspace product under `/app/[workspaceSlug]/...`, public status pages under `/status/[slug]`, the management REST API, and the MCP endpoint at `/api/mcp`. All state (workspaces, members, connectors, ingested events, alert rules, dashboards, status pages) lives in Convex, which also runs the alert-evaluation and daily-digest crons.
 
-Sign-in is Google via `@convex-dev/auth`; a personal workspace is created on first sign-in. Events arrive from connectors through the gateway (`apps/gateway`) into Convex; live queue actions currently use a direct-HTTP forwarding path retained from the legacy proxy (`src/lib/forwarding/forward-to-proxy.ts`), with the migration to the gateway's RPC bridge pending.
+Sign-in is Google via `@convex-dev/auth`; a personal workspace is created on first sign-in. Events arrive from connectors through the gateway (`apps/gateway`) into Convex; live queue reads and actions (the per-connector dashboard and the MCP tools) are relayed to the connector through the gateway's RPC bridge (`src/lib/gateway/call-gateway-rpc.ts`).
 
 ## Environment variables
 

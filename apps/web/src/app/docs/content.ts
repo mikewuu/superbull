@@ -12,9 +12,9 @@ There are two ways to run it:
   one command next to your workers: \`npx @superbull/connector --token ...\`. It
   opens a single outbound WebSocket, no inbound port, no public URL. Ingest-driven
   history, analytics, error tracking, email alerts, dashboards, and public status
-  pages go live for every connector in the workspace; the embedded live dashboard
-  at \`/app/[workspaceSlug]/connectors/[connectorId]\` currently still requires a
-  connector registered with a reachable URL through the legacy proxy flow. See
+  pages go live for every connector in the workspace, and the embedded live
+  dashboard at \`/app/[workspaceSlug]/connectors/[connectorId]\` operates your
+  queues over that same WebSocket. See
   [Getting started](/docs/getting-started),
   [Connector](/docs/connector), and [Hosted app](/docs/hub).
 - **Standalone**: mount an adapter (Express, Fastify, Hono, Koa, h3, Hapi, Elysia,

@@ -52,18 +52,18 @@ existence is never leaked to another's users.
 token, shown exactly once, plus the exact \`npx @superbull/connector\` command
 to run (see [Connector](/docs/connector)). As soon as it connects, everything
 ingest-driven (history, analytics, alerts, status pages; see Ingest below)
-goes live for it. The embedded live dashboard at
-\`/app/[workspaceSlug]/connectors/[connectorId]\` is the transitional
-exception: today it requires a connector registered with a reachable URL
-through the legacy proxy flow (see the caveat under Per-connector dashboard).
+goes live for it, and so does the embedded live dashboard at
+\`/app/[workspaceSlug]/connectors/[connectorId]\`. Until the connector dials in
+for the first time, that dashboard URL shows enrollment guidance instead and
+swaps itself for the dashboard as soon as the connector connects.
 
 ## Ingest
 
 Connectors don't get polled. Each one streams \`job.completed\`/\`job.failed\`
 events and 60-second \`queue.snapshot\`s over its WebSocket as \`events\` frames;
 the gateway acknowledges with \`events_ack\` and records the batch in Convex,
-deduped by event \`uuid\` (at-least-once delivery, so duplicates are expected
-and harmless). Up to 500 events per batch. Everything ingest-driven (history,
+deduped by event \`uuid\` per connector (at-least-once delivery, so duplicates
+are expected and harmless). Up to 500 events per batch. Everything ingest-driven (history,
 [analytics](/docs/analytics), [alerts](/docs/alerts),
 [status pages](/docs/status-pages)) works whenever the connector is or was
 connected; nothing about it requires an inbound path to your infrastructure.
@@ -72,17 +72,13 @@ connected; nothing about it requires an inbound path to your infrastructure.
 
 \`/app/[workspaceSlug]/connectors/[connectorId]\` serves the same
 \`@superbull/react\` SPA a standalone board serves, pointed at that connector,
-and live actions there (retry, pause, add) run against your real queues. One
-transitional caveat: the web app currently forwards every dashboard request,
-reads included, over a direct HTTP path retained from the legacy
-\`superbull-proxy\` agent, which requires a connector registered with a
-reachable URL. A connector enrolled through the WebSocket flow answers
-\`502 { "error": "this connector hasn't been enrolled through the legacy proxy flow" }\`,
-and a proxy-registered one that is unreachable answers
-\`502 { "error": "proxy unreachable" }\`. Relaying those requests over the
-gateway's WebSocket, so that WebSocket-only connectors are fully operable with
-no inbound path, is built on the gateway side but not yet wired into the web
-app.
+and live actions there (retry, pause, add) run against your real queues. Every
+dashboard request, reads included, is relayed through the gateway's RPC bridge
+and answered by the connector over its own WebSocket, so a WebSocket-only
+connector is fully operable with no inbound path to your infrastructure. There
+is no queuing: a connector with no live session answers
+\`502 { "error": "connector disconnected" }\`, and one that doesn't reply within
+10 seconds answers \`504 { "error": "connector timeout" }\`.
 
 ## Background jobs
 

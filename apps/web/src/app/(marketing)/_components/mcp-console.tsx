@@ -56,7 +56,7 @@ const tools: Record<ToolId, { desc: string; request: string; response: string }>
     desc: 'List every registered connector, without their bearer tokens.',
     request: '{ "tool": "list_connectors", "arguments": {} }',
     response:
-      '{ "connectors": [\n    { "id": "cnn_9f2a", "name": "my-app", "url": "https://proxy.internal:9865",\n      "created_at": "2026-03-02T18:04:00.000Z" } ] }',
+      '{ "connectors": [\n    { "id": "cnn_9f2a", "name": "my-app", "is_connected": true,\n      "created_at": "2026-03-02T18:04:00.000Z" } ] }',
   },
   remove_connector: {
     desc: 'Delete a connector and its stored credential.',

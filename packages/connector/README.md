@@ -5,7 +5,7 @@ The outbound agent for [SuperBull](https://superbull.com)'s hosted mode. Run it 
 ## Run
 
 ```bash
-npx @superbull/connector --url wss://connect.superbull.com --token <one-time-token>
+npx @superbull/connector --token <one-time-token>
 ```
 
 The bin is `superbull-connector`. Get the one-time token by creating a connector in your workspace (Connectors, then New connector); it is shown exactly once and the workspace stores only a hash of it.
@@ -14,7 +14,7 @@ The bin is `superbull-connector`. Get the one-time token by creating a connector
 
 | Flag | Env var | Default |
 | --- | --- | --- |
-| `-u, --url` | `SUPERBULL_URL` | required |
+| `-u, --url` | `SUPERBULL_URL` | `wss://connect.superbull.com` (the hosted gateway) |
 | `-t, --token` | `SUPERBULL_TOKEN` | required |
 | `-n, --name` | `SUPERBULL_NAME` | `os.hostname()` |
 | `--queues a,b,c` | `SUPERBULL_QUEUES` | auto-discovered via Redis `SCAN` |
@@ -31,7 +31,7 @@ Unknown flags are an error. `bullmq` (`^5.0.0`) is a peer dependency.
 ## Behavior
 
 - **Events, not polling.** One blocking BullMQ `QueueEvents` consumer per queue emits `job.completed` / `job.failed` (enriched with job name, duration, and wait time where available), plus a `queue.snapshot` every 60s with counts, worker count, and oldest waiting job age.
-- **At-least-once delivery.** Event batches count as sent only after the gateway acknowledges them; the workspace dedupes by event `uuid`. Unacked batches are resent after reconnect. The buffer caps at 5000 events, then drops oldest first with a warning.
+- **At-least-once delivery.** Event batches count as sent only after the gateway acknowledges them; the workspace dedupes by event `uuid` per connector. Unacked batches are resent after reconnect. The buffer caps at 5000 events, then drops oldest first with a warning.
 - **Reconnects.** Jittered exponential backoff, base 1s, capped at 60s. The gateway pings over the socket; 45s without a ping and the connector terminates the connection and redials.
 - **Auth failure is terminal.** On an unauthorized handshake the connector exits without reconnecting (the token was deleted or already replaced by another connector).
 - **Fail-fast RPC.** While disconnected, dashboard and MCP actions against this connector fail immediately with "connector disconnected" rather than queueing.

@@ -71,15 +71,18 @@ every mutation as production and say what you changed.
 
 ## Error handling
 
-Errors come back with the proxy's own message, which names the rule you hit:
+Errors come back with the connector's own message (or the gateway's, for
+delivery failures), which names the rule you hit:
 
-- `connector not found`: wrong `connector_id`, or the connector was enrolled
-  through the newer gateway flow and has no stored proxy url/token, so it is
-  not reachable over MCP yet. Re-run `list_connectors`; if it is listed but
-  still errors, send the user to the dashboard for that connector.
-- `proxy unreachable`: the connector's proxy is down or unreachable. Calls
-  fail fast and are never queued; report it rather than retrying in a loop.
-- `queue is read-only`: the proxy mounted this queue read-only, so every
+- `connector not found`: wrong `connector_id`. Re-run `list_connectors` and
+  pick the id from there.
+- `connector disconnected`: the connector process has no live WebSocket
+  session, so the gateway rejects the call instead of queuing it. Ask the user
+  to start the connector; `list_connectors` shows `is_connected` per
+  connector.
+- `connector timeout`: the connector is connected but did not answer within
+  10 seconds. Report it rather than retrying in a loop.
+- `queue is read-only`: the connector mounted this queue read-only, so every
   mutating tool is rejected. Inspect-only; suggest changes for the user to
   apply where the queue is writable.
 - `retries are disabled for this queue` and

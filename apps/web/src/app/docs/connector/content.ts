@@ -8,13 +8,14 @@ nothing else: no inbound port, no public URL, nothing to put behind a load
 balancer or open a firewall rule for.
 
 \`\`\`bash
-npx @superbull/connector --url wss://connect.superbull.com --token <enrollment-token>
+npx @superbull/connector --token <enrollment-token>
 \`\`\`
 
-The bin is \`superbull-connector\`. Two arguments are required: the gateway URL
-(\`--url\`) and the enrollment token (\`--token\`). Everything else has a default
-or is auto-discovered. The **New connector** dialog in your workspace prints
-this exact command with both filled in.
+The bin is \`superbull-connector\`. Only the enrollment token (\`--token\`) is
+required; \`--url\` defaults to the hosted gateway at
+\`wss://connect.superbull.com\`. Everything else has a default or is
+auto-discovered. The **New connector** dialog in your workspace prints this
+exact command with the token filled in.
 
 ## Getting a token
 
@@ -29,8 +30,8 @@ export const flagRows = [
   [
     '-u, --url <url>',
     'SUPERBULL_URL',
-    '(required)',
-    'Gateway WebSocket URL, wss://connect.superbull.com for the hosted app',
+    'wss://connect.superbull.com',
+    'Gateway WebSocket URL; the default is the hosted app',
   ],
   ['-t, --token <token>', 'SUPERBULL_TOKEN', '(required)', 'One-time enrollment token'],
   ['-n, --name <name>', 'SUPERBULL_NAME', 'os.hostname()', 'Shown in the dashboard'],
@@ -100,8 +101,8 @@ Events batch client-side (batches of 100, flushed at least every 5 seconds,
 up to 500 per frame) and are only considered sent once the gateway replies
 with \`events_ack\`; the connector's per-queue \`QueueEvents\` cursor only
 advances on ack. A dropped ack means the same events ship again on reconnect,
-and the workspace dedupes incoming events by their \`uuid\`, so retries are
-safe. If more than 5000 events pile up while disconnected, the oldest are
+and the workspace dedupes incoming events by their \`uuid\` (scoped per
+connector), so retries are safe. If more than 5000 events pile up while disconnected, the oldest are
 dropped with a warning rather than growing memory without bound.
 
 ### Reconnecting

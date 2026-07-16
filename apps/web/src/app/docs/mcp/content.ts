@@ -192,34 +192,36 @@ export const toolGroups = [
 ];
 
 export const outro = `
-Every tool that takes a \`connector_id\` forwards the call over HTTP to that
-connector's registered proxy \`url\`, authenticated with the proxy token stored
-at registration. There is no queuing or retrying on the SuperBull side; you see
-the proxy's answer or a fast failure.
+Every tool that takes a \`connector_id\` relays the call to that connector over
+its own WebSocket, via the gateway's RPC bridge. There is no queuing or
+retrying on the SuperBull side; you see the connector's answer or a fast
+failure.
 
 ## Errors and limits
 
-Tool failures come back as MCP error results with the proxy's own error text,
-so the message tells you which rule you hit:
+Tool failures come back as MCP error results carrying the error text from the
+connector (or from the gateway, for delivery failures), so the message tells
+you which rule you hit:
 
-- \`connector not found\`: the \`connector_id\` doesn't exist, or the connector
-  has no stored proxy url and token for this path to call (connectors enrolled
-  through the newer gateway flow don't yet, so they aren't reachable over MCP).
-- \`proxy unreachable\`: the connector's proxy didn't answer. Calls fail fast
-  rather than being queued; fix the proxy, then re-run the tool.
-- \`queue is read-only\`: proxies can mount a queue read-only, which rejects
-  every mutating tool (\`add_job\` through \`clean_queue\`) with HTTP 405.
+- \`connector not found\`: the \`connector_id\` doesn't match any connector.
+- \`connector disconnected\`: the connector has no live WebSocket session, so
+  the gateway rejects the call instead of queuing it. Start the connector,
+  then re-run the tool.
+- \`connector timeout\`: the connector is connected but didn't answer within
+  10 seconds.
+- \`queue is read-only\`: the connector can mount a queue read-only, which
+  rejects every mutating tool (\`add_job\` through \`clean_queue\`) with HTTP 405.
 - \`retries are disabled for this queue\`: \`retry_job\` on a queue with retries
   turned off. Completed-job retries can be disabled separately, in which case
   only failed jobs retry.
 - \`job is in "<state>" state and cannot be retried\`: \`retry_job\` only works
   from \`failed\` or \`completed\`.
-- Requests cap at 60 seconds; \`get_queue\` pages at the proxy's page size, so
-  paginate rather than raising it.
+- Requests cap at 60 seconds; \`get_queue\` pages at the connector's page size,
+  so paginate rather than raising it.
 
 ## Deliberately not exposed
 
-Some proxy routes exist in the REST surface but are not MCP tools, on purpose.
+Some connector routes exist in the queue API but are not MCP tools, on purpose.
 They are either too destructive for an agent default or are operator decisions:
 
 - \`drain\` and \`empty\`: mass-delete a queue's waiting and delayed jobs.
@@ -232,6 +234,7 @@ They are either too destructive for an agent default or are operator decisions:
 - pause-all across connectors: this one isn't a REST route either; there is
   deliberately no pause-all, so pause queues one at a time.
 
-If you genuinely need one of these, use the dashboard or the connector's own
-REST API. See [REST API](/docs/api).
+If you genuinely need one of these, use the connector's live dashboard (which
+relays the full queue API), or the REST API in standalone mode. See
+[REST API](/docs/api).
 `;

@@ -79,15 +79,14 @@ serve({ fetch: app.fetch, port: 3000 });
   `npx @superbull/connector` next to your workers. It opens one outbound WebSocket to
   `connect.superbull.com`: no inbound port, no public URL, nothing to expose. Ingest-driven
   history, analytics, error tracking, email alerts, dashboards, and public status pages go
-  live for every connector in the workspace; the embedded live dashboard at
-  `/app/[workspaceSlug]/connectors/[connectorId]` currently still requires a connector
-  registered with a reachable URL via the legacy proxy flow (see the transitional note
-  under "The hosted app").
+  live for every connector in the workspace, and the embedded live dashboard at
+  `/app/[workspaceSlug]/connectors/[connectorId]` relays queue reads and actions to the
+  connector over that same WebSocket (via the gateway's RPC bridge).
 
 ## Connector usage
 
 ```bash
-npx @superbull/connector --url wss://connect.superbull.com --token <one-time-token>
+npx @superbull/connector --token <one-time-token>
 ```
 
 The bin is `superbull-connector`. Create a connector from your workspace (**Connectors →
@@ -96,7 +95,7 @@ token is shown exactly once, and the workspace only ever stores a hash of it.
 
 ```
 Flag                    Env var           Default
--u, --url               SUPERBULL_URL     (required) gateway URL, wss://connect.superbull.com
+-u, --url               SUPERBULL_URL     wss://connect.superbull.com (the hosted gateway)
 -t, --token             SUPERBULL_TOKEN   (required) one-time enrollment token
 -n, --name              SUPERBULL_NAME    os.hostname()
 --queues a,b,c          SUPERBULL_QUEUES  auto-discovered via SCAN <prefix>:*:meta
@@ -112,7 +111,7 @@ Once connected, the connector streams `job.completed`/`job.failed` events (via B
 `QueueEvents`, not polling) plus a `queue.snapshot` every 60s: counts, worker count, oldest
 waiting job age, over that same WebSocket. Delivery is at-least-once: events are only
 considered sent once the gateway acknowledges the batch, and the workspace dedupes by event
-`uuid`. If the connection drops, the connector reconnects with jittered exponential backoff
+`uuid` per connector. If the connection drops, the connector reconnects with jittered exponential backoff
 (base 1s, cap 60s); an unauthorized token exits instead of retrying. While a connector is
 disconnected, live dashboard actions against it fail immediately instead of queuing.
 
@@ -193,7 +192,6 @@ pnpm --filter @superbull/web e2e    # hosted two-hop e2e: convex + gateway + con
 | `@superbull/ui` | Shared React component library used by the web app and dashboard |
 | `@superbull/protocol` | The connector ↔ gateway WebSocket frame contract (zod schemas) |
 | `@superbull/connector` | Outbound-only agent for the hosted app: one WebSocket, no inbound port |
-| `@superbull/proxy` | Legacy inbound-HTTP agent, superseded by `@superbull/connector` |
 | `@superbull/express` | Express server adapter |
 | `@superbull/fastify` | Fastify server adapter |
 | `@superbull/hono` | Hono server adapter |
