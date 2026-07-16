@@ -1,7 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { findConnectorByIdLegacy } from '../connectors/find-connector-by-id-legacy';
 import { forwardToProxy } from '../forwarding/forward-to-proxy';
-import { findSourceById } from '../sources/find-source-by-id';
 import { errorResult } from './error-result';
 import { jsonResult } from './json-result';
 
@@ -10,19 +10,19 @@ export function registerRetryJobTool(server: McpServer): void {
     'retry_job',
     {
       title: 'Retry job',
-      description: 'Retry a failed or completed job on a proxy source.',
-      inputSchema: { source_id: z.string(), queue_name: z.string(), job_id: z.string() },
+      description: 'Retry a failed or completed job on a connector.',
+      inputSchema: { connector_id: z.string(), queue_name: z.string(), job_id: z.string() },
       annotations: { destructiveHint: true },
     },
     async (args) => {
       try {
-        const source = await findSourceById(args.source_id);
-        if (!source) {
-          return errorResult('source not found');
+        const connector = await findConnectorByIdLegacy(args.connector_id);
+        if (!connector || !connector.url || !connector.token) {
+          return errorResult('connector not found');
         }
 
         const result = await forwardToProxy({
-          source,
+          connector: { url: connector.url, token: connector.token },
           method: 'PUT',
           path: ['queues', args.queue_name, args.job_id, 'retry'],
           search: '',

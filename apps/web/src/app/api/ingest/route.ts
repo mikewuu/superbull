@@ -2,9 +2,9 @@ import { timingSafeEqual } from 'node:crypto';
 import { buildRoute } from '@nextastic/http';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { findConnectorByIdLegacy } from '../../../lib/connectors/find-connector-by-id-legacy';
 import type { IngestEventInput } from '../../../lib/ingest/record-ingest-events';
 import { recordIngestEvents } from '../../../lib/ingest/record-ingest-events';
-import { findSourceById } from '../../../lib/sources/find-source-by-id';
 
 const eventSchema = z.object({
   uuid: z.string(),
@@ -26,19 +26,22 @@ const bodySchema = z.object({
   events: z.array(eventSchema).max(500),
 });
 
-async function authenticateSourceToken<
+// TRANSITIONAL — the old HTTP proxy flow (connector's plaintext `token`
+// field). Round 3 replaces this with the gateway calling
+// ingest.recordBatch directly over the WS connection.
+async function authenticateConnectorToken<
   TReq extends { headers: Headers; body: { source_id: string } },
 >(req: TReq): Promise<TReq | NextResponse> {
-  const source = await findSourceById(req.body.source_id);
-  if (!source) {
+  const connector = await findConnectorByIdLegacy(req.body.source_id);
+  if (!connector || !connector.token) {
     return NextResponse.json({ error: 'unknown source' }, { status: 401 });
   }
 
   const header = req.headers.get('authorization') ?? '';
   const presented = header.startsWith('Bearer ') ? header.slice('Bearer '.length) : '';
   const authorized =
-    presented.length === source.token.length &&
-    timingSafeEqual(Buffer.from(presented), Buffer.from(source.token));
+    presented.length === connector.token.length &&
+    timingSafeEqual(Buffer.from(presented), Buffer.from(connector.token));
 
   if (!authorized) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
@@ -50,7 +53,7 @@ export const POST = buildRoute({
   body: bodySchema,
   response: z.object({ accepted: z.number(), deduped: z.number() }),
 })
-  .use(authenticateSourceToken)
+  .use(authenticateConnectorToken)
   .handle(async (req) => {
     const events: IngestEventInput[] = req.body.events.map((event) => ({
       uuid: event.uuid,
@@ -67,6 +70,6 @@ export const POST = buildRoute({
       oldestWaitingMs: event.oldest_waiting_ms ?? undefined,
     }));
 
-    const result = await recordIngestEvents({ sourceId: req.body.source_id, events });
+    const result = await recordIngestEvents({ connectorId: req.body.source_id, events });
     return NextResponse.json(result);
   });

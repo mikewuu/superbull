@@ -1,27 +1,25 @@
 import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import { type QueryCtx, query } from './_generated/server';
-
-function guardInternalToken(internalToken: string): void {
-  if (internalToken !== process.env.CONVEX_INTERNAL_TOKEN) {
-    throw new Error('unauthorized');
-  }
-}
-
-function guardSourceId(ctx: QueryCtx, rawSourceId: string): Id<'proxySources'> {
-  const sourceId = ctx.db.normalizeId('proxySources', rawSourceId);
-  if (!sourceId) {
-    throw new Error('unknown source');
-  }
-  return sourceId;
-}
+import { requireWorkspaceMember } from './access';
 
 const maxEventsPerQuery = 10000;
 const maxBuckets = 3000;
 
+async function guardConnector(
+  ctx: QueryCtx,
+  workspaceId: Id<'workspaces'>,
+  connectorId: Id<'connectors'>,
+): Promise<void> {
+  const connector = await ctx.db.get(connectorId);
+  if (!connector || connector.workspaceId !== workspaceId) {
+    throw new Error('unknown connector');
+  }
+}
+
 async function queryEvents(
   ctx: QueryCtx,
-  sourceId: Id<'proxySources'>,
+  connectorId: Id<'connectors'>,
   queueName: string | undefined,
   fromTs: number,
   toTs: number,
@@ -29,14 +27,20 @@ async function queryEvents(
   if (queueName) {
     return await ctx.db
       .query('ingestEvents')
-      .withIndex('by_source_queue_ts', (q) =>
-        q.eq('sourceId', sourceId).eq('queueName', queueName).gte('ts', fromTs).lte('ts', toTs),
+      .withIndex('by_connector_queue_ts', (q) =>
+        q
+          .eq('connectorId', connectorId)
+          .eq('queueName', queueName)
+          .gte('ts', fromTs)
+          .lte('ts', toTs),
       )
       .take(maxEventsPerQuery);
   }
   return await ctx.db
     .query('ingestEvents')
-    .withIndex('by_source_ts', (q) => q.eq('sourceId', sourceId).gte('ts', fromTs).lte('ts', toTs))
+    .withIndex('by_connector_ts', (q) =>
+      q.eq('connectorId', connectorId).gte('ts', fromTs).lte('ts', toTs),
+    )
     .take(maxEventsPerQuery);
 }
 
@@ -82,18 +86,18 @@ function percentileOrNull(values: number[], p: number): number | null {
 
 export const throughputSeries = query({
   args: {
-    internalToken: v.string(),
-    sourceId: v.string(),
+    workspaceId: v.id('workspaces'),
+    connectorId: v.id('connectors'),
     queueName: v.optional(v.string()),
     fromTs: v.number(),
     toTs: v.number(),
     bucketMinutes: v.number(),
   },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
-    const sourceId = guardSourceId(ctx, args.sourceId);
+    await requireWorkspaceMember(ctx, args.workspaceId);
+    await guardConnector(ctx, args.workspaceId, args.connectorId);
     const bucketMs = guardBucketMs(args.fromTs, args.toTs, args.bucketMinutes);
-    const events = await queryEvents(ctx, sourceId, args.queueName, args.fromTs, args.toTs);
+    const events = await queryEvents(ctx, args.connectorId, args.queueName, args.fromTs, args.toTs);
 
     const timestamps = listBucketTimestamps(args.fromTs, args.toTs, bucketMs);
     const counts = new Map(timestamps.map((ts) => [ts, { completed: 0, failed: 0 }]));
@@ -118,18 +122,18 @@ export const throughputSeries = query({
 
 export const latencySeries = query({
   args: {
-    internalToken: v.string(),
-    sourceId: v.string(),
+    workspaceId: v.id('workspaces'),
+    connectorId: v.id('connectors'),
     queueName: v.optional(v.string()),
     fromTs: v.number(),
     toTs: v.number(),
     bucketMinutes: v.number(),
   },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
-    const sourceId = guardSourceId(ctx, args.sourceId);
+    await requireWorkspaceMember(ctx, args.workspaceId);
+    await guardConnector(ctx, args.workspaceId, args.connectorId);
     const bucketMs = guardBucketMs(args.fromTs, args.toTs, args.bucketMinutes);
-    const events = await queryEvents(ctx, sourceId, args.queueName, args.fromTs, args.toTs);
+    const events = await queryEvents(ctx, args.connectorId, args.queueName, args.fromTs, args.toTs);
 
     const timestamps = listBucketTimestamps(args.fromTs, args.toTs, bucketMs);
     const samples = new Map(
@@ -167,11 +171,16 @@ export const latencySeries = query({
 });
 
 export const queueTotals = query({
-  args: { internalToken: v.string(), sourceId: v.string(), fromTs: v.number(), toTs: v.number() },
+  args: {
+    workspaceId: v.id('workspaces'),
+    connectorId: v.id('connectors'),
+    fromTs: v.number(),
+    toTs: v.number(),
+  },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
-    const sourceId = guardSourceId(ctx, args.sourceId);
-    const events = await queryEvents(ctx, sourceId, undefined, args.fromTs, args.toTs);
+    await requireWorkspaceMember(ctx, args.workspaceId);
+    await guardConnector(ctx, args.workspaceId, args.connectorId);
+    const events = await queryEvents(ctx, args.connectorId, undefined, args.fromTs, args.toTs);
 
     const totals = new Map<
       string,
@@ -209,11 +218,16 @@ export const queueTotals = query({
 });
 
 export const heatmap = query({
-  args: { internalToken: v.string(), sourceId: v.string(), fromTs: v.number(), toTs: v.number() },
+  args: {
+    workspaceId: v.id('workspaces'),
+    connectorId: v.id('connectors'),
+    fromTs: v.number(),
+    toTs: v.number(),
+  },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
-    const sourceId = guardSourceId(ctx, args.sourceId);
-    const events = await queryEvents(ctx, sourceId, undefined, args.fromTs, args.toTs);
+    await requireWorkspaceMember(ctx, args.workspaceId);
+    await guardConnector(ctx, args.workspaceId, args.connectorId);
+    const events = await queryEvents(ctx, args.connectorId, undefined, args.fromTs, args.toTs);
 
     const matrix: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
     for (const event of events) {

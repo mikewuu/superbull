@@ -15,7 +15,7 @@ test.describe.configure({ mode: 'serial' });
 
 let cli: ChildProcess | undefined;
 let worker: Worker | undefined;
-let sourceId = '';
+let connectorId = '';
 
 test.afterAll(async () => {
   cli?.kill('SIGINT');
@@ -54,20 +54,20 @@ test('the CLI discovers the queue, starts, and auto-registers with the hub', asy
   await waitForHealthz(`http://127.0.0.1:${proxyPort}/healthz`);
 
   await page.goto('/app');
-  const row = page.getByTestId('source-row').filter({ hasText: 'CLI Proxy' });
+  const row = page.getByTestId('connector-row').filter({ hasText: 'CLI Proxy' });
   await expect(row).toBeVisible({ timeout: 15_000 });
-  await expect(row.getByTestId('source-health')).toContainText('online');
+  await expect(row.getByTestId('connector-health')).toContainText('online');
 
   const href = await row.getByRole('link').getAttribute('href');
-  sourceId = href?.match(/\/s\/([^/]+)\//)?.[1] ?? '';
-  expect(sourceId).not.toBe('');
+  connectorId = href?.match(/\/app\/[^/]+\/connectors\/([^/]+)\//)?.[1] ?? '';
+  expect(connectorId).not.toBe('');
 });
 
 test('the ingest loop reports new job completions to convex', async () => {
   worker = new Worker('hub-e2e', async () => ({ ok: true }), { connection });
   await worker.waitUntilReady();
 
-  const before = await countBySource(sourceId);
+  const before = await countByConnector(connectorId);
 
   const queue = new Queue('hub-e2e', { connection });
   await queue.addBulk([
@@ -77,14 +77,14 @@ test('the ingest loop reports new job completions to convex', async () => {
   await queue.close();
 
   await expect
-    .poll(() => countBySource(sourceId), { timeout: 20_000, intervals: [1000] })
+    .poll(() => countByConnector(connectorId), { timeout: 20_000, intervals: [1000] })
     .toBeGreaterThan(before);
 });
 
-async function countBySource(id: string): Promise<number> {
+async function countByConnector(id: string): Promise<number> {
   const client = new ConvexHttpClient('http://127.0.0.1:3210');
-  const reference = makeFunctionReference<'query'>('ingest:countBySource');
-  const count = await client.query(reference, { internalToken: 'e2e-internal', sourceId: id });
+  const reference = makeFunctionReference<'query'>('ingest:countByConnector');
+  const count = await client.query(reference, { internalToken: 'e2e-internal', connectorId: id });
   return Number(count);
 }
 

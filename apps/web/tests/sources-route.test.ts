@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-interface FakeSource {
+interface FakeConnector {
   id: string;
   name: string;
   url: string;
@@ -11,47 +11,47 @@ interface FakeSource {
 
 const SUPERBULL_API_TOKEN = 'test-token';
 
-const { sources } = vi.hoisted(() => {
-  return { sources: new Map<string, FakeSource>() };
+const { connectors } = vi.hoisted(() => {
+  return { connectors: new Map<string, FakeConnector>() };
 });
 
-vi.mock('../src/lib/sources/list-sources', () => {
+vi.mock('../src/lib/connectors/list-connectors-legacy', () => {
   return {
-    async listSources() {
-      return Array.from(sources.values());
+    async listConnectorsLegacy() {
+      return Array.from(connectors.values());
     },
   };
 });
 
-vi.mock('../src/lib/sources/find-source-by-id', () => {
+vi.mock('../src/lib/connectors/find-connector-by-id-legacy', () => {
   return {
-    async findSourceById(id: string) {
-      return sources.get(id) ?? null;
+    async findConnectorByIdLegacy(id: string) {
+      return connectors.get(id) ?? null;
     },
   };
 });
 
-vi.mock('../src/lib/sources/create-source', () => {
+vi.mock('../src/lib/connectors/create-connector-legacy', () => {
   return {
-    async createSource(args: { name: string; url: string; token: string }) {
-      const source: FakeSource = { id: crypto.randomUUID(), ...args, created_at: new Date() };
-      sources.set(source.id, source);
-      return source;
+    async createConnectorLegacy(args: { name: string; url: string; token: string }) {
+      const connector: FakeConnector = { id: crypto.randomUUID(), ...args, created_at: new Date() };
+      connectors.set(connector.id, connector);
+      return connector;
     },
   };
 });
 
-vi.mock('../src/lib/sources/delete-source', () => {
+vi.mock('../src/lib/connectors/delete-connector-legacy', () => {
   return {
-    async deleteSource(id: string) {
-      sources.delete(id);
+    async deleteConnectorLegacy(id: string) {
+      connectors.delete(id);
     },
   };
 });
 
 beforeEach(() => {
   vi.resetModules();
-  sources.clear();
+  connectors.clear();
   vi.stubEnv('SUPERBULL_API_TOKEN', SUPERBULL_API_TOKEN);
 });
 
@@ -134,7 +134,7 @@ describe('sources REST routes', () => {
     expect(response.status).toBe(400);
   });
 
-  it('DELETE returns 204 for a known source and 404 for an unknown one', async () => {
+  it('DELETE returns 204 for a known connector and 404 for an unknown one', async () => {
     const collection = await import('../src/app/api/sources/route');
     const item = await import('../src/app/api/sources/[sourceId]/route');
 

@@ -1,18 +1,17 @@
-import { anyApi } from 'convex/server';
-import { createServerConvexClient } from '../convex/create-server-convex-client';
+import { convexAuthNextjsToken } from '@convex-dev/auth/nextjs/server';
+import { fetchQuery } from 'convex/nextjs';
+import { api } from '../../../convex/_generated/api';
+import type { Id } from '../../../convex/_generated/dataModel';
 import type { ThroughputPoint } from './types';
 
 export async function getThroughputSeries(args: {
-  sourceId: string;
+  workspaceId: Id<'workspaces'>;
+  connectorId: Id<'connectors'>;
   queueName?: string;
   fromTs: number;
   toTs: number;
   bucketMinutes: number;
 }): Promise<ThroughputPoint[]> {
-  const client = createServerConvexClient();
-  const ref = anyApi.analytics?.throughputSeries;
-  if (!ref) {
-    throw new Error('missing analytics.throughputSeries function reference');
-  }
-  return await client.query(ref, args);
+  const token = await convexAuthNextjsToken();
+  return await fetchQuery(api.analytics.throughputSeries, args, { token });
 }

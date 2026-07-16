@@ -1,12 +1,7 @@
 import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import { type QueryCtx, mutation, query } from './_generated/server';
-
-function guardInternalToken(internalToken: string): void {
-  if (internalToken !== process.env.CONVEX_INTERNAL_TOKEN) {
-    throw new Error('unauthorized');
-  }
-}
+import { requireInternalToken, requireWorkspaceMember } from './access';
 
 const dayMs = 86_400_000;
 const maxEventsPerQuery = 20_000;
@@ -64,73 +59,73 @@ function bucketEventsByDay(
   return { days, rate90d: rateOrNull(totals.completed, totals.failed) };
 }
 
-async function bucketSourceEvents(
+async function bucketConnectorEvents(
   ctx: QueryCtx,
-  sourceId: Id<'proxySources'>,
+  connectorId: Id<'connectors'>,
   cutoffTs: number,
   todayStart: number,
 ) {
   const events = await ctx.db
     .query('ingestEvents')
-    .withIndex('by_source_ts', (q) => q.eq('sourceId', sourceId).gte('ts', cutoffTs))
+    .withIndex('by_connector_ts', (q) => q.eq('connectorId', connectorId).gte('ts', cutoffTs))
     .take(maxEventsPerQuery);
   return bucketEventsByDay(events, cutoffTs, todayStart);
 }
 
 async function bucketQueueEvents(
   ctx: QueryCtx,
-  sourceId: Id<'proxySources'>,
+  connectorId: Id<'connectors'>,
   queueName: string,
   cutoffTs: number,
 ) {
   const events = await ctx.db
     .query('ingestEvents')
-    .withIndex('by_source_queue_ts', (q) =>
-      q.eq('sourceId', sourceId).eq('queueName', queueName).gte('ts', cutoffTs),
+    .withIndex('by_connector_queue_ts', (q) =>
+      q.eq('connectorId', connectorId).eq('queueName', queueName).gte('ts', cutoffTs),
     )
     .take(maxEventsPerQuery);
   return { name: queueName, events };
 }
 
-export const getBySource = query({
-  args: { internalToken: v.string(), sourceId: v.string() },
+export const getByConnector = query({
+  args: { workspaceId: v.id('workspaces'), connectorId: v.id('connectors') },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
-    const sourceId = ctx.db.normalizeId('proxySources', args.sourceId);
-    if (!sourceId) {
+    await requireWorkspaceMember(ctx, args.workspaceId);
+    const config = await ctx.db
+      .query('statusPageConfigs')
+      .withIndex('by_connector', (q) => q.eq('connectorId', args.connectorId))
+      .unique();
+    if (!config || config.workspaceId !== args.workspaceId) {
       return null;
     }
-    return await ctx.db
-      .query('statusPageConfigs')
-      .withIndex('by_source', (q) => q.eq('sourceId', sourceId))
-      .unique();
+    return config;
   },
 });
 
 export const upsert = mutation({
   args: {
-    internalToken: v.string(),
-    sourceId: v.string(),
+    workspaceId: v.id('workspaces'),
+    connectorId: v.id('connectors'),
     slug: v.string(),
     isEnabled: v.boolean(),
     title: v.string(),
     queueNames: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
+    await requireWorkspaceMember(ctx, args.workspaceId);
     if (!/^[a-z0-9-]{3,50}$/.test(args.slug)) {
       throw new Error('invalid slug');
     }
-    const sourceId = ctx.db.normalizeId('proxySources', args.sourceId);
-    if (!sourceId) {
-      throw new Error('unknown source');
+    const connector = await ctx.db.get(args.connectorId);
+    if (!connector || connector.workspaceId !== args.workspaceId) {
+      throw new Error('unknown connector');
     }
 
     const bySlug = await ctx.db
       .query('statusPageConfigs')
       .withIndex('by_slug', (q) => q.eq('slug', args.slug))
       .unique();
-    if (bySlug && bySlug.sourceId !== sourceId) {
+    if (bySlug && bySlug.connectorId !== args.connectorId) {
       throw new Error('slug already taken');
     }
 
@@ -138,11 +133,78 @@ export const upsert = mutation({
       bySlug ??
       (await ctx.db
         .query('statusPageConfigs')
-        .withIndex('by_source', (q) => q.eq('sourceId', sourceId))
+        .withIndex('by_connector', (q) => q.eq('connectorId', args.connectorId))
         .unique());
 
     const fields = {
-      sourceId,
+      workspaceId: args.workspaceId,
+      connectorId: args.connectorId,
+      slug: args.slug,
+      isEnabled: args.isEnabled,
+      title: args.title,
+      queueNames: args.queueNames,
+    };
+
+    if (existing) {
+      await ctx.db.patch(existing._id, fields);
+      const patched = await ctx.db.get(existing._id);
+      if (!patched) {
+        throw new Error('failed to upsert status page config');
+      }
+      return patched;
+    }
+
+    const id = await ctx.db.insert('statusPageConfigs', fields);
+    const created = await ctx.db.get(id);
+    if (!created) {
+      throw new Error('failed to upsert status page config');
+    }
+    return created;
+  },
+});
+
+// TRANSITIONAL — internalToken-gated, for scripts/dev tooling that have no
+// Convex Auth session to impersonate a user with (see
+// src/scripts/seed-status-page.ts). Not part of the gateway or hub-token
+// HTTP contract; workspaceId is derived from the connector, mirroring
+// deployAnnotations.create's pattern.
+export const upsertLegacy = mutation({
+  args: {
+    internalToken: v.string(),
+    connectorId: v.id('connectors'),
+    slug: v.string(),
+    isEnabled: v.boolean(),
+    title: v.string(),
+    queueNames: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    requireInternalToken(args.internalToken);
+    if (!/^[a-z0-9-]{3,50}$/.test(args.slug)) {
+      throw new Error('invalid slug');
+    }
+    const connector = await ctx.db.get(args.connectorId);
+    if (!connector) {
+      throw new Error('unknown connector');
+    }
+
+    const bySlug = await ctx.db
+      .query('statusPageConfigs')
+      .withIndex('by_slug', (q) => q.eq('slug', args.slug))
+      .unique();
+    if (bySlug && bySlug.connectorId !== args.connectorId) {
+      throw new Error('slug already taken');
+    }
+
+    const existing =
+      bySlug ??
+      (await ctx.db
+        .query('statusPageConfigs')
+        .withIndex('by_connector', (q) => q.eq('connectorId', args.connectorId))
+        .unique());
+
+    const fields = {
+      workspaceId: connector.workspaceId,
+      connectorId: args.connectorId,
       slug: args.slug,
       isEnabled: args.isEnabled,
       title: args.title,
@@ -168,20 +230,20 @@ export const upsert = mutation({
 });
 
 export const setLogo = mutation({
-  args: { internalToken: v.string(), configId: v.string(), storageId: v.string() },
+  args: {
+    workspaceId: v.id('workspaces'),
+    configId: v.id('statusPageConfigs'),
+    storageId: v.id('_storage'),
+  },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
-    const configId = ctx.db.normalizeId('statusPageConfigs', args.configId);
-    if (!configId) {
+    await requireWorkspaceMember(ctx, args.workspaceId);
+    const config = await ctx.db.get(args.configId);
+    if (!config || config.workspaceId !== args.workspaceId) {
       throw new Error('unknown status page config');
     }
-    const storageId = ctx.db.system.normalizeId('_storage', args.storageId);
-    if (!storageId) {
-      throw new Error('unknown storage id');
-    }
 
-    await ctx.db.patch(configId, { logoStorageId: storageId });
-    const patched = await ctx.db.get(configId);
+    await ctx.db.patch(args.configId, { logoStorageId: args.storageId });
+    const patched = await ctx.db.get(args.configId);
     if (!patched) {
       throw new Error('failed to set logo');
     }
@@ -190,12 +252,19 @@ export const setLogo = mutation({
 });
 
 export const generateLogoUploadUrl = mutation({
-  args: { internalToken: v.string() },
+  args: { workspaceId: v.id('workspaces') },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
+    await requireWorkspaceMember(ctx, args.workspaceId);
     return await ctx.storage.generateUploadUrl();
   },
 });
+
+// ---------------------------------------------------------------------------
+// Public — unauthenticated by design. Recipient-facing status pages must
+// stay reachable with no Convex Auth session; workspaceId is stored on the
+// config but never required by these two queries, so the public interface
+// is unchanged from before workspaces existed.
+// ---------------------------------------------------------------------------
 
 export const getPublicPage = query({
   args: { slug: v.string() },
@@ -228,9 +297,9 @@ export const getPublicUptime = query({
     const queueNames = config.queueNames ?? [];
 
     if (queueNames.length === 0) {
-      const { days, rate90d } = await bucketSourceEvents(
+      const { days, rate90d } = await bucketConnectorEvents(
         ctx,
-        config.sourceId,
+        config.connectorId,
         cutoffTs,
         todayStart,
       );
@@ -238,7 +307,7 @@ export const getPublicUptime = query({
     }
 
     const perQueue = await Promise.all(
-      queueNames.map((name) => bucketQueueEvents(ctx, config.sourceId, name, cutoffTs)),
+      queueNames.map((name) => bucketQueueEvents(ctx, config.connectorId, name, cutoffTs)),
     );
     const queues = perQueue.map(({ name, events }) => {
       const { days, rate90d } = bucketEventsByDay(events, cutoffTs, todayStart);

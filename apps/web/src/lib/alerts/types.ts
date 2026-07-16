@@ -2,7 +2,7 @@ export type AlertRuleType = 'failed_threshold' | 'stuck_queue' | 'worker_loss' |
 
 export interface AlertRule {
   id: string;
-  sourceId: string | null;
+  connectorId: string | null;
   type: AlertRuleType;
   queueName: string | null;
   threshold: number | null;
@@ -16,13 +16,4 @@ export interface AlertState {
   state: 'firing' | 'resolved';
   lastFiredTs: number | null;
   lastNotifiedTs: number | null;
-}
-
-export interface AlertNotification {
-  ruleId: string;
-  email: string;
-  type: AlertRuleType;
-  queueName: string | null;
-  summary: string;
-  kind: 'firing' | 'resolved';
 }

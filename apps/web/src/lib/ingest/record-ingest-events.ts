@@ -16,8 +16,11 @@ export interface IngestEventInput {
   oldestWaitingMs?: number;
 }
 
+// TRANSITIONAL — backs /api/ingest (the old HTTP proxy flow, authenticated
+// by the connector's plaintext token). Round 3 replaces this with the
+// gateway calling ingest.recordBatch directly.
 export async function recordIngestEvents(args: {
-  sourceId: string;
+  connectorId: string;
   events: IngestEventInput[];
 }): Promise<{ accepted: number; deduped: number }> {
   const client = createServerConvexClient();

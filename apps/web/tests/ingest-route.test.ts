@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-interface FakeSource {
+interface FakeConnector {
   id: string;
   name: string;
   url: string;
@@ -9,24 +9,24 @@ interface FakeSource {
   created_at: Date;
 }
 
-const { sources, recordedCalls } = vi.hoisted(() => {
+const { connectors, recordedCalls } = vi.hoisted(() => {
   return {
-    sources: new Map<string, FakeSource>(),
-    recordedCalls: [] as Array<{ sourceId: string; events: unknown[] }>,
+    connectors: new Map<string, FakeConnector>(),
+    recordedCalls: [] as Array<{ connectorId: string; events: unknown[] }>,
   };
 });
 
-vi.mock('../src/lib/sources/find-source-by-id', () => {
+vi.mock('../src/lib/connectors/find-connector-by-id-legacy', () => {
   return {
-    async findSourceById(id: string) {
-      return sources.get(id) ?? null;
+    async findConnectorByIdLegacy(id: string) {
+      return connectors.get(id) ?? null;
     },
   };
 });
 
 vi.mock('../src/lib/ingest/record-ingest-events', () => {
   return {
-    async recordIngestEvents(args: { sourceId: string; events: unknown[] }) {
+    async recordIngestEvents(args: { connectorId: string; events: unknown[] }) {
       recordedCalls.push(args);
       return { accepted: args.events.length, deduped: 0 };
     },
@@ -35,9 +35,9 @@ vi.mock('../src/lib/ingest/record-ingest-events', () => {
 
 beforeEach(() => {
   vi.resetModules();
-  sources.clear();
+  connectors.clear();
   recordedCalls.length = 0;
-  sources.set('source-1', {
+  connectors.set('source-1', {
     id: 'source-1',
     name: 'proxy-a',
     url: 'http://proxy-a.local',
@@ -59,7 +59,7 @@ function request(body: unknown, token = 'proxy-secret'): NextRequest {
 }
 
 describe('POST /api/ingest', () => {
-  it('accepts events authenticated with the source token and converts fields to camelCase', async () => {
+  it('accepts events authenticated with the connector token and converts fields to camelCase', async () => {
     const route = await import('../src/app/api/ingest/route');
 
     const response = await route.POST(
@@ -86,7 +86,7 @@ describe('POST /api/ingest', () => {
     expect(body).toEqual({ accepted: 1, deduped: 0 });
     expect(recordedCalls).toHaveLength(1);
     expect(recordedCalls[0]).toEqual({
-      sourceId: 'source-1',
+      connectorId: 'source-1',
       events: [
         {
           uuid: 'evt-1',
@@ -106,7 +106,7 @@ describe('POST /api/ingest', () => {
     });
   });
 
-  it('rejects an unknown source with 401', async () => {
+  it('rejects an unknown connector with 401', async () => {
     const route = await import('../src/app/api/ingest/route');
 
     const response = await route.POST(
@@ -117,7 +117,7 @@ describe('POST /api/ingest', () => {
     expect(response.status).toBe(401);
   });
 
-  it('rejects a token that does not match the stored source token', async () => {
+  it('rejects a token that does not match the stored connector token', async () => {
     const route = await import('../src/app/api/ingest/route');
 
     const response = await route.POST(
@@ -128,7 +128,7 @@ describe('POST /api/ingest', () => {
     expect(response.status).toBe(401);
   });
 
-  it('is not guarded by SUPERBULL_API_TOKEN — a correct source token is enough', async () => {
+  it('is not guarded by SUPERBULL_API_TOKEN — a correct connector token is enough', async () => {
     vi.stubEnv('SUPERBULL_API_TOKEN', 'some-other-hub-token');
     const route = await import('../src/app/api/ingest/route');
 

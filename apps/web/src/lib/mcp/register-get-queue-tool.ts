@@ -1,7 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { findConnectorByIdLegacy } from '../connectors/find-connector-by-id-legacy';
 import { forwardToProxy } from '../forwarding/forward-to-proxy';
-import { findSourceById } from '../sources/find-source-by-id';
 import { errorResult } from './error-result';
 import { jsonResult } from './json-result';
 
@@ -10,9 +10,9 @@ export function registerGetQueueTool(server: McpServer): void {
     'get_queue',
     {
       title: 'Get queue',
-      description: 'Get one queue from a proxy source, including its current page of jobs.',
+      description: 'Get one queue from a connector, including its current page of jobs.',
       inputSchema: {
-        source_id: z.string(),
+        connector_id: z.string(),
         queue_name: z.string(),
         status: z
           .string()
@@ -24,9 +24,9 @@ export function registerGetQueueTool(server: McpServer): void {
     },
     async (args) => {
       try {
-        const source = await findSourceById(args.source_id);
-        if (!source) {
-          return errorResult('source not found');
+        const connector = await findConnectorByIdLegacy(args.connector_id);
+        if (!connector || !connector.url || !connector.token) {
+          return errorResult('connector not found');
         }
 
         const params = new URLSearchParams({ active_queue: args.queue_name });
@@ -38,7 +38,7 @@ export function registerGetQueueTool(server: McpServer): void {
         }
 
         const result = await forwardToProxy({
-          source,
+          connector: { url: connector.url, token: connector.token },
           method: 'GET',
           path: ['queues'],
           search: `?${params.toString()}`,

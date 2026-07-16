@@ -2,17 +2,64 @@ import { authTables } from '@convex-dev/auth/server';
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 
+export const memberRole = v.union(v.literal('owner'), v.literal('admin'), v.literal('member'));
+
 export default defineSchema({
   ...authTables,
 
-  proxySources: defineTable({
+  workspaces: defineTable({
     name: v.string(),
-    url: v.string(),
-    token: v.string(),
-  }).index('by_name', ['name']),
+    slug: v.string(),
+    createdAt: v.number(),
+  }).index('by_slug', ['slug']),
+
+  members: defineTable({
+    workspaceId: v.id('workspaces'),
+    userId: v.id('users'),
+    role: memberRole,
+  })
+    .index('by_user', ['userId'])
+    .index('by_workspace', ['workspaceId'])
+    .index('by_workspace_user', ['workspaceId', 'userId']),
+
+  invites: defineTable({
+    workspaceId: v.id('workspaces'),
+    email: v.string(),
+    role: memberRole,
+    tokenHash: v.string(),
+    invitedBy: v.id('users'),
+    expiresAt: v.number(),
+    acceptedAt: v.optional(v.number()),
+  })
+    .index('by_workspace', ['workspaceId'])
+    .index('by_token_hash', ['tokenHash'])
+    .index('by_email', ['email']),
+
+  // Replaces proxySources. `url`/`token` are a TRANSITIONAL exception for the
+  // old HTTP proxy flow (registration, forwardToProxy, /api/ingest) so e2e
+  // stays green this round — Round 3 deletes them once the gateway RPC path
+  // replaces forwardToProxy. `tokenHash` is the new enrollment-token flow
+  // (sha256 of a one-time plaintext token minted by the Next server action
+  // and never stored).
+  connectors: defineTable({
+    workspaceId: v.id('workspaces'),
+    name: v.string(),
+    tokenHash: v.optional(v.string()),
+    version: v.optional(v.string()),
+    queues: v.optional(v.array(v.string())),
+    lastConnectedAt: v.optional(v.number()),
+    lastDisconnectedAt: v.optional(v.number()),
+    // TRANSITIONAL — Round 3 deletes these two fields.
+    url: v.optional(v.string()),
+    token: v.optional(v.string()),
+  })
+    .index('by_workspace', ['workspaceId'])
+    .index('by_token_hash', ['tokenHash'])
+    .index('by_workspace_name', ['workspaceId', 'name']),
 
   ingestEvents: defineTable({
-    sourceId: v.id('proxySources'),
+    workspaceId: v.id('workspaces'),
+    connectorId: v.id('connectors'),
     uuid: v.string(),
     type: v.string(),
     queueName: v.string(),
@@ -27,11 +74,13 @@ export default defineSchema({
     oldestWaitingMs: v.optional(v.number()),
   })
     .index('by_uuid', ['uuid'])
-    .index('by_source_ts', ['sourceId', 'ts'])
-    .index('by_source_queue_ts', ['sourceId', 'queueName', 'ts']),
+    .index('by_connector_ts', ['connectorId', 'ts'])
+    .index('by_connector_queue_ts', ['connectorId', 'queueName', 'ts'])
+    .index('by_workspace_ts', ['workspaceId', 'ts']),
 
   errorGroups: defineTable({
-    sourceId: v.id('proxySources'),
+    workspaceId: v.id('workspaces'),
+    connectorId: v.id('connectors'),
     fingerprint: v.string(),
     queueName: v.string(),
     jobName: v.optional(v.string()),
@@ -43,18 +92,22 @@ export default defineSchema({
     lastJobId: v.optional(v.string()),
     isRegression: v.boolean(),
   })
-    .index('by_source_fingerprint', ['sourceId', 'fingerprint'])
-    .index('by_source_last_seen', ['sourceId', 'lastSeenTs'])
-    .index('by_source_state', ['sourceId', 'state']),
+    .index('by_connector_fingerprint', ['connectorId', 'fingerprint'])
+    .index('by_connector_last_seen', ['connectorId', 'lastSeenTs'])
+    .index('by_connector_state', ['connectorId', 'state'])
+    .index('by_workspace_last_seen', ['workspaceId', 'lastSeenTs']),
 
   deployAnnotations: defineTable({
-    sourceId: v.id('proxySources'),
+    workspaceId: v.id('workspaces'),
+    connectorId: v.id('connectors'),
     label: v.string(),
     ts: v.number(),
-  }).index('by_source_ts', ['sourceId', 'ts']),
+  }).index('by_connector_ts', ['connectorId', 'ts']),
 
   alertRules: defineTable({
-    sourceId: v.optional(v.id('proxySources')),
+    workspaceId: v.id('workspaces'),
+    // undefined connectorId = every connector in this rule's workspace.
+    connectorId: v.optional(v.id('connectors')),
     type: v.union(
       v.literal('failed_threshold'),
       v.literal('stuck_queue'),
@@ -66,7 +119,9 @@ export default defineSchema({
     windowMinutes: v.optional(v.number()),
     email: v.string(),
     isEnabled: v.boolean(),
-  }).index('by_enabled', ['isEnabled']),
+  })
+    .index('by_enabled', ['isEnabled'])
+    .index('by_workspace', ['workspaceId']),
 
   alertStates: defineTable({
     ruleId: v.id('alertRules'),
@@ -76,12 +131,14 @@ export default defineSchema({
   }).index('by_rule', ['ruleId']),
 
   savedDashboards: defineTable({
+    workspaceId: v.id('workspaces'),
     name: v.string(),
     cards: v.array(v.any()),
-  }).index('by_name', ['name']),
+  }).index('by_workspace', ['workspaceId']),
 
   statusPageConfigs: defineTable({
-    sourceId: v.id('proxySources'),
+    workspaceId: v.id('workspaces'),
+    connectorId: v.id('connectors'),
     slug: v.string(),
     isEnabled: v.boolean(),
     title: v.string(),
@@ -89,5 +146,6 @@ export default defineSchema({
     queueNames: v.optional(v.array(v.string())),
   })
     .index('by_slug', ['slug'])
-    .index('by_source', ['sourceId']),
+    .index('by_connector', ['connectorId'])
+    .index('by_workspace', ['workspaceId']),
 });

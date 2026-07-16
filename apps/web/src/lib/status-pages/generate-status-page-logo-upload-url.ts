@@ -1,11 +1,11 @@
-import { makeFunctionReference } from 'convex/server';
-import { createServerConvexClient } from '../convex/create-server-convex-client';
+import { convexAuthNextjsToken } from '@convex-dev/auth/nextjs/server';
+import { fetchMutation } from 'convex/nextjs';
+import { api } from '../../../convex/_generated/api';
+import type { Id } from '../../../convex/_generated/dataModel';
 
-const generateLogoUploadUrl = makeFunctionReference<'mutation'>(
-  'statusPages:generateLogoUploadUrl',
-);
-
-export async function generateStatusPageLogoUploadUrl(): Promise<string> {
-  const client = createServerConvexClient();
-  return await client.mutation(generateLogoUploadUrl, {});
+export async function generateStatusPageLogoUploadUrl(
+  workspaceId: Id<'workspaces'>,
+): Promise<string> {
+  const token = await convexAuthNextjsToken();
+  return await fetchMutation(api.statusPages.generateLogoUploadUrl, { workspaceId }, { token });
 }

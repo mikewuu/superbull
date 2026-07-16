@@ -1,16 +1,15 @@
-import { anyApi } from 'convex/server';
-import { createServerConvexClient } from '../convex/create-server-convex-client';
+import { convexAuthNextjsToken } from '@convex-dev/auth/nextjs/server';
+import { fetchQuery } from 'convex/nextjs';
+import { api } from '../../../convex/_generated/api';
+import type { Id } from '../../../convex/_generated/dataModel';
 import type { QueueTotal } from './types';
 
 export async function getQueueTotals(args: {
-  sourceId: string;
+  workspaceId: Id<'workspaces'>;
+  connectorId: Id<'connectors'>;
   fromTs: number;
   toTs: number;
 }): Promise<QueueTotal[]> {
-  const client = createServerConvexClient();
-  const ref = anyApi.analytics?.queueTotals;
-  if (!ref) {
-    throw new Error('missing analytics.queueTotals function reference');
-  }
-  return await client.query(ref, args);
+  const token = await convexAuthNextjsToken();
+  return await fetchQuery(api.analytics.queueTotals, args, { token });
 }

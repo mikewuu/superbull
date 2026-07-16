@@ -53,17 +53,23 @@ describe('isPublicRoute', () => {
 
   it.each([
     '/app',
-    '/app/analytics',
-    '/app/errors',
-    '/app/alerts',
-    '/app/dashboards',
-    '/app/status-pages',
-    '/s/source-1/',
+    '/app/my-workspace',
+    '/app/my-workspace/analytics',
+    '/app/my-workspace/errors',
+    '/app/my-workspace/alerts',
+    '/app/my-workspace/dashboards',
+    '/app/my-workspace/status-pages',
+    '/app/my-workspace/connectors',
+    '/app/my-workspace/connectors/connector-1/',
+    '/app/my-workspace/settings',
+    '/invite/some-token',
   ])('treats %s as protected', (pathname) => {
     expect(isPublicRoute(requestFor(pathname))).toBe(false);
   });
 
-  it('protects the per-source dashboard API forwarding route', () => {
-    expect(isPublicRoute(requestFor('/s/source-1/api/queues'))).toBe(false);
+  it('protects the per-connector embedded dashboard API forwarding route', () => {
+    expect(isPublicRoute(requestFor('/app/my-workspace/connectors/connector-1/api/queues'))).toBe(
+      false,
+    );
   });
 });

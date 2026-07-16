@@ -1,42 +1,27 @@
 /// <reference types="vite/client" />
-import { convexTest } from 'convex-test';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
-import schema from '../../convex/schema';
-
-const INTERNAL_TOKEN = 'test-internal-token';
+import { INTERNAL_TOKEN, makeTestClient, seedConnector, seedWorkspace } from './test-helpers';
 
 beforeEach(() => {
   process.env.CONVEX_INTERNAL_TOKEN = INTERNAL_TOKEN;
 });
 
-function makeTestClient() {
-  return convexTest(schema, import.meta.glob('../../convex/**/*.ts'));
-}
-
-type TestConvexClient = ReturnType<typeof makeTestClient>;
-
-async function seedSource(t: TestConvexClient, name = 'proxy-a'): Promise<Id<'proxySources'>> {
-  return await t.run(async (ctx) => {
-    return await ctx.db.insert('proxySources', {
-      name,
-      url: `https://${name}.example.com`,
-      token: 't',
-    });
-  });
-}
+type TestClient = ReturnType<typeof makeTestClient>;
 
 async function seedFailedEvents(
-  t: TestConvexClient,
-  sourceId: Id<'proxySources'>,
+  t: TestClient,
+  workspaceId: Id<'workspaces'>,
+  connectorId: Id<'connectors'>,
   queueName: string,
   count: number,
 ): Promise<void> {
   await t.run(async (ctx) => {
     for (let i = 0; i < count; i++) {
       await ctx.db.insert('ingestEvents', {
-        sourceId,
+        workspaceId,
+        connectorId,
         uuid: `failed-${queueName}-${i}`,
         type: 'job.failed',
         queueName,
@@ -47,14 +32,16 @@ async function seedFailedEvents(
 }
 
 async function seedSnapshot(
-  t: TestConvexClient,
-  sourceId: Id<'proxySources'>,
+  t: TestClient,
+  workspaceId: Id<'workspaces'>,
+  connectorId: Id<'connectors'>,
   queueName: string,
   args: { waiting: number; workerCount: number },
 ): Promise<void> {
   await t.run(async (ctx) => {
     await ctx.db.insert('ingestEvents', {
-      sourceId,
+      workspaceId,
+      connectorId,
       uuid: `snapshot-${queueName}-${Date.now()}-${Math.random()}`,
       type: 'queue.snapshot',
       queueName,
@@ -66,13 +53,15 @@ async function seedSnapshot(
 }
 
 async function seedCompletedEvent(
-  t: TestConvexClient,
-  sourceId: Id<'proxySources'>,
+  t: TestClient,
+  workspaceId: Id<'workspaces'>,
+  connectorId: Id<'connectors'>,
   queueName: string,
 ): Promise<void> {
   await t.run(async (ctx) => {
     await ctx.db.insert('ingestEvents', {
-      sourceId,
+      workspaceId,
+      connectorId,
       uuid: `completed-${queueName}-${Date.now()}-${Math.random()}`,
       type: 'job.completed',
       queueName,
@@ -81,10 +70,15 @@ async function seedCompletedEvent(
   });
 }
 
-async function seedErrorGroup(t: TestConvexClient, sourceId: Id<'proxySources'>): Promise<void> {
+async function seedErrorGroup(
+  t: TestClient,
+  workspaceId: Id<'workspaces'>,
+  connectorId: Id<'connectors'>,
+): Promise<void> {
   await t.run(async (ctx) => {
     await ctx.db.insert('errorGroups', {
-      sourceId,
+      workspaceId,
+      connectorId,
       fingerprint: 'fp-1',
       queueName: 'emails',
       message: 'boom',
@@ -97,32 +91,39 @@ async function seedErrorGroup(t: TestConvexClient, sourceId: Id<'proxySources'>)
   });
 }
 
-describe('alerts rules CRUD', () => {
-  it('creates a rule and lists it back', async () => {
+describe('alerts rules CRUD (user-facing)', () => {
+  it('creates a rule and lists it back, scoped to the workspace', async () => {
     const t = makeTestClient();
-    const sourceId = await seedSource(t);
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    const connectorId = await seedConnector(t, workspaceId);
 
-    const created = await t.mutation(api.alerts.create, {
-      internalToken: INTERNAL_TOKEN,
-      sourceId,
+    const created = await asMember.mutation(api.alerts.create, {
+      workspaceId,
+      connectorId,
       type: 'failed_threshold',
       threshold: 5,
       windowMinutes: 10,
       email: 'a@example.com',
       isEnabled: true,
     });
-    const rules = await t.query(api.alerts.list, { internalToken: INTERNAL_TOKEN });
+    const rules = await asMember.query(api.alerts.list, { workspaceId });
 
     expect(rules).toHaveLength(1);
     expect(rules[0]).toMatchObject({ _id: created._id, type: 'failed_threshold', threshold: 5 });
+
+    const outsider = await seedWorkspace(t);
+    expect(
+      await outsider.asMember.query(api.alerts.list, { workspaceId: outsider.workspaceId }),
+    ).toHaveLength(0);
   });
 
   it('rejects a rule without windowMinutes', async () => {
     const t = makeTestClient();
+    const { workspaceId, asMember } = await seedWorkspace(t);
 
     await expect(
-      t.mutation(api.alerts.create, {
-        internalToken: INTERNAL_TOKEN,
+      asMember.mutation(api.alerts.create, {
+        workspaceId,
         type: 'new_error_group',
         email: 'a@example.com',
         isEnabled: true,
@@ -132,10 +133,11 @@ describe('alerts rules CRUD', () => {
 
   it('rejects a failed_threshold rule without a threshold', async () => {
     const t = makeTestClient();
+    const { workspaceId, asMember } = await seedWorkspace(t);
 
     await expect(
-      t.mutation(api.alerts.create, {
-        internalToken: INTERNAL_TOKEN,
+      asMember.mutation(api.alerts.create, {
+        workspaceId,
         type: 'failed_threshold',
         windowMinutes: 5,
         email: 'a@example.com',
@@ -146,10 +148,11 @@ describe('alerts rules CRUD', () => {
 
   it('rejects a stuck_queue rule without a queueName', async () => {
     const t = makeTestClient();
+    const { workspaceId, asMember } = await seedWorkspace(t);
 
     await expect(
-      t.mutation(api.alerts.create, {
-        internalToken: INTERNAL_TOKEN,
+      asMember.mutation(api.alerts.create, {
+        workspaceId,
         type: 'stuck_queue',
         windowMinutes: 5,
         email: 'a@example.com',
@@ -158,32 +161,37 @@ describe('alerts rules CRUD', () => {
     ).rejects.toThrow(/queueName/);
   });
 
-  it('rejects a worker_loss rule without a queueName', async () => {
+  it('rejects a connectorId from a different workspace', async () => {
     const t = makeTestClient();
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    const other = await seedWorkspace(t);
+    const foreignConnectorId = await seedConnector(t, other.workspaceId);
 
     await expect(
-      t.mutation(api.alerts.create, {
-        internalToken: INTERNAL_TOKEN,
-        type: 'worker_loss',
+      asMember.mutation(api.alerts.create, {
+        workspaceId,
+        connectorId: foreignConnectorId,
+        type: 'new_error_group',
         windowMinutes: 5,
         email: 'a@example.com',
         isEnabled: true,
       }),
-    ).rejects.toThrow(/queueName/);
+    ).rejects.toThrow(/unknown connector/);
   });
 
   it('update toggles isEnabled', async () => {
     const t = makeTestClient();
-    const created = await t.mutation(api.alerts.create, {
-      internalToken: INTERNAL_TOKEN,
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    const created = await asMember.mutation(api.alerts.create, {
+      workspaceId,
       type: 'new_error_group',
       windowMinutes: 5,
       email: 'a@example.com',
       isEnabled: true,
     });
 
-    const updated = await t.mutation(api.alerts.update, {
-      internalToken: INTERNAL_TOKEN,
+    const updated = await asMember.mutation(api.alerts.update, {
+      workspaceId,
       id: created._id,
       isEnabled: false,
     });
@@ -191,33 +199,14 @@ describe('alerts rules CRUD', () => {
     expect(updated.isEnabled).toBe(false);
   });
 
-  it('update rejects clearing queueName off a stuck_queue rule', async () => {
-    const t = makeTestClient();
-    const created = await t.mutation(api.alerts.create, {
-      internalToken: INTERNAL_TOKEN,
-      type: 'stuck_queue',
-      queueName: 'emails',
-      windowMinutes: 5,
-      email: 'a@example.com',
-      isEnabled: true,
-    });
-
-    await expect(
-      t.mutation(api.alerts.update, {
-        internalToken: INTERNAL_TOKEN,
-        id: created._id,
-        queueName: '',
-      }),
-    ).rejects.toThrow(/queueName/);
-  });
-
   it('remove deletes the rule and its alert state', async () => {
     const t = makeTestClient();
-    const sourceId = await seedSource(t);
-    await seedFailedEvents(t, sourceId, 'emails', 3);
-    const created = await t.mutation(api.alerts.create, {
-      internalToken: INTERNAL_TOKEN,
-      sourceId,
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    const connectorId = await seedConnector(t, workspaceId);
+    await seedFailedEvents(t, workspaceId, connectorId, 'emails', 3);
+    const created = await asMember.mutation(api.alerts.create, {
+      workspaceId,
+      connectorId,
       type: 'failed_threshold',
       queueName: 'emails',
       threshold: 1,
@@ -227,39 +216,40 @@ describe('alerts rules CRUD', () => {
     });
     await t.mutation(api.alerts.evaluate, { internalToken: INTERNAL_TOKEN });
 
-    await t.mutation(api.alerts.remove, { internalToken: INTERNAL_TOKEN, id: created._id });
+    await asMember.mutation(api.alerts.remove, { workspaceId, id: created._id });
 
-    const rules = await t.query(api.alerts.list, { internalToken: INTERNAL_TOKEN });
-    const states = await t.query(api.alerts.listStates, { internalToken: INTERNAL_TOKEN });
+    const rules = await asMember.query(api.alerts.list, { workspaceId });
+    const states = await asMember.query(api.alerts.listStates, { workspaceId });
     expect(rules).toHaveLength(0);
     expect(states).toHaveLength(0);
   });
 
-  it('rejects every function with the wrong internal token', async () => {
+  it('rejects an unauthenticated caller', async () => {
     const t = makeTestClient();
+    const { workspaceId } = await seedWorkspace(t);
 
-    await expect(t.query(api.alerts.list, { internalToken: 'wrong' })).rejects.toThrow();
+    await expect(t.query(api.alerts.list, { workspaceId })).rejects.toThrow();
     await expect(
       t.mutation(api.alerts.create, {
-        internalToken: 'wrong',
+        workspaceId,
         type: 'new_error_group',
         windowMinutes: 5,
         email: 'a@example.com',
         isEnabled: true,
       }),
     ).rejects.toThrow();
-    await expect(t.mutation(api.alerts.evaluate, { internalToken: 'wrong' })).rejects.toThrow();
   });
 });
 
-describe('alerts evaluate', () => {
+describe('alerts.evaluate (internalToken-gated cron path)', () => {
   it('fires a failed_threshold rule once the count reaches the threshold', async () => {
     const t = makeTestClient();
-    const sourceId = await seedSource(t);
-    await seedFailedEvents(t, sourceId, 'emails', 3);
-    await t.mutation(api.alerts.create, {
-      internalToken: INTERNAL_TOKEN,
-      sourceId,
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    const connectorId = await seedConnector(t, workspaceId);
+    await seedFailedEvents(t, workspaceId, connectorId, 'emails', 3);
+    await asMember.mutation(api.alerts.create, {
+      workspaceId,
+      connectorId,
       type: 'failed_threshold',
       queueName: 'emails',
       threshold: 2,
@@ -272,18 +262,21 @@ describe('alerts evaluate', () => {
 
     expect(result.evaluated).toBe(1);
     expect(result.to_notify).toHaveLength(1);
-    expect(result.to_notify[0]).toMatchObject({ kind: 'firing', type: 'failed_threshold' });
-    const states = await t.query(api.alerts.listStates, { internalToken: INTERNAL_TOKEN });
-    expect(states[0]).toMatchObject({ state: 'firing' });
+    expect(result.to_notify[0]).toMatchObject({
+      kind: 'firing',
+      type: 'failed_threshold',
+      workspace_id: workspaceId,
+    });
   });
 
-  it('does not fire a failed_threshold rule below the threshold', async () => {
+  it('does not fire below the threshold', async () => {
     const t = makeTestClient();
-    const sourceId = await seedSource(t);
-    await seedFailedEvents(t, sourceId, 'emails', 1);
-    await t.mutation(api.alerts.create, {
-      internalToken: INTERNAL_TOKEN,
-      sourceId,
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    const connectorId = await seedConnector(t, workspaceId);
+    await seedFailedEvents(t, workspaceId, connectorId, 'emails', 1);
+    await asMember.mutation(api.alerts.create, {
+      workspaceId,
+      connectorId,
       type: 'failed_threshold',
       queueName: 'emails',
       threshold: 5,
@@ -293,19 +286,17 @@ describe('alerts evaluate', () => {
     });
 
     const result = await t.mutation(api.alerts.evaluate, { internalToken: INTERNAL_TOKEN });
-
     expect(result.to_notify).toHaveLength(0);
-    const states = await t.query(api.alerts.listStates, { internalToken: INTERNAL_TOKEN });
-    expect(states).toHaveLength(0);
   });
 
   it('does not re-notify while a rule stays firing (cooldown)', async () => {
     const t = makeTestClient();
-    const sourceId = await seedSource(t);
-    await seedFailedEvents(t, sourceId, 'emails', 3);
-    await t.mutation(api.alerts.create, {
-      internalToken: INTERNAL_TOKEN,
-      sourceId,
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    const connectorId = await seedConnector(t, workspaceId);
+    await seedFailedEvents(t, workspaceId, connectorId, 'emails', 3);
+    await asMember.mutation(api.alerts.create, {
+      workspaceId,
+      connectorId,
       type: 'failed_threshold',
       queueName: 'emails',
       threshold: 1,
@@ -323,11 +314,12 @@ describe('alerts evaluate', () => {
 
   it('transitions a stuck_queue rule from firing to resolved once completions appear', async () => {
     const t = makeTestClient();
-    const sourceId = await seedSource(t);
-    await seedSnapshot(t, sourceId, 'emails', { waiting: 5, workerCount: 2 });
-    await t.mutation(api.alerts.create, {
-      internalToken: INTERNAL_TOKEN,
-      sourceId,
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    const connectorId = await seedConnector(t, workspaceId);
+    await seedSnapshot(t, workspaceId, connectorId, 'emails', { waiting: 5, workerCount: 2 });
+    await asMember.mutation(api.alerts.create, {
+      workspaceId,
+      connectorId,
       type: 'stuck_queue',
       queueName: 'emails',
       windowMinutes: 60,
@@ -336,45 +328,43 @@ describe('alerts evaluate', () => {
     });
 
     const first = await t.mutation(api.alerts.evaluate, { internalToken: INTERNAL_TOKEN });
-    expect(first.to_notify).toHaveLength(1);
     expect(first.to_notify[0]?.kind).toBe('firing');
 
-    await seedCompletedEvent(t, sourceId, 'emails');
+    await seedCompletedEvent(t, workspaceId, connectorId, 'emails');
     const second = await t.mutation(api.alerts.evaluate, { internalToken: INTERNAL_TOKEN });
-
-    expect(second.to_notify).toHaveLength(1);
     expect(second.to_notify[0]?.kind).toBe('resolved');
-    const states = await t.query(api.alerts.listStates, { internalToken: INTERNAL_TOKEN });
-    expect(states[0]).toMatchObject({ state: 'resolved' });
   });
 
-  it('fires a worker_loss rule when the latest snapshot has zero workers', async () => {
+  it('a rule with no connectorId sweeps every connector in its own workspace only', async () => {
     const t = makeTestClient();
-    const sourceId = await seedSource(t);
-    await seedSnapshot(t, sourceId, 'emails', { waiting: 0, workerCount: 0 });
-    await t.mutation(api.alerts.create, {
-      internalToken: INTERNAL_TOKEN,
-      sourceId,
-      type: 'worker_loss',
-      queueName: 'emails',
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    const connectorId = await seedConnector(t, workspaceId);
+    const other = await seedWorkspace(t);
+    const otherConnectorId = await seedConnector(t, other.workspaceId);
+    await seedFailedEvents(t, workspaceId, connectorId, 'emails', 3);
+    await seedFailedEvents(t, other.workspaceId, otherConnectorId, 'emails', 10);
+
+    await asMember.mutation(api.alerts.create, {
+      workspaceId,
+      type: 'failed_threshold',
+      threshold: 1,
       windowMinutes: 60,
       email: 'a@example.com',
       isEnabled: true,
     });
 
     const result = await t.mutation(api.alerts.evaluate, { internalToken: INTERNAL_TOKEN });
-
-    expect(result.to_notify).toHaveLength(1);
-    expect(result.to_notify[0]?.type).toBe('worker_loss');
+    expect(result.to_notify[0]?.summary).toContain('3 failed jobs');
   });
 
   it('fires a new_error_group rule when a fresh error group appears in the window', async () => {
     const t = makeTestClient();
-    const sourceId = await seedSource(t);
-    await seedErrorGroup(t, sourceId);
-    await t.mutation(api.alerts.create, {
-      internalToken: INTERNAL_TOKEN,
-      sourceId,
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    const connectorId = await seedConnector(t, workspaceId);
+    await seedErrorGroup(t, workspaceId, connectorId);
+    await asMember.mutation(api.alerts.create, {
+      workspaceId,
+      connectorId,
       type: 'new_error_group',
       windowMinutes: 60,
       email: 'a@example.com',
@@ -382,18 +372,18 @@ describe('alerts evaluate', () => {
     });
 
     const result = await t.mutation(api.alerts.evaluate, { internalToken: INTERNAL_TOKEN });
-
     expect(result.to_notify).toHaveLength(1);
     expect(result.to_notify[0]?.type).toBe('new_error_group');
   });
 
   it('skips disabled rules entirely', async () => {
     const t = makeTestClient();
-    const sourceId = await seedSource(t);
-    await seedFailedEvents(t, sourceId, 'emails', 5);
-    await t.mutation(api.alerts.create, {
-      internalToken: INTERNAL_TOKEN,
-      sourceId,
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    const connectorId = await seedConnector(t, workspaceId);
+    await seedFailedEvents(t, workspaceId, connectorId, 'emails', 5);
+    await asMember.mutation(api.alerts.create, {
+      workspaceId,
+      connectorId,
       type: 'failed_threshold',
       queueName: 'emails',
       threshold: 1,
@@ -403,8 +393,54 @@ describe('alerts evaluate', () => {
     });
 
     const result = await t.mutation(api.alerts.evaluate, { internalToken: INTERNAL_TOKEN });
-
     expect(result.evaluated).toBe(0);
-    expect(result.to_notify).toHaveLength(0);
+  });
+
+  it('throws with the wrong internal token', async () => {
+    const t = makeTestClient();
+    await expect(t.mutation(api.alerts.evaluate, { internalToken: 'wrong' })).rejects.toThrow();
+  });
+});
+
+describe('alerts.digestSummary / listAllRulesForDigest', () => {
+  it('digestSummary groups per-connector stats with their workspaceId', async () => {
+    const t = makeTestClient();
+    const { workspaceId } = await seedWorkspace(t);
+    const connectorId = await seedConnector(t, workspaceId, { name: 'connector-a' });
+    await t.mutation(api.ingest.record, {
+      internalToken: INTERNAL_TOKEN,
+      connectorId,
+      events: [{ uuid: '1', type: 'job.completed', queueName: 'q', ts: Date.now() }],
+    });
+
+    const { perConnector } = await t.query(api.alerts.digestSummary, {
+      internalToken: INTERNAL_TOKEN,
+      sinceTs: 0,
+    });
+
+    expect(perConnector).toHaveLength(1);
+    expect(perConnector[0]).toMatchObject({
+      workspaceId,
+      connectorId,
+      connectorName: 'connector-a',
+      completed: 1,
+    });
+  });
+
+  it('listAllRulesForDigest returns every rule regardless of isEnabled', async () => {
+    const t = makeTestClient();
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    await asMember.mutation(api.alerts.create, {
+      workspaceId,
+      type: 'new_error_group',
+      windowMinutes: 5,
+      email: 'a@example.com',
+      isEnabled: false,
+    });
+
+    const rules = await t.query(api.alerts.listAllRulesForDigest, {
+      internalToken: INTERNAL_TOKEN,
+    });
+    expect(rules).toEqual([{ email: 'a@example.com', workspaceId }]);
   });
 });

@@ -2,12 +2,7 @@ import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
-
-function guardInternalToken(internalToken: string): void {
-  if (internalToken !== process.env.CONVEX_INTERNAL_TOKEN) {
-    throw new Error('unauthorized');
-  }
-}
+import { requireInternalToken, requireWorkspaceMember } from './access';
 
 function normalizeFingerprintMessage(message: string): string {
   const firstLine = message.split('\n')[0] ?? '';
@@ -28,7 +23,8 @@ function computeFingerprint(message: string, queueName: string): string {
 export async function upsertErrorGroup(
   ctx: MutationCtx,
   args: {
-    sourceId: Id<'proxySources'>;
+    workspaceId: Id<'workspaces'>;
+    connectorId: Id<'connectors'>;
     queueName: string;
     jobName?: string;
     jobId?: string;
@@ -39,8 +35,8 @@ export async function upsertErrorGroup(
   const fingerprint = computeFingerprint(args.message, args.queueName);
   const existing = await ctx.db
     .query('errorGroups')
-    .withIndex('by_source_fingerprint', (q) =>
-      q.eq('sourceId', args.sourceId).eq('fingerprint', fingerprint),
+    .withIndex('by_connector_fingerprint', (q) =>
+      q.eq('connectorId', args.connectorId).eq('fingerprint', fingerprint),
     )
     .unique();
 
@@ -55,7 +51,8 @@ export async function upsertErrorGroup(
   }
 
   await ctx.db.insert('errorGroups', {
-    sourceId: args.sourceId,
+    workspaceId: args.workspaceId,
+    connectorId: args.connectorId,
     fingerprint,
     queueName: args.queueName,
     jobName: args.jobName,
@@ -69,10 +66,12 @@ export async function upsertErrorGroup(
   });
 }
 
+// TRANSITIONAL — internalToken-gated, mirrors ingest.record's failure path
+// for direct callers that aren't sending a full ingest batch.
 export const recordFailure = mutation({
   args: {
     internalToken: v.string(),
-    sourceId: v.string(),
+    connectorId: v.string(),
     queueName: v.string(),
     jobName: v.optional(v.string()),
     jobId: v.optional(v.string()),
@@ -80,18 +79,19 @@ export const recordFailure = mutation({
     ts: v.number(),
   },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
-    const sourceId = ctx.db.normalizeId('proxySources', args.sourceId);
-    if (!sourceId) {
-      throw new Error('unknown source');
+    requireInternalToken(args.internalToken);
+    const connectorId = ctx.db.normalizeId('connectors', args.connectorId);
+    if (!connectorId) {
+      throw new Error('unknown connector');
     }
-    const source = await ctx.db.get(sourceId);
-    if (!source) {
-      throw new Error('unknown source');
+    const connector = await ctx.db.get(connectorId);
+    if (!connector) {
+      throw new Error('unknown connector');
     }
 
     await upsertErrorGroup(ctx, {
-      sourceId,
+      workspaceId: connector.workspaceId,
+      connectorId,
       queueName: args.queueName,
       jobName: args.jobName,
       jobId: args.jobId,
@@ -103,14 +103,14 @@ export const recordFailure = mutation({
 
 export const listGroups = query({
   args: {
-    internalToken: v.string(),
-    sourceId: v.string(),
+    workspaceId: v.id('workspaces'),
+    connectorId: v.id('connectors'),
     state: v.optional(v.union(v.literal('open'), v.literal('resolved'), v.literal('ignored'))),
   },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
-    const sourceId = ctx.db.normalizeId('proxySources', args.sourceId);
-    if (!sourceId) {
+    await requireWorkspaceMember(ctx, args.workspaceId);
+    const connector = await ctx.db.get(args.connectorId);
+    if (!connector || connector.workspaceId !== args.workspaceId) {
       return [];
     }
 
@@ -118,48 +118,50 @@ export const listGroups = query({
     if (state) {
       return await ctx.db
         .query('errorGroups')
-        .withIndex('by_source_state', (q) => q.eq('sourceId', sourceId).eq('state', state))
+        .withIndex('by_connector_state', (q) =>
+          q.eq('connectorId', args.connectorId).eq('state', state),
+        )
         .order('desc')
         .take(200);
     }
 
     return await ctx.db
       .query('errorGroups')
-      .withIndex('by_source_last_seen', (q) => q.eq('sourceId', sourceId))
+      .withIndex('by_connector_last_seen', (q) => q.eq('connectorId', args.connectorId))
       .order('desc')
       .take(200);
   },
 });
 
 export const getGroup = query({
-  args: { internalToken: v.string(), groupId: v.string() },
+  args: { workspaceId: v.id('workspaces'), groupId: v.id('errorGroups') },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
-    const groupId = ctx.db.normalizeId('errorGroups', args.groupId);
-    if (!groupId) {
+    await requireWorkspaceMember(ctx, args.workspaceId);
+    const group = await ctx.db.get(args.groupId);
+    if (!group || group.workspaceId !== args.workspaceId) {
       return null;
     }
-    return await ctx.db.get(groupId);
+    return group;
   },
 });
 
 export const setGroupState = mutation({
   args: {
-    internalToken: v.string(),
-    groupId: v.string(),
+    workspaceId: v.id('workspaces'),
+    groupId: v.id('errorGroups'),
     state: v.union(v.literal('open'), v.literal('resolved'), v.literal('ignored')),
   },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
-    const groupId = ctx.db.normalizeId('errorGroups', args.groupId);
-    if (!groupId) {
+    await requireWorkspaceMember(ctx, args.workspaceId);
+    const group = await ctx.db.get(args.groupId);
+    if (!group || group.workspaceId !== args.workspaceId) {
       throw new Error('unknown group');
     }
 
-    await ctx.db.patch(groupId, {
+    await ctx.db.patch(args.groupId, {
       state: args.state,
       ...(args.state === 'resolved' ? { isRegression: false } : {}),
     });
-    return await ctx.db.get(groupId);
+    return await ctx.db.get(args.groupId);
   },
 });

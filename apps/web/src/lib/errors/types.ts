@@ -2,7 +2,7 @@ export type ErrorGroupState = 'open' | 'resolved' | 'ignored';
 
 export interface ErrorGroup {
   id: string;
-  sourceId: string;
+  connectorId: string;
   fingerprint: string;
   queueName: string;
   jobName?: string;

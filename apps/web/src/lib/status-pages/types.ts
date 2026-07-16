@@ -1,6 +1,6 @@
 export interface StatusPageConfig {
   id: string;
-  sourceId: string;
+  connectorId: string;
   slug: string;
   isEnabled: boolean;
   title: string;

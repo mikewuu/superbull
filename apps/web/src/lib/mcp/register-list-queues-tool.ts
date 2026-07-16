@@ -1,7 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { findConnectorByIdLegacy } from '../connectors/find-connector-by-id-legacy';
 import { forwardToProxy } from '../forwarding/forward-to-proxy';
-import { findSourceById } from '../sources/find-source-by-id';
 import { errorResult } from './error-result';
 import { jsonResult } from './json-result';
 
@@ -16,19 +16,19 @@ export function registerListQueuesTool(server: McpServer): void {
     'list_queues',
     {
       title: 'List queues',
-      description: 'List the queues a proxy source exposes, with job counts and paused state.',
-      inputSchema: { source_id: z.string() },
+      description: 'List the queues a connector exposes, with job counts and paused state.',
+      inputSchema: { connector_id: z.string() },
       annotations: { readOnlyHint: true },
     },
     async (args) => {
       try {
-        const source = await findSourceById(args.source_id);
-        if (!source) {
-          return errorResult('source not found');
+        const connector = await findConnectorByIdLegacy(args.connector_id);
+        if (!connector || !connector.url || !connector.token) {
+          return errorResult('connector not found');
         }
 
         const result = await forwardToProxy({
-          source,
+          connector: { url: connector.url, token: connector.token },
           method: 'GET',
           path: ['queues'],
           search: '',

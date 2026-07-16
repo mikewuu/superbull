@@ -8,23 +8,10 @@ function makeTestClient() {
   return convexTest(schema, import.meta.glob('../../convex/**/*.ts'));
 }
 
-describe('users.canSignUp', () => {
-  it('allows sign-up when no user exists yet', async () => {
-    const t = makeTestClient();
-
-    expect(await t.query(api.users.canSignUp, {})).toBe(true);
-  });
-
-  it('blocks sign-up once a first user exists', async () => {
-    const t = makeTestClient();
-
-    await t.run(async (ctx) => {
-      await ctx.db.insert('users', { email: 'first@example.com' });
-    });
-
-    expect(await t.query(api.users.canSignUp, {})).toBe(false);
-  });
-});
+// Round 2: signup is open (multi-tenant, Google auth) — the old
+// single-account `canSignUp` gate is gone. See convex/auth.ts's
+// afterUserCreatedOrUpdated for the personal-workspace bootstrap this
+// replaced it with.
 
 describe('users.viewer', () => {
   it('returns null when unauthenticated', async () => {

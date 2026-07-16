@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import type { MutationCtx, QueryCtx } from './_generated/server';
+import { requireInternalToken, requireWorkspaceMember } from './access';
 
 const alertRuleType = v.union(
   v.literal('failed_threshold'),
@@ -9,12 +10,6 @@ const alertRuleType = v.union(
   v.literal('worker_loss'),
   v.literal('new_error_group'),
 );
-
-function guardInternalToken(internalToken: string): void {
-  if (internalToken !== process.env.CONVEX_INTERNAL_TOKEN) {
-    throw new Error('unauthorized');
-  }
-}
 
 function guardRuleFields(rule: {
   type: 'failed_threshold' | 'stuck_queue' | 'worker_loss' | 'new_error_group';
@@ -33,26 +28,61 @@ function guardRuleFields(rule: {
   }
 }
 
+// ---------------------------------------------------------------------------
+// User-facing (workspace + Convex-auth scoped)
+// ---------------------------------------------------------------------------
+
 export const list = query({
-  args: { internalToken: v.string() },
+  args: { workspaceId: v.id('workspaces') },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
-    return await ctx.db.query('alertRules').collect();
+    await requireWorkspaceMember(ctx, args.workspaceId);
+    return await ctx.db
+      .query('alertRules')
+      .withIndex('by_workspace', (q) => q.eq('workspaceId', args.workspaceId))
+      .collect();
   },
 });
 
 export const listStates = query({
-  args: { internalToken: v.string() },
+  args: { workspaceId: v.id('workspaces') },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
-    return await ctx.db.query('alertStates').collect();
+    await requireWorkspaceMember(ctx, args.workspaceId);
+    const rules = await ctx.db
+      .query('alertRules')
+      .withIndex('by_workspace', (q) => q.eq('workspaceId', args.workspaceId))
+      .collect();
+    const states = [];
+    for (const rule of rules) {
+      const state = await ctx.db
+        .query('alertStates')
+        .withIndex('by_rule', (q) => q.eq('ruleId', rule._id))
+        .unique();
+      if (state) {
+        states.push(state);
+      }
+    }
+    return states;
   },
 });
 
+async function guardConnectorInWorkspace(
+  ctx: QueryCtx | MutationCtx,
+  workspaceId: Id<'workspaces'>,
+  connectorId: Id<'connectors'> | undefined,
+): Promise<void> {
+  if (!connectorId) {
+    return;
+  }
+  const connector = await ctx.db.get(connectorId);
+  if (!connector || connector.workspaceId !== workspaceId) {
+    throw new Error('unknown connector');
+  }
+}
+
 export const create = mutation({
   args: {
-    internalToken: v.string(),
-    sourceId: v.optional(v.string()),
+    workspaceId: v.id('workspaces'),
+    connectorId: v.optional(v.id('connectors')),
     type: alertRuleType,
     queueName: v.optional(v.string()),
     threshold: v.optional(v.number()),
@@ -61,12 +91,13 @@ export const create = mutation({
     isEnabled: v.boolean(),
   },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
+    await requireWorkspaceMember(ctx, args.workspaceId);
     guardRuleFields(args);
-    const sourceId = args.sourceId ? normalizeSourceId(ctx, args.sourceId) : undefined;
+    await guardConnectorInWorkspace(ctx, args.workspaceId, args.connectorId);
 
     const id = await ctx.db.insert('alertRules', {
-      sourceId,
+      workspaceId: args.workspaceId,
+      connectorId: args.connectorId,
       type: args.type,
       queueName: args.queueName,
       threshold: args.threshold,
@@ -84,9 +115,9 @@ export const create = mutation({
 
 export const update = mutation({
   args: {
-    internalToken: v.string(),
-    id: v.string(),
-    sourceId: v.optional(v.string()),
+    workspaceId: v.id('workspaces'),
+    id: v.id('alertRules'),
+    connectorId: v.optional(v.id('connectors')),
     type: v.optional(alertRuleType),
     queueName: v.optional(v.string()),
     threshold: v.optional(v.number()),
@@ -95,13 +126,9 @@ export const update = mutation({
     isEnabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
-    const id = ctx.db.normalizeId('alertRules', args.id);
-    if (!id) {
-      throw new Error('unknown alert rule');
-    }
-    const existing = await ctx.db.get(id);
-    if (!existing) {
+    await requireWorkspaceMember(ctx, args.workspaceId);
+    const existing = await ctx.db.get(args.id);
+    if (!existing || existing.workspaceId !== args.workspaceId) {
       throw new Error('unknown alert rule');
     }
 
@@ -111,10 +138,10 @@ export const update = mutation({
     const windowMinutes =
       args.windowMinutes !== undefined ? args.windowMinutes : existing.windowMinutes;
     guardRuleFields({ type, queueName, threshold, windowMinutes });
+    await guardConnectorInWorkspace(ctx, args.workspaceId, args.connectorId);
 
-    await ctx.db.patch(id, {
-      sourceId:
-        args.sourceId !== undefined ? normalizeSourceId(ctx, args.sourceId) : existing.sourceId,
+    await ctx.db.patch(args.id, {
+      connectorId: args.connectorId !== undefined ? args.connectorId : existing.connectorId,
       type,
       queueName,
       threshold,
@@ -122,7 +149,7 @@ export const update = mutation({
       email: args.email ?? existing.email,
       isEnabled: args.isEnabled ?? existing.isEnabled,
     });
-    const updated = await ctx.db.get(id);
+    const updated = await ctx.db.get(args.id);
     if (!updated) {
       throw new Error('failed to update alert rule');
     }
@@ -131,27 +158,36 @@ export const update = mutation({
 });
 
 export const remove = mutation({
-  args: { internalToken: v.string(), id: v.string() },
+  args: { workspaceId: v.id('workspaces'), id: v.id('alertRules') },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
-    const id = ctx.db.normalizeId('alertRules', args.id);
-    if (!id) {
+    await requireWorkspaceMember(ctx, args.workspaceId);
+    const existing = await ctx.db.get(args.id);
+    if (!existing || existing.workspaceId !== args.workspaceId) {
       return null;
     }
     const states = await ctx.db
       .query('alertStates')
-      .withIndex('by_rule', (q) => q.eq('ruleId', id))
+      .withIndex('by_rule', (q) => q.eq('ruleId', args.id))
       .collect();
     for (const state of states) {
       await ctx.db.delete(state._id);
     }
-    await ctx.db.delete(id);
+    await ctx.db.delete(args.id);
     return null;
   },
 });
 
+// ---------------------------------------------------------------------------
+// internalToken-gated — called by the evaluateAlerts / sendDigest Convex
+// crons (Builder E's territory: convex/crons.ts + the "use node" email
+// actions). Evaluation stays a single sweep across every workspace's
+// enabled rules; email routing is per-rule (rule.email), so no workspace
+// filtering is needed here.
+// ---------------------------------------------------------------------------
+
 interface NotifyEntry {
   rule_id: Id<'alertRules'>;
+  workspace_id: Id<'workspaces'>;
   email: string;
   type: Doc<'alertRules'>['type'];
   queue_name: string | null;
@@ -159,10 +195,24 @@ interface NotifyEntry {
   kind: 'firing' | 'resolved';
 }
 
+// For the daily-digest cron's recipient grouping (convex/alertNotifications.ts,
+// Builder E's territory): every rule's {email, workspaceId}, regardless of
+// isEnabled — matches the pre-multi-tenant behavior of the deleted
+// @nextastic/queue job runner. Feeds convex/emails/digestRecipients.ts's
+// groupRecipientsByWorkspace.
+export const listAllRulesForDigest = query({
+  args: { internalToken: v.string() },
+  handler: async (ctx, args) => {
+    requireInternalToken(args.internalToken);
+    const rules = await ctx.db.query('alertRules').collect();
+    return rules.map((rule) => ({ email: rule.email, workspaceId: rule.workspaceId }));
+  },
+});
+
 export const evaluate = mutation({
   args: { internalToken: v.string() },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
+    requireInternalToken(args.internalToken);
     const rules = await ctx.db
       .query('alertRules')
       .withIndex('by_enabled', (q) => q.eq('isEnabled', true))
@@ -182,18 +232,20 @@ export const evaluate = mutation({
 export const digestSummary = query({
   args: { internalToken: v.string(), sinceTs: v.number() },
   handler: async (ctx, args) => {
-    guardInternalToken(args.internalToken);
-    const sources = await ctx.db.query('proxySources').collect();
-    const perSource = [];
-    for (const source of sources) {
+    requireInternalToken(args.internalToken);
+    const connectors = await ctx.db.query('connectors').collect();
+    const perConnector = [];
+    for (const connector of connectors) {
       const events = await ctx.db
         .query('ingestEvents')
-        .withIndex('by_source_ts', (q) => q.eq('sourceId', source._id).gte('ts', args.sinceTs))
+        .withIndex('by_connector_ts', (q) =>
+          q.eq('connectorId', connector._id).gte('ts', args.sinceTs),
+        )
         .collect();
       const errorGroups = await ctx.db
         .query('errorGroups')
-        .withIndex('by_source_last_seen', (q) =>
-          q.eq('sourceId', source._id).gte('lastSeenTs', args.sinceTs),
+        .withIndex('by_connector_last_seen', (q) =>
+          q.eq('connectorId', connector._id).gte('lastSeenTs', args.sinceTs),
         )
         .collect();
       const topErrorGroups = errorGroups
@@ -205,15 +257,16 @@ export const digestSummary = query({
           count: group.count,
         }));
 
-      perSource.push({
-        sourceId: source._id,
-        sourceName: source.name,
+      perConnector.push({
+        workspaceId: connector.workspaceId,
+        connectorId: connector._id,
+        connectorName: connector.name,
         completed: events.filter((event) => event.type === 'job.completed').length,
         failed: events.filter((event) => event.type === 'job.failed').length,
         topErrorGroups,
       });
     }
-    return { perSource };
+    return { perConnector };
   },
 });
 
@@ -245,6 +298,7 @@ async function evaluateRule(
     }
     return {
       rule_id: rule._id,
+      workspace_id: rule.workspaceId,
       email: rule.email,
       type: rule.type,
       queue_name: rule.queueName ?? null,
@@ -257,6 +311,7 @@ async function evaluateRule(
     await ctx.db.patch(state._id, { state: 'resolved', lastNotifiedTs: Date.now() });
     return {
       rule_id: rule._id,
+      workspace_id: rule.workspaceId,
       email: rule.email,
       type: rule.type,
       queue_name: rule.queueName ?? null,
@@ -292,10 +347,10 @@ async function computeFailedThresholdStatus(
   rule: Doc<'alertRules'>,
   windowStart: number,
 ): Promise<{ firing: boolean; summary: string }> {
-  const sourceIds = await getRuleSourceIds(ctx, rule);
+  const connectorIds = await getRuleConnectorIds(ctx, rule);
   let count = 0;
-  for (const sourceId of sourceIds) {
-    const events = await queryEventsInWindow(ctx, sourceId, rule.queueName, windowStart);
+  for (const connectorId of connectorIds) {
+    const events = await queryEventsInWindow(ctx, connectorId, rule.queueName, windowStart);
     count += events.filter((event) => event.type === 'job.failed').length;
   }
   const threshold = rule.threshold ?? 0;
@@ -311,9 +366,9 @@ async function computeStuckQueueStatus(
   rule: Doc<'alertRules'>,
   windowStart: number,
 ): Promise<{ firing: boolean; summary: string }> {
-  const sourceIds = await getRuleSourceIds(ctx, rule);
-  for (const sourceId of sourceIds) {
-    const events = await queryEventsInWindow(ctx, sourceId, rule.queueName, windowStart);
+  const connectorIds = await getRuleConnectorIds(ctx, rule);
+  for (const connectorId of connectorIds) {
+    const events = await queryEventsInWindow(ctx, connectorId, rule.queueName, windowStart);
     const completedByQueue = countEventsByQueue(events, 'job.completed');
     for (const snapshot of latestSnapshotsByQueue(events)) {
       const counts = snapshot.counts as Record<string, number> | undefined;
@@ -335,9 +390,9 @@ async function computeWorkerLossStatus(
   rule: Doc<'alertRules'>,
   windowStart: number,
 ): Promise<{ firing: boolean; summary: string }> {
-  const sourceIds = await getRuleSourceIds(ctx, rule);
-  for (const sourceId of sourceIds) {
-    const events = await queryEventsInWindow(ctx, sourceId, rule.queueName, windowStart);
+  const connectorIds = await getRuleConnectorIds(ctx, rule);
+  for (const connectorId of connectorIds) {
+    const events = await queryEventsInWindow(ctx, connectorId, rule.queueName, windowStart);
     for (const snapshot of latestSnapshotsByQueue(events)) {
       if (snapshot.workerCount === 0) {
         return {
@@ -355,13 +410,13 @@ async function computeNewErrorGroupStatus(
   rule: Doc<'alertRules'>,
   windowStart: number,
 ): Promise<{ firing: boolean; summary: string }> {
-  const sourceIds = await getRuleSourceIds(ctx, rule);
+  const connectorIds = await getRuleConnectorIds(ctx, rule);
   let newCount = 0;
-  for (const sourceId of sourceIds) {
+  for (const connectorId of connectorIds) {
     const groups = await ctx.db
       .query('errorGroups')
-      .withIndex('by_source_last_seen', (q) =>
-        q.eq('sourceId', sourceId).gte('lastSeenTs', windowStart),
+      .withIndex('by_connector_last_seen', (q) =>
+        q.eq('connectorId', connectorId).gte('lastSeenTs', windowStart),
       )
       .collect();
     newCount += groups.filter((group) => group.firstSeenTs >= windowStart).length;
@@ -372,34 +427,37 @@ async function computeNewErrorGroupStatus(
   };
 }
 
-async function getRuleSourceIds(
+async function getRuleConnectorIds(
   ctx: MutationCtx,
   rule: Doc<'alertRules'>,
-): Promise<Id<'proxySources'>[]> {
-  if (rule.sourceId) {
-    return [rule.sourceId];
+): Promise<Id<'connectors'>[]> {
+  if (rule.connectorId) {
+    return [rule.connectorId];
   }
-  const sources = await ctx.db.query('proxySources').collect();
-  return sources.map((source) => source._id);
+  const connectors = await ctx.db
+    .query('connectors')
+    .withIndex('by_workspace', (q) => q.eq('workspaceId', rule.workspaceId))
+    .collect();
+  return connectors.map((connector) => connector._id);
 }
 
 async function queryEventsInWindow(
   ctx: MutationCtx,
-  sourceId: Id<'proxySources'>,
+  connectorId: Id<'connectors'>,
   queueName: string | undefined,
   windowStart: number,
 ): Promise<Doc<'ingestEvents'>[]> {
   if (queueName) {
     return await ctx.db
       .query('ingestEvents')
-      .withIndex('by_source_queue_ts', (q) =>
-        q.eq('sourceId', sourceId).eq('queueName', queueName).gte('ts', windowStart),
+      .withIndex('by_connector_queue_ts', (q) =>
+        q.eq('connectorId', connectorId).eq('queueName', queueName).gte('ts', windowStart),
       )
       .collect();
   }
   return await ctx.db
     .query('ingestEvents')
-    .withIndex('by_source_ts', (q) => q.eq('sourceId', sourceId).gte('ts', windowStart))
+    .withIndex('by_connector_ts', (q) => q.eq('connectorId', connectorId).gte('ts', windowStart))
     .collect();
 }
 
@@ -426,12 +484,4 @@ function countEventsByQueue(events: Doc<'ingestEvents'>[], type: string): Map<st
     counts.set(event.queueName, (counts.get(event.queueName) ?? 0) + 1);
   }
   return counts;
-}
-
-function normalizeSourceId(ctx: QueryCtx, sourceId: string): Id<'proxySources'> {
-  const normalized = ctx.db.normalizeId('proxySources', sourceId);
-  if (!normalized) {
-    throw new Error('unknown source');
-  }
-  return normalized;
 }

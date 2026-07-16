@@ -1,30 +1,16 @@
-import { anyApi } from 'convex/server';
-import { createServerConvexClient } from '../convex/create-server-convex-client';
+import { convexAuthNextjsToken } from '@convex-dev/auth/nextjs/server';
+import { fetchMutation } from 'convex/nextjs';
+import { api } from '../../../convex/_generated/api';
+import type { Id } from '../../../convex/_generated/dataModel';
+import { toSavedDashboard } from './to-saved-dashboard';
 import type { DashboardCard, SavedDashboard } from './types';
 
 export async function createDashboard(args: {
+  workspaceId: Id<'workspaces'>;
   name: string;
   cards: DashboardCard[];
 }): Promise<SavedDashboard> {
-  const client = createServerConvexClient();
-  const ref = anyApi.dashboards?.create;
-  if (!ref) {
-    throw new Error('missing dashboards.create function reference');
-  }
-  const doc = await client.mutation(ref, args);
+  const token = await convexAuthNextjsToken();
+  const doc = await fetchMutation(api.dashboards.create, args, { token });
   return toSavedDashboard(doc);
-}
-
-function toSavedDashboard(doc: {
-  _id: string;
-  _creationTime: number;
-  name: string;
-  cards: SavedDashboard['cards'];
-}): SavedDashboard {
-  return {
-    id: doc._id,
-    name: doc.name,
-    cards: doc.cards,
-    created_at: new Date(doc._creationTime),
-  };
 }

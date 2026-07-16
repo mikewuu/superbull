@@ -2,8 +2,11 @@ import { buildRoute } from '@nextastic/http';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { authenticateHubToken } from '../../../../lib/auth/authenticate-hub-token';
-import { upsertSourceByName } from '../../../../lib/sources/upsert-source-by-name';
+import { upsertConnectorByName } from '../../../../lib/connectors/upsert-connector-by-name';
 
+// TRANSITIONAL — deleted in Round 3. Registers/updates a connector by name,
+// attached to the oldest workspace in the db (see
+// convex/connectors.ts's upsertByName for the actual attach logic).
 export const POST = buildRoute({
   body: z.object({
     name: z.string().min(1),
@@ -18,6 +21,10 @@ export const POST = buildRoute({
 })
   .use(authenticateHubToken)
   .handle(async (req) => {
-    const source = await upsertSourceByName(req.body);
-    return NextResponse.json({ source_id: source.id, name: source.name, url: source.url });
+    const connector = await upsertConnectorByName(req.body);
+    return NextResponse.json({
+      source_id: connector.id,
+      name: connector.name,
+      url: connector.url as string,
+    });
   });

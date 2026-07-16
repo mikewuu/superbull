@@ -1,5 +1,13 @@
+// TRANSITIONAL — the old HTTP proxy flow. Round 3 replaces this with a
+// gateway RPC call (POST /internal/rpc on apps/gateway) once connectors
+// carry a live WebSocket connection instead of a static url/token. The
+// caller (the connector SPA embed route under
+// /app/[workspaceSlug]/connectors/[connectorId]/**) is responsible for
+// verifying the caller is a workspace member (via
+// lib/connectors/find-connector-by-id.ts, which does that check) before
+// ever reaching this function — it does no auth of its own.
 export interface ForwardToProxyArgs {
-  source: { url: string; token: string };
+  connector: { url: string; token: string };
   method: string;
   path: string[];
   search: string;
@@ -14,9 +22,9 @@ export interface ForwardToProxyResult {
 }
 
 export async function forwardToProxy(args: ForwardToProxyArgs): Promise<ForwardToProxyResult> {
-  const { source, method, path, search, body, contentType } = args;
-  const url = `${source.url}/api/${path.join('/')}${search}`;
-  const headers: Record<string, string> = { authorization: `Bearer ${source.token}` };
+  const { connector, method, path, search, body, contentType } = args;
+  const url = `${connector.url}/api/${path.join('/')}${search}`;
+  const headers: Record<string, string> = { authorization: `Bearer ${connector.token}` };
   if (contentType) {
     headers['content-type'] = contentType;
   }

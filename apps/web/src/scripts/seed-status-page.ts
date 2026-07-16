@@ -1,6 +1,6 @@
+import { upsertConnectorByName } from '../lib/connectors/upsert-connector-by-name';
 import { recordIngestEvents } from '../lib/ingest/record-ingest-events';
-import { upsertSourceByName } from '../lib/sources/upsert-source-by-name';
-import { upsertStatusPageConfig } from '../lib/status-pages/upsert-status-page-config';
+import { upsertStatusPageConfigLegacy } from '../lib/status-pages/upsert-status-page-config-legacy';
 
 const sourceName = 'SuperBull Dev Status Demo';
 const slug = 'dev-demo';
@@ -52,14 +52,14 @@ function buildDayEvents(args: {
 async function main(): Promise<void> {
   guardDevDeployment();
 
-  const source = await upsertSourceByName({
+  const connector = await upsertConnectorByName({
     name: sourceName,
     url: 'http://127.0.0.1:4655',
     token: 'dev-status-demo-token',
   });
 
-  await upsertStatusPageConfig({
-    sourceId: source.id,
+  await upsertStatusPageConfigLegacy({
+    connectorId: connector.id,
     slug,
     isEnabled: true,
     title: 'SuperBull Dev Status',
@@ -77,7 +77,7 @@ async function main(): Promise<void> {
           : { queueName, daysAgo, todayStart, completed: eventsPerQueuePerDay, failed: 0 },
       ),
     );
-    const result = await recordIngestEvents({ sourceId: source.id, events: dayEvents });
+    const result = await recordIngestEvents({ connectorId: connector.id, events: dayEvents });
     accepted += result.accepted;
     deduped += result.deduped;
   }

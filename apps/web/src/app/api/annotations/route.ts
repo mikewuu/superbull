@@ -12,6 +12,8 @@ const annotationSchema = z.object({
   ts: z.number(),
 });
 
+// TRANSITIONAL — global SUPERBULL_API_TOKEN hub API. Round 3 gives this
+// per-workspace API keys. `source_id` on the wire is a connector id.
 export const GET = buildRoute({
   query: z.object({
     source_id: z.string(),
@@ -23,14 +25,14 @@ export const GET = buildRoute({
   .use(authenticateHubToken)
   .handle(async (req) => {
     const annotations = await listDeployAnnotations({
-      sourceId: req.query.source_id,
+      connectorId: req.query.source_id,
       fromTs: req.query.from_ts ? Number(req.query.from_ts) : undefined,
       toTs: req.query.to_ts ? Number(req.query.to_ts) : undefined,
     });
     return NextResponse.json({
       annotations: annotations.map((annotation) => ({
         id: annotation.id,
-        source_id: annotation.sourceId,
+        source_id: annotation.connectorId,
         label: annotation.label,
         ts: annotation.ts,
       })),
@@ -48,14 +50,14 @@ export const POST = buildRoute({
   .use(authenticateHubToken)
   .handle(async (req) => {
     const annotation = await createDeployAnnotation({
-      sourceId: req.body.source_id,
+      connectorId: req.body.source_id,
       label: req.body.label,
       ts: req.body.ts ?? Date.now(),
     });
     return NextResponse.json(
       {
         id: annotation.id,
-        source_id: annotation.sourceId,
+        source_id: annotation.connectorId,
         label: annotation.label,
         ts: annotation.ts,
       },

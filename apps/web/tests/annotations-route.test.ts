@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 interface FakeAnnotation {
   id: string;
-  sourceId: string;
+  connectorId: string;
   label: string;
   ts: number;
 }
@@ -16,7 +16,7 @@ const { annotations } = vi.hoisted(() => {
 
 vi.mock('../src/lib/deploy-annotations/create-deploy-annotation', () => {
   return {
-    async createDeployAnnotation(args: { sourceId: string; label: string; ts: number }) {
+    async createDeployAnnotation(args: { connectorId: string; label: string; ts: number }) {
       const annotation: FakeAnnotation = { id: crypto.randomUUID(), ...args };
       annotations.push(annotation);
       return annotation;
@@ -26,9 +26,9 @@ vi.mock('../src/lib/deploy-annotations/create-deploy-annotation', () => {
 
 vi.mock('../src/lib/deploy-annotations/list-deploy-annotations', () => {
   return {
-    async listDeployAnnotations(args: { sourceId: string; fromTs?: number; toTs?: number }) {
+    async listDeployAnnotations(args: { connectorId: string; fromTs?: number; toTs?: number }) {
       return annotations.filter((annotation) => {
-        if (annotation.sourceId !== args.sourceId) {
+        if (annotation.connectorId !== args.connectorId) {
           return false;
         }
         if (args.fromTs !== undefined && annotation.ts < args.fromTs) {
@@ -129,7 +129,7 @@ describe('annotations REST routes', () => {
     expect(response.status).toBe(401);
   });
 
-  it('GET lists annotations scoped by source and range', async () => {
+  it('GET lists annotations scoped by connector and range', async () => {
     const route = await import('../src/app/api/annotations/route');
     await route.POST(
       authedRequest('http://localhost/api/annotations', {

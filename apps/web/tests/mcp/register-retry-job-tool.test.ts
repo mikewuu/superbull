@@ -1,11 +1,13 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { findConnectorByIdLegacy } from '../../src/lib/connectors/find-connector-by-id-legacy';
 import { forwardToProxy } from '../../src/lib/forwarding/forward-to-proxy';
 import { registerRetryJobTool } from '../../src/lib/mcp/register-retry-job-tool';
-import { findSourceById } from '../../src/lib/sources/find-source-by-id';
 
 vi.mock('../../src/lib/forwarding/forward-to-proxy', () => ({ forwardToProxy: vi.fn() }));
-vi.mock('../../src/lib/sources/find-source-by-id', () => ({ findSourceById: vi.fn() }));
+vi.mock('../../src/lib/connectors/find-connector-by-id-legacy', () => ({
+  findConnectorByIdLegacy: vi.fn(),
+}));
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -41,11 +43,16 @@ describe('registerRetryJobTool', () => {
   });
 
   it('PUTs the retry route and reports success on 204', async () => {
-    vi.mocked(findSourceById).mockResolvedValue({
+    vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
+      workspaceId: 'ws_1',
       name: 'proxy-a',
       url: 'https://proxy-a.example.com',
       token: 'secret',
+      version: null,
+      queues: null,
+      lastConnectedAt: null,
+      lastDisconnectedAt: null,
       created_at: new Date(),
     });
     vi.mocked(forwardToProxy).mockResolvedValue({ status: 204, contentType: null, body: '' });
@@ -54,7 +61,7 @@ describe('registerRetryJobTool', () => {
 
     const result = await tools
       .get('retry_job')
-      ?.handler({ source_id: 'src_1', queue_name: 'jobs', job_id: '42' });
+      ?.handler({ connector_id: 'src_1', queue_name: 'jobs', job_id: '42' });
     const body = JSON.parse(result?.content[0]?.text ?? '{}');
 
     expect(body).toEqual({ retried: true, job_id: '42' });
@@ -64,11 +71,16 @@ describe('registerRetryJobTool', () => {
   });
 
   it('returns an error result when the proxy rejects the retry', async () => {
-    vi.mocked(findSourceById).mockResolvedValue({
+    vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
+      workspaceId: 'ws_1',
       name: 'proxy-a',
       url: 'https://proxy-a.example.com',
       token: 'secret',
+      version: null,
+      queues: null,
+      lastConnectedAt: null,
+      lastDisconnectedAt: null,
       created_at: new Date(),
     });
     vi.mocked(forwardToProxy).mockResolvedValue({
@@ -81,7 +93,7 @@ describe('registerRetryJobTool', () => {
 
     const result = await tools
       .get('retry_job')
-      ?.handler({ source_id: 'src_1', queue_name: 'jobs', job_id: '42' });
+      ?.handler({ connector_id: 'src_1', queue_name: 'jobs', job_id: '42' });
 
     expect(result?.isError).toBe(true);
     expect(result?.content[0]?.text).toContain('job not found');

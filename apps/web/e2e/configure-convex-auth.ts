@@ -7,15 +7,21 @@ import { exportJWK, exportPKCS8, generateKeyPair } from 'jose';
 // happens before `convex dev` finishes pushing the schema/functions (and
 // again before it's done applying each `env set` below, which each trigger
 // their own redeploy). So this waits for a real query — and, at the end, the
-// real first sign-up — to succeed before next dev starts serving pages.
+// real first sign-in — to succeed before next dev starts serving pages.
 const convexUrl = 'http://127.0.0.1:3210';
-const E2E_EMAIL = 'e2e@superbull.test';
-const E2E_PASSWORD = 'superbull-e2e-pw';
 
 async function main(): Promise<void> {
   await waitForDeployed();
 
   execSync('npx convex env set CONVEX_INTERNAL_TOKEN e2e-internal', { stdio: 'inherit' });
+  await waitForDeployed();
+
+  // Registers convex/auth.ts's test-login ConvexCredentials provider (id
+  // 'test-login') — only ever set on this anonymous e2e deployment, never in
+  // production. See src/app/signin/_components/sign-in-form.tsx for the
+  // matching NEXT_PUBLIC_AUTH_TEST_LOGIN client flag (set separately, in
+  // playwright.config.ts's `web` webServer env block).
+  execSync('npx convex env set AUTH_TEST_LOGIN true', { stdio: 'inherit' });
   await waitForDeployed();
 
   // @convex-dev/auth signs session JWTs with these; `npx @convex-dev/auth`
@@ -46,7 +52,7 @@ async function waitForDeployed(): Promise<void> {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          path: 'proxySources:list',
+          path: 'connectors:list',
           args: { internalToken: '' },
           format: 'json',
         }),
@@ -68,7 +74,9 @@ async function waitForDeployed(): Promise<void> {
 
 // The first user has to exist before e2e/auth.setup.ts signs in through the
 // UI; creating it here doubles as the write-path readiness probe (writes are
-// a separate redeploy target from the reads waitForDeployed exercises).
+// a separate redeploy target from the reads waitForDeployed exercises). The
+// test-login provider ignores its credentials and always resolves to the
+// hardcoded e2e@superbull.test account (see convex/auth.ts).
 async function bootstrapFirstUser(): Promise<void> {
   for (let attempt = 0; attempt < 150; attempt++) {
     try {
@@ -77,10 +85,7 @@ async function bootstrapFirstUser(): Promise<void> {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           path: 'auth:signIn',
-          args: {
-            provider: 'password',
-            params: { flow: 'signUp', email: E2E_EMAIL, password: E2E_PASSWORD },
-          },
+          args: { provider: 'test-login', params: {} },
           format: 'json',
         }),
       });

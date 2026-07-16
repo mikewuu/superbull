@@ -3,7 +3,7 @@ export type DashboardRange = '24h' | '7d' | '30d';
 
 export interface DashboardCard {
   type: DashboardCardType;
-  source_id: string;
+  connector_id: string;
   queue_name?: string;
   range: DashboardRange;
 }

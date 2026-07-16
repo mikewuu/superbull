@@ -1,19 +1,25 @@
+import { convexAuthNextjsToken } from '@convex-dev/auth/nextjs/server';
+import { fetchQuery } from 'convex/nextjs';
 import { api } from '../../../convex/_generated/api';
-import type { Doc } from '../../../convex/_generated/dataModel';
-import { createServerConvexClient } from '../convex/create-server-convex-client';
+import type { Id } from '../../../convex/_generated/dataModel';
 import type { AlertState } from './types';
 
-export async function listAlertStates(): Promise<AlertState[]> {
-  const client = createServerConvexClient();
-  const docs = await client.query(api.alerts.listStates, {});
-  return docs.map(toAlertState);
-}
-
-function toAlertState(doc: Doc<'alertStates'>): AlertState {
+function toAlertState(doc: {
+  ruleId: string;
+  state: 'firing' | 'resolved';
+  lastFiredTs?: number;
+  lastNotifiedTs?: number;
+}): AlertState {
   return {
     ruleId: doc.ruleId,
     state: doc.state,
     lastFiredTs: doc.lastFiredTs ?? null,
     lastNotifiedTs: doc.lastNotifiedTs ?? null,
   };
+}
+
+export async function listAlertStates(workspaceId: Id<'workspaces'>): Promise<AlertState[]> {
+  const token = await convexAuthNextjsToken();
+  const docs = await fetchQuery(api.alerts.listStates, { workspaceId }, { token });
+  return docs.map(toAlertState);
 }

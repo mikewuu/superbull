@@ -1,16 +1,15 @@
-import { anyApi } from 'convex/server';
-import { createServerConvexClient } from '../convex/create-server-convex-client';
+import { convexAuthNextjsToken } from '@convex-dev/auth/nextjs/server';
+import { fetchQuery } from 'convex/nextjs';
+import { api } from '../../../convex/_generated/api';
+import type { Id } from '../../../convex/_generated/dataModel';
 import type { HeatmapResult } from './types';
 
 export async function getHeatmap(args: {
-  sourceId: string;
+  workspaceId: Id<'workspaces'>;
+  connectorId: Id<'connectors'>;
   fromTs: number;
   toTs: number;
 }): Promise<HeatmapResult> {
-  const client = createServerConvexClient();
-  const ref = anyApi.analytics?.heatmap;
-  if (!ref) {
-    throw new Error('missing analytics.heatmap function reference');
-  }
-  return await client.query(ref, args);
+  const token = await convexAuthNextjsToken();
+  return await fetchQuery(api.analytics.heatmap, args, { token });
 }

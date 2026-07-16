@@ -1,11 +1,13 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { findConnectorByIdLegacy } from '../../src/lib/connectors/find-connector-by-id-legacy';
 import { forwardToProxy } from '../../src/lib/forwarding/forward-to-proxy';
 import { registerGetQueueTool } from '../../src/lib/mcp/register-get-queue-tool';
-import { findSourceById } from '../../src/lib/sources/find-source-by-id';
 
 vi.mock('../../src/lib/forwarding/forward-to-proxy', () => ({ forwardToProxy: vi.fn() }));
-vi.mock('../../src/lib/sources/find-source-by-id', () => ({ findSourceById: vi.fn() }));
+vi.mock('../../src/lib/connectors/find-connector-by-id-legacy', () => ({
+  findConnectorByIdLegacy: vi.fn(),
+}));
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -41,11 +43,16 @@ describe('registerGetQueueTool', () => {
   });
 
   it('forwards with active_queue/status/page query params and returns the matching queue', async () => {
-    vi.mocked(findSourceById).mockResolvedValue({
+    vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
+      workspaceId: 'ws_1',
       name: 'proxy-a',
       url: 'https://proxy-a.example.com',
       token: 'secret',
+      version: null,
+      queues: null,
+      lastConnectedAt: null,
+      lastDisconnectedAt: null,
       created_at: new Date(),
     });
     vi.mocked(forwardToProxy).mockResolvedValue({
@@ -63,7 +70,7 @@ describe('registerGetQueueTool', () => {
 
     const result = await tools
       .get('get_queue')
-      ?.handler({ source_id: 'src_1', queue_name: 'jobs', status: 'failed', page: 2 });
+      ?.handler({ connector_id: 'src_1', queue_name: 'jobs', status: 'failed', page: 2 });
     const body = JSON.parse(result?.content[0]?.text ?? '{}');
 
     expect(body.queue.name).toBe('jobs');
@@ -74,15 +81,15 @@ describe('registerGetQueueTool', () => {
   });
 
   it('returns an error result for an unknown source', async () => {
-    vi.mocked(findSourceById).mockResolvedValue(null);
+    vi.mocked(findConnectorByIdLegacy).mockResolvedValue(null);
     const { server, tools } = createFakeServer();
     registerGetQueueTool(server);
 
     const result = await tools
       .get('get_queue')
-      ?.handler({ source_id: 'missing', queue_name: 'jobs' });
+      ?.handler({ connector_id: 'missing', queue_name: 'jobs' });
 
     expect(result?.isError).toBe(true);
-    expect(result?.content[0]?.text).toContain('source not found');
+    expect(result?.content[0]?.text).toContain('connector not found');
   });
 });

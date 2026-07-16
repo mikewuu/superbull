@@ -9,19 +9,19 @@ test.use({ storageState: { cookies: [], origins: [] } });
 
 test('a public status page loads without auth state', async ({ page }) => {
   const convex = new ConvexHttpClient('http://127.0.0.1:3210');
-  const createSource = makeFunctionReference<'mutation'>('proxySources:create');
-  const upsertStatusPage = makeFunctionReference<'mutation'>('statusPages:upsert');
+  const createConnector = makeFunctionReference<'mutation'>('connectors:create');
+  const upsertStatusPage = makeFunctionReference<'mutation'>('statusPages:upsertLegacy');
 
-  const source = await convex.mutation(createSource, {
+  const connector = await convex.mutation(createConnector, {
     internalToken: 'e2e-internal',
-    name: 'Status Page E2E Source',
+    name: 'Status Page E2E Connector',
     url: 'http://127.0.0.1:4655',
     token: 'unused',
   });
 
   await convex.mutation(upsertStatusPage, {
     internalToken: 'e2e-internal',
-    sourceId: source._id,
+    connectorId: connector._id,
     slug: 'e2e-public-status',
     isEnabled: true,
     title: 'E2E Public Status',

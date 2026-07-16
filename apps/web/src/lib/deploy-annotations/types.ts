@@ -1,6 +1,6 @@
 export interface DeployAnnotation {
   id: string;
-  sourceId: string;
+  connectorId: string;
   label: string;
   ts: number;
 }

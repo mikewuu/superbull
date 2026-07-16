@@ -1,7 +1,12 @@
+import { convexAuthNextjsToken } from '@convex-dev/auth/nextjs/server';
+import { fetchMutation } from 'convex/nextjs';
 import { api } from '../../../convex/_generated/api';
-import { createServerConvexClient } from '../convex/create-server-convex-client';
+import type { Id } from '../../../convex/_generated/dataModel';
 
-export async function deleteAlertRule(id: string): Promise<void> {
-  const client = createServerConvexClient();
-  await client.mutation(api.alerts.remove, { id });
+export async function deleteAlertRule(
+  workspaceId: Id<'workspaces'>,
+  id: Id<'alertRules'>,
+): Promise<void> {
+  const token = await convexAuthNextjsToken();
+  await fetchMutation(api.alerts.remove, { workspaceId, id }, { token });
 }

@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-interface FakeSource {
+interface FakeConnector {
   id: string;
   name: string;
   url: string;
@@ -11,30 +11,30 @@ interface FakeSource {
 
 const SUPERBULL_API_TOKEN = 'test-token';
 
-const { sourcesByName } = vi.hoisted(() => {
-  return { sourcesByName: new Map<string, FakeSource>() };
+const { connectorsByName } = vi.hoisted(() => {
+  return { connectorsByName: new Map<string, FakeConnector>() };
 });
 
-vi.mock('../src/lib/sources/upsert-source-by-name', () => {
+vi.mock('../src/lib/connectors/upsert-connector-by-name', () => {
   return {
-    async upsertSourceByName(args: { name: string; url: string; token: string }) {
-      const existing = sourcesByName.get(args.name);
-      const source: FakeSource = {
+    async upsertConnectorByName(args: { name: string; url: string; token: string }) {
+      const existing = connectorsByName.get(args.name);
+      const connector: FakeConnector = {
         id: existing?.id ?? crypto.randomUUID(),
         name: args.name,
         url: args.url,
         token: args.token,
         created_at: existing?.created_at ?? new Date(),
       };
-      sourcesByName.set(args.name, source);
-      return source;
+      connectorsByName.set(args.name, connector);
+      return connector;
     },
   };
 });
 
 beforeEach(() => {
   vi.resetModules();
-  sourcesByName.clear();
+  connectorsByName.clear();
   vi.stubEnv('SUPERBULL_API_TOKEN', SUPERBULL_API_TOKEN);
 });
 
@@ -52,7 +52,7 @@ function authedRequest(
 }
 
 describe('POST /api/sources/register', () => {
-  it('registers a new source and never echoes the token', async () => {
+  it('registers a new connector and never echoes the token', async () => {
     const route = await import('../src/app/api/sources/register/route');
 
     const response = await route.POST(

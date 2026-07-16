@@ -3,32 +3,41 @@
 import { useAuthActions } from '@convex-dev/auth/react';
 import { Button } from '@superbull/ui';
 import { useRouter } from 'next/navigation';
-import { type FormEvent, useState } from 'react';
+import { useState } from 'react';
 
-interface SignInFormProps {
-  canSignUp: boolean;
-}
+// Gated purely on the NEXT_PUBLIC_ build-time flag (see
+// playwright.config.ts's `web` webServer env block) — Next.js inlines
+// NEXT_PUBLIC_* vars at build time regardless of the env.ts zod wrapper, so
+// no server round-trip is needed to decide whether to render this button.
+// Never set in production.
+const testLoginEnabled = process.env.NEXT_PUBLIC_AUTH_TEST_LOGIN === 'true';
 
-export function SignInForm(props: SignInFormProps) {
-  const { canSignUp } = props;
+export function SignInForm() {
   const { signIn } = useAuthActions();
   const router = useRouter();
-  const [flow, setFlow] = useState<'signIn' | 'signUp'>('signIn');
   const [error, setError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [submitting, setSubmitting] = useState<'google' | 'test-login' | null>(null);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleGoogleSignIn() {
     setError(null);
-    setSubmitting(true);
-    const formData = new FormData(event.currentTarget);
-    formData.set('flow', flow);
+    setSubmitting('google');
     try {
-      await signIn('password', formData);
+      await signIn('google', { redirectTo: '/app' });
+    } catch {
+      setError("Couldn't reach Google. Try again.");
+      setSubmitting(null);
+    }
+  }
+
+  async function handleTestLogin() {
+    setError(null);
+    setSubmitting('test-login');
+    try {
+      await signIn('test-login', {});
       router.push('/app');
     } catch {
-      setError(flow === 'signIn' ? 'Wrong email or password.' : 'Could not create the account.');
-      setSubmitting(false);
+      setError('Test sign-in failed.');
+      setSubmitting(null);
     }
   }
 
@@ -38,84 +47,36 @@ export function SignInForm(props: SignInFormProps) {
         <div className="mb-6 flex flex-col items-center gap-3 text-center">
           <img src="/logo-mark.webp" alt="" className="h-10 w-auto" />
           <div>
-            <h1 className="text-lg font-semibold text-content-emphasis">SuperBull Hub</h1>
-            <p className="mt-1 text-sm text-content-subtle">
-              {flow === 'signIn' ? 'Sign in to your hub' : 'Create the first account'}
-            </p>
+            <h1 className="text-lg font-semibold text-content-emphasis">SuperBull</h1>
+            <p className="mt-1 text-sm text-content-subtle">Sign in to your workspace</p>
           </div>
         </div>
-        <div className="candy-card rounded-lg p-6">
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div>
-              <label htmlFor="email" className="block text-xs font-medium text-content-subtle">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                data-testid="signin-email"
-                required
-                className="mt-1 h-9 w-full rounded-lg border border-border-subtle bg-bg-default px-2.5 text-sm text-content-emphasis outline-none transition-colors duration-150 ease-snout focus-visible:border-border-emphasis focus-visible:ring-2 focus-visible:ring-blue-500/40"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-xs font-medium text-content-subtle">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                data-testid="signin-password"
-                required
-                minLength={8}
-                className="mt-1 h-9 w-full rounded-lg border border-border-subtle bg-bg-default px-2.5 text-sm text-content-emphasis outline-none transition-colors duration-150 ease-snout focus-visible:border-border-emphasis focus-visible:ring-2 focus-visible:ring-blue-500/40"
-              />
-            </div>
-            {error && (
-              <p data-testid="signin-error" className="text-xs text-content-error">
-                {error}
-              </p>
-            )}
+        <div className="candy-card space-y-3 rounded-lg p-6">
+          <Button
+            type="button"
+            data-testid="signin-google"
+            text="Continue with Google"
+            loading={submitting === 'google'}
+            disabled={submitting !== null}
+            onClick={handleGoogleSignIn}
+            className="w-full"
+          />
+          {error && (
+            <p data-testid="signin-error" className="text-xs text-content-error">
+              {error}
+            </p>
+          )}
+          {testLoginEnabled && (
             <Button
-              type="submit"
-              data-testid="signin-submit"
-              text={flow === 'signIn' ? 'Sign in' : 'Sign up'}
-              loading={submitting}
+              type="button"
+              variant="secondary"
+              data-testid="signin-test-login"
+              text="Continue with test account"
+              loading={submitting === 'test-login'}
+              disabled={submitting !== null}
+              onClick={handleTestLogin}
               className="w-full"
             />
-          </form>
-          {flow === 'signIn' && canSignUp && (
-            <button
-              type="button"
-              data-testid="signin-toggle-flow"
-              onClick={() => setFlow('signUp')}
-              className="mt-4 w-full rounded-md text-center text-xs text-content-subtle outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-            >
-              Don&apos;t have an account?{' '}
-              <span className="font-medium text-content-emphasis underline underline-offset-4">
-                Sign up
-              </span>
-            </button>
-          )}
-          {flow === 'signUp' && (
-            <button
-              type="button"
-              data-testid="signin-toggle-flow"
-              onClick={() => setFlow('signIn')}
-              className="mt-4 w-full rounded-md text-center text-xs text-content-subtle outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-            >
-              Already have an account?{' '}
-              <span className="font-medium text-content-emphasis underline underline-offset-4">
-                Sign in
-              </span>
-            </button>
-          )}
-          {flow === 'signIn' && !canSignUp && (
-            <p className="mt-4 text-center text-xs text-content-muted">
-              Ask an existing user to invite you.
-            </p>
           )}
         </div>
       </div>

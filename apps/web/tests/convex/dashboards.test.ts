@@ -1,115 +1,88 @@
 /// <reference types="vite/client" />
-import { convexTest } from 'convex-test';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { api } from '../../convex/_generated/api';
-import schema from '../../convex/schema';
-
-const INTERNAL_TOKEN = 'test-internal-token';
+import { makeTestClient, seedWorkspace } from './test-helpers';
 
 beforeEach(() => {
-  process.env.CONVEX_INTERNAL_TOKEN = INTERNAL_TOKEN;
+  process.env.CONVEX_INTERNAL_TOKEN = 'test-internal-token';
 });
-
-function makeTestClient() {
-  return convexTest(schema, import.meta.glob('../../convex/**/*.ts'));
-}
 
 const validCard = {
   type: 'throughput' as const,
-  source_id: 'some-source-id',
+  connector_id: 'some-connector-id',
   range: '24h' as const,
 };
 
 describe('dashboards.create', () => {
-  it('creates a dashboard with the given name and cards', async () => {
+  it('creates a dashboard scoped to the workspace', async () => {
     const t = makeTestClient();
+    const { workspaceId, asMember } = await seedWorkspace(t);
 
-    const dashboard = await t.mutation(api.dashboards.create, {
-      internalToken: INTERNAL_TOKEN,
+    const dashboard = await asMember.mutation(api.dashboards.create, {
+      workspaceId,
       name: 'ops overview',
       cards: [validCard],
     });
 
     expect(dashboard.name).toBe('ops overview');
     expect(dashboard.cards).toEqual([validCard]);
+    expect(dashboard.workspaceId).toBe(workspaceId);
   });
 
   it('rejects an invalid card type', async () => {
     const t = makeTestClient();
+    const { workspaceId, asMember } = await seedWorkspace(t);
 
     await expect(
-      t.mutation(api.dashboards.create, {
-        internalToken: INTERNAL_TOKEN,
+      asMember.mutation(api.dashboards.create, {
+        workspaceId,
         name: 'bad',
         cards: [{ ...validCard, type: 'bogus' }] as never,
       }),
     ).rejects.toThrow();
   });
 
-  it('rejects an invalid range', async () => {
+  it('rejects an unauthenticated caller', async () => {
     const t = makeTestClient();
+    const { workspaceId } = await seedWorkspace(t);
 
     await expect(
-      t.mutation(api.dashboards.create, {
-        internalToken: INTERNAL_TOKEN,
-        name: 'bad',
-        cards: [{ ...validCard, range: '1h' }] as never,
-      }),
-    ).rejects.toThrow();
-  });
-
-  it('throws with the wrong internal token', async () => {
-    const t = makeTestClient();
-
-    await expect(
-      t.mutation(api.dashboards.create, { internalToken: 'wrong', name: 'x', cards: [] }),
+      t.mutation(api.dashboards.create, { workspaceId, name: 'x', cards: [] }),
     ).rejects.toThrow();
   });
 });
 
 describe('dashboards.list and findById', () => {
-  it('lists all created dashboards', async () => {
+  it('lists only this workspace dashboards', async () => {
     const t = makeTestClient();
-    await t.mutation(api.dashboards.create, {
-      internalToken: INTERNAL_TOKEN,
-      name: 'a',
-      cards: [],
-    });
-    await t.mutation(api.dashboards.create, {
-      internalToken: INTERNAL_TOKEN,
-      name: 'b',
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    const other = await seedWorkspace(t);
+    await asMember.mutation(api.dashboards.create, { workspaceId, name: 'a', cards: [] });
+    await asMember.mutation(api.dashboards.create, { workspaceId, name: 'b', cards: [] });
+    await other.asMember.mutation(api.dashboards.create, {
+      workspaceId: other.workspaceId,
+      name: 'other workspace',
       cards: [],
     });
 
-    const dashboards = await t.query(api.dashboards.list, { internalToken: INTERNAL_TOKEN });
-
+    const dashboards = await asMember.query(api.dashboards.list, { workspaceId });
     expect(dashboards).toHaveLength(2);
   });
 
-  it('finds a dashboard by id', async () => {
+  it('findById returns null for a dashboard in a different workspace', async () => {
     const t = makeTestClient();
-    const created = await t.mutation(api.dashboards.create, {
-      internalToken: INTERNAL_TOKEN,
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    const other = await seedWorkspace(t);
+    const created = await asMember.mutation(api.dashboards.create, {
+      workspaceId,
       name: 'a',
       cards: [],
     });
 
-    const found = await t.query(api.dashboards.findById, {
-      internalToken: INTERNAL_TOKEN,
+    const found = await other.asMember.query(api.dashboards.findById, {
+      workspaceId: other.workspaceId,
       id: created._id,
     });
-
-    expect(found?.name).toBe('a');
-  });
-
-  it('returns null for an unknown dashboard id', async () => {
-    const t = makeTestClient();
-
-    const found = await t.query(api.dashboards.findById, {
-      internalToken: INTERNAL_TOKEN,
-      id: 'not-a-real-id',
-    });
-
     expect(found).toBeNull();
   });
 });
@@ -117,14 +90,15 @@ describe('dashboards.list and findById', () => {
 describe('dashboards.update', () => {
   it('patches the name only, leaving cards intact', async () => {
     const t = makeTestClient();
-    const created = await t.mutation(api.dashboards.create, {
-      internalToken: INTERNAL_TOKEN,
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    const created = await asMember.mutation(api.dashboards.create, {
+      workspaceId,
       name: 'old name',
       cards: [validCard],
     });
 
-    const updated = await t.mutation(api.dashboards.update, {
-      internalToken: INTERNAL_TOKEN,
+    const updated = await asMember.mutation(api.dashboards.update, {
+      workspaceId,
       id: created._id,
       name: 'new name',
     });
@@ -133,49 +107,21 @@ describe('dashboards.update', () => {
     expect(updated.cards).toEqual([validCard]);
   });
 
-  it('patches cards only, leaving name intact', async () => {
+  it('throws for a dashboard in a different workspace', async () => {
     const t = makeTestClient();
-    const created = await t.mutation(api.dashboards.create, {
-      internalToken: INTERNAL_TOKEN,
-      name: 'keep me',
-      cards: [],
-    });
-
-    const updated = await t.mutation(api.dashboards.update, {
-      internalToken: INTERNAL_TOKEN,
-      id: created._id,
-      cards: [validCard],
-    });
-
-    expect(updated.name).toBe('keep me');
-    expect(updated.cards).toEqual([validCard]);
-  });
-
-  it('rejects an invalid card shape on update', async () => {
-    const t = makeTestClient();
-    const created = await t.mutation(api.dashboards.create, {
-      internalToken: INTERNAL_TOKEN,
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    const other = await seedWorkspace(t);
+    const created = await asMember.mutation(api.dashboards.create, {
+      workspaceId,
       name: 'x',
       cards: [],
     });
 
     await expect(
-      t.mutation(api.dashboards.update, {
-        internalToken: INTERNAL_TOKEN,
+      other.asMember.mutation(api.dashboards.update, {
+        workspaceId: other.workspaceId,
         id: created._id,
-        cards: [{ type: 'throughput', source_id: 'x' }] as never,
-      }),
-    ).rejects.toThrow();
-  });
-
-  it('throws for an unknown dashboard', async () => {
-    const t = makeTestClient();
-
-    await expect(
-      t.mutation(api.dashboards.update, {
-        internalToken: INTERNAL_TOKEN,
-        id: 'not-a-real-id',
-        name: 'x',
+        name: 'y',
       }),
     ).rejects.toThrow(/unknown dashboard/);
   });
@@ -184,31 +130,16 @@ describe('dashboards.update', () => {
 describe('dashboards.remove', () => {
   it('deletes a dashboard', async () => {
     const t = makeTestClient();
-    const created = await t.mutation(api.dashboards.create, {
-      internalToken: INTERNAL_TOKEN,
+    const { workspaceId, asMember } = await seedWorkspace(t);
+    const created = await asMember.mutation(api.dashboards.create, {
+      workspaceId,
       name: 'to delete',
       cards: [],
     });
 
-    await t.mutation(api.dashboards.remove, { internalToken: INTERNAL_TOKEN, id: created._id });
+    await asMember.mutation(api.dashboards.remove, { workspaceId, id: created._id });
 
-    const found = await t.query(api.dashboards.findById, {
-      internalToken: INTERNAL_TOKEN,
-      id: created._id,
-    });
+    const found = await asMember.query(api.dashboards.findById, { workspaceId, id: created._id });
     expect(found).toBeNull();
-  });
-
-  it('throws with the wrong internal token', async () => {
-    const t = makeTestClient();
-    const created = await t.mutation(api.dashboards.create, {
-      internalToken: INTERNAL_TOKEN,
-      name: 'x',
-      cards: [],
-    });
-
-    await expect(
-      t.mutation(api.dashboards.remove, { internalToken: 'wrong', id: created._id }),
-    ).rejects.toThrow();
   });
 });

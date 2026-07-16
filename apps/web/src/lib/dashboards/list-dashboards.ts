@@ -1,27 +1,12 @@
-import { anyApi } from 'convex/server';
-import { createServerConvexClient } from '../convex/create-server-convex-client';
+import { convexAuthNextjsToken } from '@convex-dev/auth/nextjs/server';
+import { fetchQuery } from 'convex/nextjs';
+import { api } from '../../../convex/_generated/api';
+import type { Id } from '../../../convex/_generated/dataModel';
+import { toSavedDashboard } from './to-saved-dashboard';
 import type { SavedDashboard } from './types';
 
-export async function listDashboards(): Promise<SavedDashboard[]> {
-  const client = createServerConvexClient();
-  const ref = anyApi.dashboards?.list;
-  if (!ref) {
-    throw new Error('missing dashboards.list function reference');
-  }
-  const docs = await client.query(ref, {});
+export async function listDashboards(workspaceId: Id<'workspaces'>): Promise<SavedDashboard[]> {
+  const token = await convexAuthNextjsToken();
+  const docs = await fetchQuery(api.dashboards.list, { workspaceId }, { token });
   return docs.map(toSavedDashboard);
-}
-
-function toSavedDashboard(doc: {
-  _id: string;
-  _creationTime: number;
-  name: string;
-  cards: SavedDashboard['cards'];
-}): SavedDashboard {
-  return {
-    id: doc._id,
-    name: doc.name,
-    cards: doc.cards,
-    created_at: new Date(doc._creationTime),
-  };
 }

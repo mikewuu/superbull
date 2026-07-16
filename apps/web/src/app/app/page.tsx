@@ -1,59 +1,20 @@
-import { PageHeader } from '@superbull/ui';
-import { listSources } from '../../lib/sources/list-sources';
-import type { ProxySource } from '../../lib/sources/types';
-import { AddSourceForm } from './_components/add-source-form';
-import { type SourceRow, SourcesTable } from './_components/sources-table';
+import { convexAuthNextjsToken } from '@convex-dev/auth/nextjs/server';
+import { fetchQuery } from 'convex/nextjs';
+import { redirect } from 'next/navigation';
+import { api } from '../../../convex/_generated/api';
 
 export const dynamic = 'force-dynamic';
 
-export default async function SourcesPage() {
-  const sources = await listSources();
-  const rows = await getSourceRows(sources);
+// Every user always has >=1 workspace in practice (auth.ts bootstraps a
+// personal workspace on first sign-in) — the zero case just falls through to
+// a create-workspace screen instead of crashing.
+export default async function AppRootPage() {
+  const token = await convexAuthNextjsToken();
+  const memberships = await fetchQuery(api.workspaces.listWorkspacesByUser, {}, { token });
 
-  return (
-    <>
-      <PageHeader
-        title="Sources"
-        subtitle="Remote superbull proxies this hub federates."
-        controls={<AddSourceForm />}
-      />
-      <div className="flex w-full flex-col gap-4 px-4 py-4 lg:px-6">
-        <SourcesTable rows={rows} />
-      </div>
-    </>
-  );
-}
-
-async function getSourceRows(sources: ProxySource[]): Promise<SourceRow[]> {
-  const [healthResults, queueResults] = await Promise.all([
-    Promise.allSettled(sources.map((source) => checkSourceOnline(source.url))),
-    Promise.allSettled(sources.map((source) => getSourceQueueCount(source))),
-  ]);
-
-  return sources.map((source, index) => ({
-    source,
-    online: settledValue(healthResults[index], false),
-    queueCount: settledValue(queueResults[index], null),
-  }));
-}
-
-function settledValue<T>(result: PromiseSettledResult<T> | undefined, fallback: T): T {
-  return result?.status === 'fulfilled' ? result.value : fallback;
-}
-
-async function checkSourceOnline(url: string): Promise<boolean> {
-  const response = await fetch(`${url}/healthz`, { signal: AbortSignal.timeout(2000) });
-  return response.ok;
-}
-
-async function getSourceQueueCount(source: ProxySource): Promise<number | null> {
-  const response = await fetch(`${source.url}/api/queues`, {
-    headers: { authorization: `Bearer ${source.token}` },
-    signal: AbortSignal.timeout(2000),
-  });
-  if (!response.ok) {
-    return null;
+  const first = memberships[0];
+  if (first) {
+    redirect(`/app/${first.workspace.slug}`);
   }
-  const body = (await response.json()) as { queues: unknown[] };
-  return body.queues.length;
+  redirect('/app/new');
 }

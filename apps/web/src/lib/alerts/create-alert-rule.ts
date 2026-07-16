@@ -1,10 +1,13 @@
+import { convexAuthNextjsToken } from '@convex-dev/auth/nextjs/server';
+import { fetchMutation } from 'convex/nextjs';
 import { api } from '../../../convex/_generated/api';
-import type { Doc } from '../../../convex/_generated/dataModel';
-import { createServerConvexClient } from '../convex/create-server-convex-client';
+import type { Id } from '../../../convex/_generated/dataModel';
+import { toAlertRule } from './to-alert-rule';
 import type { AlertRule, AlertRuleType } from './types';
 
 export async function createAlertRule(args: {
-  sourceId?: string;
+  workspaceId: Id<'workspaces'>;
+  connectorId?: Id<'connectors'>;
   type: AlertRuleType;
   queueName?: string;
   threshold?: number;
@@ -12,20 +15,7 @@ export async function createAlertRule(args: {
   email: string;
   isEnabled: boolean;
 }): Promise<AlertRule> {
-  const client = createServerConvexClient();
-  const doc = await client.mutation(api.alerts.create, args);
+  const token = await convexAuthNextjsToken();
+  const doc = await fetchMutation(api.alerts.create, args, { token });
   return toAlertRule(doc);
-}
-
-function toAlertRule(doc: Doc<'alertRules'>): AlertRule {
-  return {
-    id: doc._id,
-    sourceId: doc.sourceId ?? null,
-    type: doc.type,
-    queueName: doc.queueName ?? null,
-    threshold: doc.threshold ?? null,
-    windowMinutes: doc.windowMinutes ?? null,
-    email: doc.email,
-    isEnabled: doc.isEnabled,
-  };
 }

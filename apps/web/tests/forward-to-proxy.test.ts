@@ -16,7 +16,7 @@ describe('forwardToProxy', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     const result = await forwardToProxy({
-      source: { url: 'https://proxy.example.com', token: 'secret' },
+      connector: { url: 'https://proxy.example.com', token: 'secret' },
       method: 'GET',
       path: ['queues'],
       search: '?active_queue=jobs',
@@ -41,7 +41,7 @@ describe('forwardToProxy', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     await forwardToProxy({
-      source: { url: 'https://proxy.example.com', token: 'secret' },
+      connector: { url: 'https://proxy.example.com', token: 'secret' },
       method: 'PUT',
       path: ['queues', 'jobs', 'pause'],
       search: '',
@@ -66,7 +66,7 @@ describe('forwardToProxy', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     const result = await forwardToProxy({
-      source: { url: 'https://proxy.example.com', token: 'secret' },
+      connector: { url: 'https://proxy.example.com', token: 'secret' },
       method: 'GET',
       path: ['queues', 'missing'],
       search: '',
@@ -81,7 +81,7 @@ describe('forwardToProxy', () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network down')));
 
     const result = await forwardToProxy({
-      source: { url: 'https://proxy.example.com', token: 'secret' },
+      connector: { url: 'https://proxy.example.com', token: 'secret' },
       method: 'GET',
       path: ['queues'],
       search: '',

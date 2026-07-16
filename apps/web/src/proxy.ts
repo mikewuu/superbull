@@ -11,8 +11,14 @@ export const isSignInPage = createRouteMatcher(['/signin']);
 // The marketing site (/) and docs (/docs/**) are always public. So are the
 // public status pages (recipient-facing) and every /api/* route below,
 // which authenticates headlessly with its own bearer token for
-// proxies/CI/agents. Everything under /app (the product), plus /s/**
-// (per-source dashboards, which expose queue data) requires sign-in.
+// proxies/CI/agents. Everything under /app (the product, including the
+// per-connector embedded dashboards at /app/[workspaceSlug]/connectors/
+// [connectorId]/**, which replaced the old top-level /s/[sourceId] routes)
+// requires sign-in — the /app(.*) prefix match below covers those nested
+// routes automatically. /invite/[token] is deliberately NOT in this list: it
+// must require sign-in too (redirect to /signin like /app does) so the
+// accept page always renders with a real session; see src/app/invite/
+// [token]/page.tsx.
 export const isPublicRoute = createRouteMatcher([
   '/',
   '/docs(.*)',

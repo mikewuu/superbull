@@ -84,6 +84,13 @@ export default defineConfig({
         NEXT_PUBLIC_CONVEX_URL: convexUrl,
         CONVEX_INTERNAL_TOKEN: 'e2e-internal',
         SUPERBULL_API_TOKEN: 'e2e-hub-token',
+        // NEXT_PUBLIC_* vars are inlined into the client bundle at `next
+        // dev` boot time, so this must live here rather than being set on
+        // the Convex deployment (that's AUTH_TEST_LOGIN, no NEXT_PUBLIC_
+        // prefix — see e2e/configure-convex-auth.ts). This is what makes
+        // src/app/signin/_components/sign-in-form.tsx render the
+        // signin-test-login button.
+        NEXT_PUBLIC_AUTH_TEST_LOGIN: 'true',
       },
     },
   ],

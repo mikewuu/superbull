@@ -1,13 +1,9 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { query } from './_generated/server';
 
-export const canSignUp = query({
-  args: {},
-  handler: async (ctx) => {
-    const existing = await ctx.db.query('users').first();
-    return existing === null;
-  },
-});
+// Round 2: signup is open (multi-tenant, Google auth). The old
+// single-account `canSignUp` gate is gone — every sign-in bootstraps its own
+// workspace, see convex/auth.ts's afterUserCreatedOrUpdated.
 
 export const viewer = query({
   args: {},

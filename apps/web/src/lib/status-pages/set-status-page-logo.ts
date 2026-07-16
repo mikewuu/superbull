@@ -1,27 +1,16 @@
-import { makeFunctionReference } from 'convex/server';
-import type { Doc } from '../../../convex/_generated/dataModel';
-import { createServerConvexClient } from '../convex/create-server-convex-client';
+import { convexAuthNextjsToken } from '@convex-dev/auth/nextjs/server';
+import { fetchMutation } from 'convex/nextjs';
+import { api } from '../../../convex/_generated/api';
+import type { Id } from '../../../convex/_generated/dataModel';
+import { toStatusPageConfig } from './to-status-page-config';
 import type { StatusPageConfig } from './types';
 
-const setLogo = makeFunctionReference<'mutation'>('statusPages:setLogo');
-
 export async function setStatusPageLogo(args: {
-  configId: string;
-  storageId: string;
+  workspaceId: Id<'workspaces'>;
+  configId: Id<'statusPageConfigs'>;
+  storageId: Id<'_storage'>;
 }): Promise<StatusPageConfig> {
-  const client = createServerConvexClient();
-  const doc = await client.mutation(setLogo, args);
+  const token = await convexAuthNextjsToken();
+  const doc = await fetchMutation(api.statusPages.setLogo, args, { token });
   return toStatusPageConfig(doc);
-}
-
-function toStatusPageConfig(doc: Doc<'statusPageConfigs'>): StatusPageConfig {
-  return {
-    id: doc._id,
-    sourceId: doc.sourceId,
-    slug: doc.slug,
-    isEnabled: doc.isEnabled,
-    title: doc.title,
-    logoStorageId: doc.logoStorageId ?? null,
-    queueNames: doc.queueNames ?? [],
-  };
 }

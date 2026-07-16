@@ -2,9 +2,12 @@ import { buildRoute } from '@nextastic/http';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { authenticateHubToken } from '../../../lib/auth/authenticate-hub-token';
-import { createSource } from '../../../lib/sources/create-source';
-import { listSources } from '../../../lib/sources/list-sources';
+import { createConnectorLegacy } from '../../../lib/connectors/create-connector-legacy';
+import { listConnectorsLegacy } from '../../../lib/connectors/list-connectors-legacy';
 
+// TRANSITIONAL — deleted in Round 3 along with the rest of the hub-token
+// connector API surface. Wire shapes (source_id/sources) stay unchanged this
+// round; only the internal connector plumbing changed.
 export const GET = buildRoute({
   response: z.object({
     sources: z.array(
@@ -19,14 +22,16 @@ export const GET = buildRoute({
 })
   .use(authenticateHubToken)
   .handle(async () => {
-    const sources = await listSources();
+    const connectors = await listConnectorsLegacy();
     return NextResponse.json({
-      sources: sources.map((source) => ({
-        id: source.id,
-        name: source.name,
-        url: source.url,
-        created_at: source.created_at.toISOString(),
-      })),
+      sources: connectors
+        .filter((connector) => connector.url !== null)
+        .map((connector) => ({
+          id: connector.id,
+          name: connector.name,
+          url: connector.url as string,
+          created_at: connector.created_at.toISOString(),
+        })),
     });
   });
 
@@ -45,13 +50,13 @@ export const POST = buildRoute({
 })
   .use(authenticateHubToken)
   .handle(async (req) => {
-    const source = await createSource(req.body);
+    const connector = await createConnectorLegacy(req.body);
     return NextResponse.json(
       {
-        id: source.id,
-        name: source.name,
-        url: source.url,
-        created_at: source.created_at.toISOString(),
+        id: connector.id,
+        name: connector.name,
+        url: connector.url as string,
+        created_at: connector.created_at.toISOString(),
       },
       { status: 201 },
     );
