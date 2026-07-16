@@ -23,17 +23,21 @@ const client = axios.create({ baseURL: readBasePath() });
 // gateway's 502 {"error":"connector disconnected"}). Surface that string as
 // the Error message instead of axios's generic "Request failed with status
 // code NNN" so error states can tell the user what actually happened.
+// Handler failures (@superbull/api handleError) hardcode `error` to a
+// generic string and put the real text in `message` — prefer that when
+// present.
 client.interceptors.response.use(undefined, (error: unknown) => {
   if (isAxiosError(error)) {
     const body: unknown = error.response?.data;
     if (isErrorBody(body)) {
-      error.message = body.error;
+      error.message =
+        typeof body.message === 'string' && body.message.length > 0 ? body.message : body.error;
     }
   }
   return Promise.reject(error);
 });
 
-function isErrorBody(body: unknown): body is { error: string } {
+function isErrorBody(body: unknown): body is { error: string; message?: unknown } {
   return (
     typeof body === 'object' &&
     body !== null &&
