@@ -17,7 +17,7 @@ function createBoard(args: {
   options?: {
     uiBasePath?: string;      // default: dirname of the resolved @superbull/react package
     uiConfig?: {
-      board_title?: string;   // default: 'superbull'
+      board_title?: string;   // default: 'SuperBull'
       polling_interval_ms?: number;
     };
   };
@@ -69,7 +69,12 @@ export const adapterRows = [
   ['@superbull/hapi', '@hapi/hapi ^21.0.0', 'HapiAdapter', 'registerPlugin()'],
   ['@superbull/elysia', 'elysia ^1.1.0', 'ElysiaAdapter', 'registerPlugin()'],
   ['@superbull/bun', 'Bun runtime', 'BunAdapter', 'getRoutes()'],
-  ['@superbull/nestjs', '@nestjs/bullmq ^10 || ^11', 'BoardModule', 'BoardModule.forRoot()'],
+  [
+    '@superbull/nestjs',
+    '@nestjs/common, core, bullmq ^10 || ^11',
+    'BoardModule',
+    'BoardModule.forRoot()',
+  ],
 ];
 
 export const perAdapter = `

@@ -1,6 +1,34 @@
 export const intro = `
 # Configuration
 
+Configuration lives in two places: board-level options passed to
+\`createBoard()\`, and per-queue options passed to each \`BullMQAdapter\`.
+
+## Board options
+
+\`\`\`ts
+createBoard({
+  queues,
+  serverAdapter,
+  options: {
+    uiBasePath: undefined,   // default: directory of the resolved @superbull/react package
+    uiConfig: {
+      board_title: 'SuperBull',   // browser title + header
+      polling_interval_ms: undefined,   // SPA poll cadence override
+    },
+  },
+});
+\`\`\`
+
+\`uiBasePath\` only matters if you ship a custom UI build: views are served from
+\`<uiBasePath>/dist\` and static assets from \`<uiBasePath>/dist/static\`.
+\`createBoard()\` returns a registry handle for changing the mounted queue set
+at runtime: \`{ setQueues, replaceQueues, addQueue, removeQueue }\`
+(\`setQueues\` adds/overwrites by name; \`replaceQueues\` also drops queues not in
+the new list).
+
+## Queue options
+
 Every knob for how a queue behaves in the dashboard is a \`Partial<QueueAdapterOptions>\`
 passed as the second argument to \`new BullMQAdapter(queue, options)\`.
 
@@ -17,8 +45,6 @@ new BullMQAdapter(queue, {
   format: (field, value) => value,
 });
 \`\`\`
-
-## Options
 `;
 
 export const headers = ['Option', 'Type', 'Default', 'Effect'];
@@ -38,7 +64,7 @@ export const rows = [
   [
     'allowCompletedRetries',
     'boolean',
-    'true',
+    'true (false if allowRetries is off)',
     'Only takes effect if allowRetries is also true (AND-ed). Lets completed jobs be retried, not just failed ones.',
   ],
   [
