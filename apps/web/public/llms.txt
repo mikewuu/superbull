@@ -21,7 +21,7 @@
 
 - Endpoint: https://superbull.com/api/mcp (streamable HTTP)
 - Auth: `Authorization: Bearer` token, set via the `SUPERBULL_API_TOKEN` env var on the deployment
-- Tools: list_connectors, add_connector, remove_connector, list_queues, get_queue, retry_job, pause_queue, resume_queue
+- Tools: list_connectors, add_connector, remove_connector, list_queues, get_queue, get_queue_stats, get_job, get_job_logs, add_job, retry_job, promote_job, remove_job, pause_queue, resume_queue, clean_queue
 
 ## Packages (npm)
 
