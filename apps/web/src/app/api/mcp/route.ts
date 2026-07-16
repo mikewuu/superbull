@@ -28,7 +28,7 @@ DISCOVER: list_connectors shows every connector in the deployment (never returns
 
 INSPECT: list_queues(connector_id) gives every queue's name, job counts, and paused state. get_queue(connector_id, queue_name) drills into one queue's current page of jobs; pass status to filter (e.g. "failed") and page to paginate. get_queue_stats(connector_id, queue_name) reports wait/run percentiles, retry rate, stalled count, top errors, and estimated drain time; start there when diagnosing a slow or failing queue. get_job(connector_id, queue_name, job_id) returns one job in full (data, attempts, failed_reason, stacktrace, return_value); get_job_logs returns the lines it logged.
 
-ACT: add_job(connector_id, queue_name, name, data, options?) enqueues a job. retry_job re-runs a failed or completed job (fails if the queue disables retries). promote_job makes a delayed job runnable now. remove_job deletes one job. pause_queue/resume_queue stop or start processing. clean_queue(connector_id, queue_name, status) bulk-deletes every job in one status. Mutations against read-only queues fail with "queue is read-only".`;
+ACT: add_job(connector_id, queue_name, name, data?, options?) enqueues a job (data defaults to null). retry_job re-runs a failed or completed job (fails if the queue disables retries). promote_job makes a delayed job runnable now. remove_job deletes one job. pause_queue/resume_queue stop or start processing. clean_queue(connector_id, queue_name, status) bulk-deletes the jobs in one status older than a 5-second grace window. Mutations against read-only queues fail with "queue is read-only".`;
 
 const handler = createMcpHandler(
   (server) => {

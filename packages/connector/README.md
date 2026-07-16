@@ -8,7 +8,7 @@ The outbound agent for [SuperBull](https://superbull.com)'s hosted mode. Run it 
 npx @superbull/connector --url wss://connect.superbull.com --token <one-time-token>
 ```
 
-The bin is `superbull-connector`. Get the one-time token by creating a connector in your workspace (Connectors, then New connector) or via the `add_connector` MCP tool; it is shown exactly once and the workspace stores only a hash of it.
+The bin is `superbull-connector`. Get the one-time token by creating a connector in your workspace (Connectors, then New connector); it is shown exactly once and the workspace stores only a hash of it.
 
 ## Flags and environment variables
 

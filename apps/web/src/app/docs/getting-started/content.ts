@@ -34,11 +34,15 @@ explicit queue names, etc.).
 
 ## 4. Watch it live
 
-As soon as the connector connects, its dashboard goes live at
-\`/app/[workspaceSlug]/connectors/[connectorId]\`: queues, jobs, retries,
-metrics, the same dense board either way you run SuperBull. Ingested events
-also feed workspace-wide [alerts](/docs/alerts), [analytics](/docs/analytics),
-[dashboards](/docs/dashboards), and [status pages](/docs/status-pages).
+As soon as the connector connects, its ingested events go live: history,
+workspace-wide [alerts](/docs/alerts), [analytics](/docs/analytics),
+[dashboards](/docs/dashboards), and [status pages](/docs/status-pages) all
+work over the outbound WebSocket alone. The embedded live dashboard at
+\`/app/[workspaceSlug]/connectors/[connectorId]\` (queues, jobs, retries,
+metrics, the same dense board either way you run SuperBull) is transitional:
+today it requires a connector registered with a reachable URL through the
+legacy proxy flow, not just the WebSocket enrollment above. See
+[Hosted app](/docs/hub) for details.
 
 Rather have an agent do this instead of clicking through a UI? See
 [MCP](/docs/mcp): an agent can watch queues and fix failed jobs directly.

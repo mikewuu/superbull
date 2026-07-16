@@ -90,8 +90,9 @@ Job completions and failures aren't polled. The connector opens one BullMQ
 and for failures a \`failed_reason\` truncated to 500 characters. Every 60
 seconds it also emits a \`queue.snapshot\` per queue: job counts, worker count,
 and the oldest waiting job's age. Snapshots are what stuck-queue and
-worker-loss alerts and the analytics/heatmap views are built on, so they keep
-flowing even during a quiet stretch with no completions or failures.
+worker-loss alerts are built on, so they keep flowing even during a quiet
+stretch with no completions or failures. (Analytics and the heatmap are
+computed from the completion and failure events, not from snapshots.)
 
 ### Delivery: at least once
 

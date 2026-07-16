@@ -77,10 +77,12 @@ serve({ fetch: app.fetch, port: 3000 });
   the same process. No sign-in, no outbound connection anywhere.
 - **hosted**: sign in with Google, create a connector in your workspace, and run
   `npx @superbull/connector` next to your workers. It opens one outbound WebSocket to
-  `connect.superbull.com`: no inbound port, no public URL, nothing to expose. Its dashboard
-  goes live at `/app/[workspaceSlug]/connectors/[connectorId]`, alongside ingest-driven
-  analytics, error tracking, email alerts, dashboards, and public status pages for every
-  connector in the workspace.
+  `connect.superbull.com`: no inbound port, no public URL, nothing to expose. Ingest-driven
+  history, analytics, error tracking, email alerts, dashboards, and public status pages go
+  live for every connector in the workspace; the embedded live dashboard at
+  `/app/[workspaceSlug]/connectors/[connectorId]` currently still requires a connector
+  registered with a reachable URL via the legacy proxy flow (see the transitional note
+  under "The hosted app").
 
 ## Connector usage
 

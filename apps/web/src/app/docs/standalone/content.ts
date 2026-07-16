@@ -273,8 +273,8 @@ npm install @superbull/api @superbull/nestjs @superbull/express @superbull/react
 \`\`\`
 
 \`BoardModule.forRoot()\` wires an adapter class (anything implementing
-\`IServerAdapter\` + \`setBasePath\`. Express or Fastify's adapters qualify; Bun's
-and Elysia's don't, since they lack \`setBasePath\`):
+\`IServerAdapter\` + \`setBasePath\`. Express's, Fastify's, and Bun's adapters
+qualify; Elysia's doesn't, since it lacks \`setBasePath\`):
 
 \`\`\`ts
 import { Module } from '@nestjs/common';

@@ -43,7 +43,8 @@ every mutation as production and say what you changed.
    `attempts`, `failed_reason`, `stacktrace`, `return_value`);
    `get_job_logs` returns what it wrote via `job.log()`.
 5. Act, narrowest tool first: `retry_job`, `promote_job`, `remove_job`,
-   `add_job`, `pause_queue`/`resume_queue`, `clean_queue`.
+   `add_job` (its `data` is optional and defaults to `null`),
+   `pause_queue`/`resume_queue`, `clean_queue`.
 
 ## Judgment defaults
 
@@ -62,7 +63,8 @@ every mutation as production and say what you changed.
   copy (start from `get_job`'s `data`), then `remove_job` the bad one if the
   user wants it gone.
 - `clean_queue` only on explicit user request, and confirm the status first:
-  it permanently deletes every job in that status.
+  it permanently deletes every job in that status older than a 5-second grace
+  window.
 - Mass-destructive operations (drain, empty, obliterate, concurrency changes,
   bulk actions) are deliberately not MCP tools. Do not work around that
   through the REST API; point the user at the dashboard instead.

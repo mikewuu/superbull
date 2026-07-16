@@ -23,9 +23,11 @@ Conventions, stated once:
   \`allowRetries\` is off, and \`405 { "error": "completed retries are disabled
   for this queue" }\` for the \`completed\` status when \`allowCompletedRetries\`
   is off. See [Configuration](/docs/configuration) for those options.
-- Validation errors respond \`400\` with
+- Query-string and body validation errors respond \`400\` with
   \`{ "error": "invalid query" | "invalid request body", "issues": [...] }\`
-  (the zod issue list).
+  (the zod issue list). Path-param validation (the \`:status\` segment of the
+  retry and clean routes) responds \`400\` with a bespoke \`{ "error": ... }\`
+  body and no \`issues\`.
 - Unhandled errors respond with the thrown error's \`statusCode\` (default
   \`500\`) and \`{ "error": "internal server error", "message": string }\`;
   \`details\` carries the stack trace only when \`NODE_ENV=development\`.
@@ -57,7 +59,7 @@ export const globalRows = [
     'GET',
     '/api/queues',
     'active_queue?, status? (csv of latest + job statuses), page=1, per_page=10 (max 100), sort=asc|desc (default desc), search?',
-    '{ queues: AppQueue[] }: only active_queue gets its jobs populated; search scans the 1000 most recent jobs by id/name; a queue that errors mid-listing is dropped rather than failing the whole response',
+    '{ queues: AppQueue[] }: only active_queue gets its jobs populated; search scans a 1000-job window by id/name following the requested sort (the 1000 most recent with the default sort=desc, the 1000 oldest with sort=asc); a queue that errors mid-listing is dropped rather than failing the whole response, unless every queue errors, which 500s',
   ],
 ];
 
@@ -182,7 +184,9 @@ export const jobIntro = `
 applying anything: unknown ids 400 with \`{ "error": "jobs not found", job_ids }\`
 (only the missing ids); ids not in a state the action allows 400 with
 \`{ "error": "jobs are not in a state that allows \\"<action>\\"", job_ids }\`.
-Valid states: \`remove\` matches any status; \`retry\` matches \`failed\`, plus
+\`action: "retry"\` additionally responds
+\`405 { "error": "retries are disabled for this queue" }\` when \`allowRetries\`
+is off. Valid states: \`remove\` matches any status; \`retry\` matches \`failed\`, plus
 \`completed\` when \`allowCompletedRetries\` is on; \`promote\` matches \`delayed\`
 only. Either every id matches or nothing runs.
 

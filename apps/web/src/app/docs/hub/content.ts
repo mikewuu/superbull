@@ -50,9 +50,12 @@ existence is never leaked to another's users.
 
 **Connectors → New connector** in a workspace gives you a one-time enrollment
 token, shown exactly once, plus the exact \`npx @superbull/connector\` command
-to run (see [Connector](/docs/connector)). The dashboard for that connector
-goes live at \`/app/[workspaceSlug]/connectors/[connectorId]\` as soon as it
-connects.
+to run (see [Connector](/docs/connector)). As soon as it connects, everything
+ingest-driven (history, analytics, alerts, status pages; see Ingest below)
+goes live for it. The embedded live dashboard at
+\`/app/[workspaceSlug]/connectors/[connectorId]\` is the transitional
+exception: today it requires a connector registered with a reachable URL
+through the legacy proxy flow (see the caveat under Per-connector dashboard).
 
 ## Ingest
 
@@ -70,10 +73,13 @@ connected; nothing about it requires an inbound path to your infrastructure.
 \`/app/[workspaceSlug]/connectors/[connectorId]\` serves the same
 \`@superbull/react\` SPA a standalone board serves, pointed at that connector,
 and live actions there (retry, pause, add) run against your real queues. One
-transitional caveat: the web app currently forwards those dashboard requests
-over a direct HTTP path retained from the legacy \`superbull-proxy\` agent (it
-requires a connector registered with a reachable URL, and an unreachable one
-answers \`502 { "error": "proxy unreachable" }\`). Relaying them over the
+transitional caveat: the web app currently forwards every dashboard request,
+reads included, over a direct HTTP path retained from the legacy
+\`superbull-proxy\` agent, which requires a connector registered with a
+reachable URL. A connector enrolled through the WebSocket flow answers
+\`502 { "error": "this connector hasn't been enrolled through the legacy proxy flow" }\`,
+and a proxy-registered one that is unreachable answers
+\`502 { "error": "proxy unreachable" }\`. Relaying those requests over the
 gateway's WebSocket, so that WebSocket-only connectors are fully operable with
 no inbound path, is built on the gateway side but not yet wired into the web
 app.

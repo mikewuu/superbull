@@ -11,7 +11,7 @@ export function registerCleanQueueTool(server: McpServer): void {
     {
       title: 'Clean queue',
       description:
-        'Bulk-delete every job in one status of a queue (completed, wait, active, delayed, or failed). Rejected on read-only queues.',
+        'Bulk-delete jobs in one status of a queue (completed, wait, active, delayed, or failed); jobs newer than a 5-second grace window are kept. Rejected on read-only queues.',
       inputSchema: {
         connector_id: z.string(),
         queue_name: z.string(),

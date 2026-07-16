@@ -37,6 +37,6 @@ Lifecycle: `hello`, then `hello_ack` or `hello_error`, then interleaved `request
 - `parseConnectorFrame(raw)` / `parseGatewayFrame(raw)`: parse one side's frames, `null` on failure.
 - Per-frame schemas (`helloFrameSchema`, `requestFrameSchema`, ...) and the `connectorFrameSchema` / `gatewayFrameSchema` unions, with inferred types (`HelloFrame`, `GatewayFrame`, ...).
 - `ingestEventSchema` / `IngestEvent`: snake_case event shape (`uuid`, `type`, `queue_name`, `ts`, plus optional `job_name`, `job_id`, `duration_ms`, `wait_ms`, `failed_reason`, `counts`, `worker_count`, `oldest_waiting_ms`).
-- `rpcRequestSchema`, `rpcResponseSchema`, `connectorStatusSchema`: the gateway's internal HTTP API contract used by the hosted web app.
+- `rpcRequestSchema`, `rpcResponseSchema`, `connectorStatusSchema`: the gateway's internal HTTP API contract, intended for the hosted web app.
 
 Part of the [superbull monorepo](https://github.com/mikewuu/superbull). MIT.

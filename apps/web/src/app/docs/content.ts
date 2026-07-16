@@ -10,11 +10,12 @@ There are two ways to run it:
 
 - **Hosted**: sign in with Google, create a connector in your workspace, and run
   one command next to your workers: \`npx @superbull/connector --token ...\`. It
-  opens a single outbound WebSocket, no inbound port, no public URL. Your
-  connector's dashboard goes live at
-  \`/app/[workspaceSlug]/connectors/[connectorId]\`, alongside ingest-driven
-  analytics, error tracking, email alerts, dashboards, and public status pages
-  for every connector in the workspace. See [Getting started](/docs/getting-started),
+  opens a single outbound WebSocket, no inbound port, no public URL. Ingest-driven
+  history, analytics, error tracking, email alerts, dashboards, and public status
+  pages go live for every connector in the workspace; the embedded live dashboard
+  at \`/app/[workspaceSlug]/connectors/[connectorId]\` currently still requires a
+  connector registered with a reachable URL through the legacy proxy flow. See
+  [Getting started](/docs/getting-started),
   [Connector](/docs/connector), and [Hosted app](/docs/hub).
 - **Standalone**: mount an adapter (Express, Fastify, Hono, Koa, h3, Hapi, Elysia,
   Bun, or NestJS) directly in your app. Serves the UI and the REST API from that

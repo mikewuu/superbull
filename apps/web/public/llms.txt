@@ -8,7 +8,7 @@
 - [Getting started](https://superbull.com/docs/getting-started): standalone and hosted quick starts
 - [Standalone](https://superbull.com/docs/standalone): mount the dashboard in your own app with a server adapter
 - [Connector](https://superbull.com/docs/connector): the hosted agent, flags, env vars, and delivery semantics
-- [Hub](https://superbull.com/docs/hub): the hosted app, workspaces, and connector dashboards
+- [Hosted app](https://superbull.com/docs/hub): the hosted app, workspaces, and connector dashboards
 - [Alerts](https://superbull.com/docs/alerts): failure and queue-depth alert rules with email delivery
 - [Status pages](https://superbull.com/docs/status-pages): public per-connector status pages
 - [Dashboards](https://superbull.com/docs/dashboards): saved dashboards over ingested events

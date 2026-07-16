@@ -157,8 +157,8 @@ export const toolGroups = [
     rows: [
       [
         'add_job',
-        '{ connector_id: string, queue_name: string, name: string, data: any, options?: { delay?, attempts?, priority? } }',
-        'Enqueue a job; delay is ms, attempts is total tries, lower priority runs first',
+        '{ connector_id: string, queue_name: string, name: string, data?: any, options?: { delay?, attempts?, priority? } }',
+        'Enqueue a job; data defaults to null; delay is ms, attempts is total tries, lower priority runs first',
       ],
       [
         'retry_job',
@@ -184,7 +184,7 @@ export const toolGroups = [
       [
         'clean_queue',
         '{ connector_id: string, queue_name: string, status: string }',
-        'Bulk-delete every job in one status: completed, wait, active, delayed, or failed',
+        'Bulk-delete jobs in one status (completed, wait, active, delayed, or failed) older than a 5-second grace window',
       ],
     ],
   },
@@ -229,7 +229,8 @@ They are either too destructive for an agent default or are operator decisions:
   actions reviewable and reversible.
 - \`update-data\`: mutating a job's payload in place; enqueue a corrected job
   with \`add_job\` instead.
-- pause-all across connectors: pause queues one at a time, deliberately.
+- pause-all across connectors: this one isn't a REST route either; there is
+  deliberately no pause-all, so pause queues one at a time.
 
 If you genuinely need one of these, use the dashboard or the connector's own
 REST API. See [REST API](/docs/api).

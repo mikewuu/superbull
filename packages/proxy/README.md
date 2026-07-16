@@ -1,6 +1,6 @@
 # @superbull/proxy
 
-The legacy headless agent for [SuperBull](https://superbull.com): it listens on an inbound HTTP port, serves the queue REST API behind a bearer token, and can register itself with a hub and push ingest events over HTTP.
+The legacy headless agent for [SuperBull](https://superbull.com): it listens on an inbound HTTP port, serves the queue REST API behind a bearer token, and can register itself with a hub (the hosted app's legacy HTTP ingest API) and push ingest events over HTTP.
 
 **Superseded by [@superbull/connector](https://www.npmjs.com/package/@superbull/connector)** for hosted setups. The connector opens a single outbound WebSocket instead, so it needs no inbound port, no public URL, and no TLS termination of its own. The proxy remains functional; prefer the connector for anything new.
 

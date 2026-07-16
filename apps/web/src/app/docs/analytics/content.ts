@@ -4,8 +4,8 @@ export const intro = `
 The workspace's **Analytics** page, dashboard cards, and status page uptime all
 read from the same ingested-events table that connectors stream into via
 [ingest](/docs/hub#ingest). There's no separate rollup job; series are computed
-from raw events per request (bounded at the 10,000 most recent events in the
-requested window per query).
+from raw events per request (bounded at the first 10,000 events in the
+requested window per query, oldest first).
 
 ## Range → bucket size
 `;
