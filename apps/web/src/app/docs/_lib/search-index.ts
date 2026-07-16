@@ -50,10 +50,10 @@ import {
   ingestSection,
 } from '../hub/content';
 import {
-  headers as mcpHeaders,
   intro as mcpIntro,
   outro as mcpOutro,
-  rows as mcpRows,
+  toolGroups as mcpToolGroups,
+  toolHeaders as mcpToolHeaders,
 } from '../mcp/content';
 import {
   adapterHeaders,
@@ -176,7 +176,17 @@ export const docsSearchIndex: DocsSearchPage[] = [
       jobIntro,
     ].join('\n\n'),
   ),
-  buildPage('/docs/mcp', [mcpIntro, tableMarkdown(mcpHeaders, mcpRows), mcpOutro].join('\n\n')),
+  buildPage(
+    '/docs/mcp',
+    [
+      mcpIntro,
+      ...mcpToolGroups.flatMap((group) => [
+        `### ${group.title}\n\n${group.blurb}`,
+        tableMarkdown(mcpToolHeaders, group.rows),
+      ]),
+      mcpOutro,
+    ].join('\n\n'),
+  ),
   buildPage(
     '/docs/configuration',
     [configurationIntro, tableMarkdown(configurationHeaders, configurationRows), redaction].join(
