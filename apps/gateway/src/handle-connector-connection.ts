@@ -20,6 +20,13 @@ export interface HandleConnectorConnectionArgs {
 export function handleConnectorConnection(args: HandleConnectorConnectionArgs): void {
   const { ws, registry, hubClient, helloTimeoutMs, heartbeatIntervalMs } = args;
 
+  // Without a listener, a socket error (e.g. ECONNRESET) is an unhandled
+  // 'error' event and takes down the whole gateway. 'close' follows and
+  // runs the normal cleanup path.
+  ws.on('error', (error) => {
+    console.error('superbull-gateway: connector socket error', error);
+  });
+
   const helloTimer = setTimeout(() => {
     sendFrame(ws, {
       type: 'hello_error',
@@ -28,6 +35,7 @@ export function handleConnectorConnection(args: HandleConnectorConnectionArgs): 
     });
     ws.close(4002, 'hello timeout');
   }, helloTimeoutMs);
+  ws.once('close', () => clearTimeout(helloTimer));
 
   ws.once('message', (raw: Buffer) => {
     clearTimeout(helloTimer);

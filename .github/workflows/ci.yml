@@ -135,6 +135,31 @@ jobs:
           REDIS_HOST: localhost
           REDIS_PORT: 6379
 
+  # Gateway unit tests run in the matrix job via turbo; this boots the built
+  # artifact (dist/main.js) and probes the internal HTTP surface end to end.
+  test-gateway:
+    name: Gateway boot smoke
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build gateway
+        run: pnpm exec turbo run build --filter=@superbull/gateway
+
+      - name: Boot smoke
+        run: pnpm --filter @superbull/gateway smoke
+
   test-ui:
     name: Test UI (no Redis)
     runs-on: ubuntu-latest

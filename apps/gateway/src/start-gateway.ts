@@ -44,14 +44,22 @@ export async function startGateway(args: StartGatewayArgs): Promise<RunningGatew
   const server = createServer((req, res) => {
     handleInternalRequest({ registry, internalToken, rpcTimeoutMs }, req, res).catch((error) => {
       console.error('superbull-gateway: internal request failed', error);
-      res.writeHead(500, { 'content-type': 'application/json' });
+      if (!res.headersSent) {
+        res.writeHead(500, { 'content-type': 'application/json' });
+      }
       res.end(JSON.stringify({ error: 'internal error' }));
     });
   });
 
   server.on('upgrade', (req, socket, head) => {
+    // A raw socket error before the WS handshake completes would otherwise be
+    // an unhandled 'error' event and crash the process.
+    socket.on('error', (error) => {
+      console.error('superbull-gateway: upgrade socket error', error);
+    });
     const url = new URL(req.url ?? '/', 'http://localhost');
     if (url.pathname !== '/connect') {
+      socket.write('HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n');
       socket.destroy();
       return;
     }
@@ -83,6 +91,9 @@ function closeGateway(server: Server, wss: WebSocketServer): Promise<void> {
     }
     wss.close(() => {
       server.close((error) => (error ? reject(error) : resolve()));
+      // Idle keep-alive connections from the web app would otherwise hold
+      // server.close() open until their keep-alive timeout expires.
+      server.closeIdleConnections();
     });
   });
 }

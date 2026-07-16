@@ -2,8 +2,17 @@ import { randomUUID, timingSafeEqual } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { type RequestFrame, type RpcResponse, rpcRequestSchema } from '@superbull/protocol';
 import { WebSocket } from 'ws';
-import { RpcTimeoutError } from './errors';
+import { ConnectorDisconnectedError, RpcTimeoutError } from './errors';
 import type { SessionRegistry } from './session-registry';
+
+const MAX_BODY_BYTES = 10 * 1024 * 1024;
+
+class PayloadTooLargeError extends Error {
+  constructor() {
+    super('payload too large');
+    this.name = 'PayloadTooLargeError';
+  }
+}
 
 export interface InternalApiArgs {
   registry: SessionRegistry;
@@ -48,7 +57,16 @@ async function handleRpc(
   req: IncomingMessage,
   res: ServerResponse,
 ): Promise<void> {
-  const body = await readJsonBody(req);
+  let body: unknown;
+  try {
+    body = await readJsonBody(req);
+  } catch (error) {
+    if (error instanceof PayloadTooLargeError) {
+      sendJson(res, 413, { error: 'payload too large' });
+      return;
+    }
+    throw error;
+  }
   const parsed = rpcRequestSchema.safeParse(body);
   if (!parsed.success) {
     sendJson(res, 400, { error: 'invalid request' });
@@ -89,7 +107,16 @@ async function handleRpc(
         body: parsed.data.body,
         content_type: parsed.data.content_type,
       };
-      session.ws.send(JSON.stringify(requestFrame));
+      session.ws.send(JSON.stringify(requestFrame), (error) => {
+        if (!error) {
+          return;
+        }
+        const pending = session.pendingRpc.get(id);
+        if (pending) {
+          session.pendingRpc.delete(id);
+          pending.reject(new ConnectorDisconnectedError());
+        }
+      });
     });
     sendJson(res, 200, response);
   } catch (error) {
@@ -103,7 +130,8 @@ async function handleRpc(
 
 function handleStatus(registry: SessionRegistry, connectorId: string, res: ServerResponse): void {
   const session = registry.get(connectorId);
-  if (!session) {
+  // A CLOSING/CLOSED socket would already fail RPC with 502; report it the same way.
+  if (!session || session.ws.readyState !== WebSocket.OPEN) {
     sendJson(res, 200, {
       connected: false,
       connected_at: null,
@@ -133,7 +161,12 @@ function isAuthorized(req: IncomingMessage, token: string): boolean {
 
 async function readJsonBody(req: IncomingMessage): Promise<unknown> {
   const chunks: Buffer[] = [];
+  let total = 0;
   for await (const chunk of req) {
+    total += (chunk as Buffer).length;
+    if (total > MAX_BODY_BYTES) {
+      throw new PayloadTooLargeError();
+    }
     chunks.push(chunk as Buffer);
   }
   const text = Buffer.concat(chunks).toString('utf8');
