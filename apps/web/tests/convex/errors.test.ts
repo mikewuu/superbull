@@ -13,9 +13,13 @@ beforeEach(() => {
   process.env.CONVEX_INTERNAL_TOKEN = INTERNAL_TOKEN;
 });
 
+// Error groups are created by the ingest path (recordBatch -> upsertErrorGroup
+// on job.failed) — record one failure event per call, with a unique uuid so
+// ingest's own dedupe never swallows a failure these tests mean to record.
+let failureCounter = 0;
 async function recordFailure(
   t: ReturnType<typeof makeTestClient>,
-  connectorId: string,
+  connectorId: Awaited<ReturnType<typeof seedConnector>>,
   overrides: Partial<{
     queueName: string;
     jobName: string;
@@ -24,18 +28,26 @@ async function recordFailure(
     ts: number;
   }> = {},
 ) {
-  return await t.mutation(api.errors.recordFailure, {
+  failureCounter += 1;
+  return await t.mutation(api.ingest.recordBatch, {
     internalToken: INTERNAL_TOKEN,
     connectorId,
-    queueName: 'emails',
-    message: 'boom',
-    ts: 1,
-    ...overrides,
+    events: [
+      {
+        uuid: `errors-test-failure-${failureCounter}`,
+        type: 'job.failed',
+        queue_name: overrides.queueName ?? 'emails',
+        job_name: overrides.jobName,
+        job_id: overrides.jobId,
+        ts: overrides.ts ?? 1,
+        failed_reason: overrides.message ?? 'boom',
+      },
+    ],
   });
 }
 
 describe('errors', () => {
-  it('recordFailure creates a new open error group on first failure', async () => {
+  it('a job.failed event creates a new open error group on first failure', async () => {
     const t = makeTestClient();
     const { workspaceId, asMember } = await seedWorkspace(t);
     const connectorId = await seedConnector(t, workspaceId);
@@ -181,28 +193,6 @@ describe('errors', () => {
       groupId: assertDefined(groups[0])._id,
     });
     expect(found).toBeNull();
-  });
-
-  it('recordFailure throws for an unknown connector', async () => {
-    const t = makeTestClient();
-
-    await expect(recordFailure(t, 'not-a-real-id')).rejects.toThrow(/unknown connector/);
-  });
-
-  it('throws with the wrong internal token on recordFailure', async () => {
-    const t = makeTestClient();
-    const { workspaceId } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
-
-    await expect(
-      t.mutation(api.errors.recordFailure, {
-        internalToken: 'wrong-token',
-        connectorId,
-        queueName: 'emails',
-        message: 'boom',
-        ts: 1,
-      }),
-    ).rejects.toThrow();
   });
 
   it('throws for an unauthenticated caller on the user-facing functions', async () => {

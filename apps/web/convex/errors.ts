@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
-import { requireInternalToken, requireWorkspaceMember } from './access';
+import { requireWorkspaceMember } from './access';
 
 function normalizeFingerprintMessage(message: string): string {
   const firstLine = message.split('\n')[0] ?? '';
@@ -65,41 +65,6 @@ export async function upsertErrorGroup(
     isRegression: false,
   });
 }
-
-// TRANSITIONAL — internalToken-gated, mirrors ingest.record's failure path
-// for direct callers that aren't sending a full ingest batch.
-export const recordFailure = mutation({
-  args: {
-    internalToken: v.string(),
-    connectorId: v.string(),
-    queueName: v.string(),
-    jobName: v.optional(v.string()),
-    jobId: v.optional(v.string()),
-    message: v.string(),
-    ts: v.number(),
-  },
-  handler: async (ctx, args) => {
-    requireInternalToken(args.internalToken);
-    const connectorId = ctx.db.normalizeId('connectors', args.connectorId);
-    if (!connectorId) {
-      throw new Error('unknown connector');
-    }
-    const connector = await ctx.db.get(connectorId);
-    if (!connector) {
-      throw new Error('unknown connector');
-    }
-
-    await upsertErrorGroup(ctx, {
-      workspaceId: connector.workspaceId,
-      connectorId,
-      queueName: args.queueName,
-      jobName: args.jobName,
-      jobId: args.jobId,
-      message: args.message,
-      ts: args.ts,
-    });
-  },
-});
 
 export const listGroups = query({
   args: {

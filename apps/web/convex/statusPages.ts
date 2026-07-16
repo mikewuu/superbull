@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import { type QueryCtx, mutation, query } from './_generated/server';
-import { requireInternalToken, requireWorkspaceMember } from './access';
+import { requireWorkspaceMember } from './access';
 
 const dayMs = 86_400_000;
 const maxEventsPerQuery = 20_000;
@@ -138,72 +138,6 @@ export const upsert = mutation({
 
     const fields = {
       workspaceId: args.workspaceId,
-      connectorId: args.connectorId,
-      slug: args.slug,
-      isEnabled: args.isEnabled,
-      title: args.title,
-      queueNames: args.queueNames,
-    };
-
-    if (existing) {
-      await ctx.db.patch(existing._id, fields);
-      const patched = await ctx.db.get(existing._id);
-      if (!patched) {
-        throw new Error('failed to upsert status page config');
-      }
-      return patched;
-    }
-
-    const id = await ctx.db.insert('statusPageConfigs', fields);
-    const created = await ctx.db.get(id);
-    if (!created) {
-      throw new Error('failed to upsert status page config');
-    }
-    return created;
-  },
-});
-
-// TRANSITIONAL — internalToken-gated, for scripts/dev tooling that have no
-// Convex Auth session to impersonate a user with (see
-// src/scripts/seed-status-page.ts). Not part of the gateway or hub-token
-// HTTP contract; workspaceId is derived from the connector, mirroring
-// deployAnnotations.create's pattern.
-export const upsertLegacy = mutation({
-  args: {
-    internalToken: v.string(),
-    connectorId: v.id('connectors'),
-    slug: v.string(),
-    isEnabled: v.boolean(),
-    title: v.string(),
-    queueNames: v.optional(v.array(v.string())),
-  },
-  handler: async (ctx, args) => {
-    requireInternalToken(args.internalToken);
-    if (!/^[a-z0-9-]{3,50}$/.test(args.slug)) {
-      throw new Error('invalid slug');
-    }
-    const connector = await ctx.db.get(args.connectorId);
-    if (!connector) {
-      throw new Error('unknown connector');
-    }
-
-    const bySlug = await ctx.db
-      .query('statusPageConfigs')
-      .withIndex('by_slug', (q) => q.eq('slug', args.slug))
-      .unique();
-    if (bySlug && bySlug.connectorId !== args.connectorId) {
-      throw new Error('slug already taken');
-    }
-
-    const existing =
-      bySlug ??
-      (await ctx.db
-        .query('statusPageConfigs')
-        .withIndex('by_connector', (q) => q.eq('connectorId', args.connectorId))
-        .unique());
-
-    const fields = {
-      workspaceId: connector.workspaceId,
       connectorId: args.connectorId,
       slug: args.slug,
       isEnabled: args.isEnabled,
