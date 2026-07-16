@@ -6,6 +6,10 @@ import { getHeadings } from '../_lib/get-headings';
 import {
   globalHeaders,
   globalRows,
+  hostedHeaders,
+  hostedIntro,
+  hostedOutro,
+  hostedRows,
   intro,
   jobHeaders,
   jobHeading,
@@ -26,6 +30,7 @@ const headings = [
   ...getHeadings(midMarkdown),
   ...getHeadings(jobHeading),
   ...getHeadings(jobIntro),
+  ...getHeadings(hostedIntro),
 ];
 
 export default function ApiPage() {
@@ -39,6 +44,9 @@ export default function ApiPage() {
         <DocsMarkdown content={jobHeading} />
         <DocsTable headers={jobHeaders} rows={jobRows} />
         <DocsMarkdown content={jobIntro} />
+        <DocsMarkdown content={hostedIntro} />
+        <DocsTable headers={hostedHeaders} rows={hostedRows} />
+        <DocsMarkdown content={hostedOutro} />
       </div>
       <DocsToc headings={headings} />
     </div>
