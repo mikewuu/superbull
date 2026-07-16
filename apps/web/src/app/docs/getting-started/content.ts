@@ -1,68 +1,59 @@
 export const content = `
 # Getting started
 
-SuperBull ships as a set of \`@superbull/*\` npm packages. \`bullmq\` is always a
-**peer dependency**. SuperBull never bundles its own copy, so job mutations
-(retry, promote, remove) run through the exact BullMQ version your workers use.
+The fastest path to a working dashboard is the hosted app: sign in, add a
+connector, run one command.
 
-## 1. Pick a mode
+## 1. Sign in
 
-- **Standalone**: you have one Node app and want a dashboard mounted inside it.
-  No extra infrastructure. Go to [Standalone](/docs/standalone).
-- **Proxy**: your workers run somewhere you'd rather not expose a UI to (a worker
-  fleet, a container with no ingress), or you plan to federate multiple queue
-  clusters into a hub. Go to [Proxy](/docs/proxy).
-- **Hub**: you're running two or more sources (standalone boards or proxies) and
-  want one place with analytics, alerts, error tracking, and status pages across
-  all of them. Go to [Hub](/docs/hub).
+Sign in with Google. A personal workspace is created for you automatically on
+first sign-in, no separate signup step. From there you can invite teammates
+to that workspace, or create more workspaces for other teams or environments.
+Members hold one of three roles: **owner**, **admin**, or **member**; invite
+by email from workspace settings.
 
-Standalone and proxy are not mutually exclusive with hub. A hub federates proxies
-(and can forward to a standalone board's API too), so most setups start with
-standalone or proxy and add a hub later.
+## 2. Create a connector
+
+From your workspace, **Connectors → New connector** gives you a name field and,
+once submitted, a one-time enrollment token. It's shown exactly once, so copy
+it before moving on. Behind the scenes the workspace only stores a hash of it.
+
+## 3. Run it next to your workers
+
+\`\`\`bash
+npx @superbull/connector --token <the-token-you-copied>
+\`\`\`
+
+No install step, no code changes, and nothing to expose: the connector opens
+one outbound WebSocket to \`wss://connect.superbull.com\` and reads your
+BullMQ queues over the Redis connection you already run. See
+[Connector](/docs/connector) for the full flag list (Redis host/port/password,
+explicit queue names, etc.).
+
+## 4. Watch it live
+
+As soon as the connector connects, its dashboard goes live at
+\`/app/[workspaceSlug]/connectors/[connectorId]\`: queues, jobs, retries,
+metrics, the same dense board either way you run SuperBull. Ingested events
+also feed workspace-wide [alerts](/docs/alerts), [analytics](/docs/analytics),
+[dashboards](/docs/dashboards), and [status pages](/docs/status-pages).
 
 Rather have an agent do this instead of clicking through a UI? See
-[MCP](/docs/mcp): the hub's MCP server lets an agent watch queues and fix
-failed jobs directly.
+[MCP](/docs/mcp): an agent can watch queues and fix failed jobs directly.
 
-## 2. Install
+## Prefer to self-host?
 
-Every mode needs \`@superbull/api\` and \`bullmq\`. Standalone additionally needs one
-adapter package and \`@superbull/react\` (the UI):
+None of the above requires the hosted app. **Standalone** mode mounts
+SuperBull's UI and REST API directly inside your own Node process, no
+workspace, no sign-in, no outbound connection to anywhere. \`bullmq\` is always
+a **peer dependency** there too, so job mutations (retry, promote, remove) run
+through the exact BullMQ version your workers use.
 
 \`\`\`bash
 npm install @superbull/api @superbull/react bullmq
 npm install @superbull/express   # or fastify, hono, koa, h3, hapi, elysia, bun, nestjs
 \`\`\`
 
-The proxy is a single package with its own CLI:
-
-\`\`\`bash
-npm install @superbull/proxy bullmq
-\`\`\`
-
-The hub is a full app (\`apps/hub\` in this repo). See [Hub](/docs/hub) for
-deployment and environment setup rather than an npm install.
-
-## 3. Point it at Redis
-
-SuperBull never opens its own Redis connection for queue data. It wraps the
-\`bullmq.Queue\` instance(s) you already have:
-
-\`\`\`ts
-import { Queue } from 'bullmq';
-
-const queue = new Queue('email', { connection: { host: '127.0.0.1', port: 6379 } });
-\`\`\`
-
-Pass that queue into a \`BullMQAdapter\` and hand it to \`createBoard()\` (standalone)
-or \`startProxy()\` (proxy). Because each queue carries its own connection, a single
-board or proxy can span multiple Redis instances by simply passing queues that
-point at different \`connection\` configs. See [Configuration](/docs/configuration).
-
-## 4. Open the dashboard
-
-Standalone and hub both serve the \`@superbull/react\` SPA at whatever base path you
-mounted it under (\`/admin/queues\` in the quickstart example, \`/s/:sourceId/\` on a
-hub). The proxy has no UI of its own. It's meant to be read by a hub or a script,
-and exposes \`GET /healthz\` unauthenticated for liveness checks.
+See [Standalone](/docs/standalone) for the full setup, one section per
+framework adapter.
 `;

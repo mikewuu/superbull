@@ -2,10 +2,11 @@ export const intro = `
 # REST API
 
 This is the route table \`createBoard()\` mounts under whatever base path you gave
-the server adapter (\`/admin/queues\` in the earlier examples). A proxy exposes the
-same \`/api/*\` routes behind a bearer token. See [Proxy](/docs/proxy). A hub
-forwards \`/s/:sourceId/api/*\` to the matching proxy with its stored token. See
-[Hub](/docs/hub).
+the server adapter (\`/admin/queues\` in the earlier examples). A connector's
+dashboard at \`/app/[workspaceSlug]/connectors/[connectorId]\` polls this same
+route table; the web app relays each request to the connector over the
+gateway's WebSocket RPC channel rather than a direct HTTP forward. See
+[Connector](/docs/connector) and [Hub](/docs/hub).
 
 Bodies and query params use snake_case. Mutations that don't return a resource
 respond \`204\` with an empty body; \`POST /add\` is the only route that returns

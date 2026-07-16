@@ -2,9 +2,9 @@ export const intro = `
 # MCP
 
 SuperBull is agent-operable: point an agent at the hub's MCP server and it can
-watch your queues, open a failed job and read its stack trace, retry the job, or
-pause a queue that's failing fast: the same actions you'd otherwise click through
-a dashboard for.
+watch your queues, open a failed job and read its stack trace, retry the job,
+or pause a queue that's failing fast: the same actions you'd otherwise click
+through a dashboard for.
 
 The hub exposes that MCP server at \`/api/mcp\` (server name \`superbull-hub\`),
 authenticated with the same \`SUPERBULL_API_TOKEN\` bearer token as the hub's
@@ -16,7 +16,7 @@ management REST API. It's streamable-HTTP only. No SSE transport,
 Claude Code:
 
 \`\`\`bash
-claude mcp add --transport http superbull-hub https://your-hub.example.com/api/mcp \\
+claude mcp add --transport http superbull-hub https://superbull.com/api/mcp \\
   --header "Authorization: Bearer YOUR_SUPERBULL_API_TOKEN"
 \`\`\`
 
@@ -27,7 +27,7 @@ Claude Desktop (\`claude_desktop_config.json\`):
   "mcpServers": {
     "superbull-hub": {
       "type": "streamable-http",
-      "url": "https://your-hub.example.com/api/mcp",
+      "url": "https://superbull.com/api/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_SUPERBULL_API_TOKEN"
       }
@@ -43,11 +43,12 @@ exposes.)
 ## Diagnose and retry a failed job
 
 Tool instructions group the surface as **discover** (list what's registered),
-**inspect** (read queue/job state), and **act** (mutate a queue or job). An agent
-is expected to list sources and queues before acting on one. A typical run:
+**inspect** (read queue/job state), and **act** (mutate a queue or job). An
+agent is expected to list connectors and queues before acting on one. A
+typical run:
 
 \`\`\`
-> get_queue({ source_id: "src_9f2a", queue_name: "email", status: "failed" })
+> get_queue({ connector_id: "cnn_9f2a", queue_name: "email", status: "failed" })
 
 {
   "queue": {
@@ -70,7 +71,7 @@ is expected to list sources and queues before acting on one. A typical run:
   }
 }
 
-> retry_job({ source_id: "src_9f2a", queue_name: "email", job_id: "482" })
+> retry_job({ connector_id: "cnn_9f2a", queue_name: "email", job_id: "482" })
 
 { "retried": true, "job_id": "482" }
 \`\`\`
@@ -84,47 +85,40 @@ permission flags, trimmed above for readability.)
 export const headers = ['Tool', 'Input', 'Description'];
 export const rows = [
   [
-    'list_sources',
+    'list_connectors',
     '{}',
-    'List every registered proxy source (id, name, url, created_at): tokens are never returned',
+    'List every connector in the workspace (id, name, is_connected, created_at): tokens are never returned',
   ],
   [
-    'add_source',
-    '{ name: string, url: string (URL), token: string }',
-    'Register a new proxy source; the token is stored, never echoed back',
+    'add_connector',
+    '{ name: string }',
+    'Create a connector; returns its one-time enrollment token, shown only in this response',
   ],
-  ['remove_source', '{ source_id: string }', 'Delete a registered source'],
+  ['remove_connector', '{ connector_id: string }', 'Delete a connector'],
   [
     'list_queues',
-    '{ source_id: string }',
-    "Forward GET queues to the source's proxy; returns [{ name, counts, is_paused }]",
+    '{ connector_id: string }',
+    "List a connector's queues; returns [{ name, counts, is_paused }]",
   ],
   [
     'get_queue',
-    '{ source_id: string, queue_name: string, status?: string, page?: number }',
-    'Forward GET queues?active_queue=...&status=...&page=... and return the matching queue, jobs included',
+    '{ connector_id: string, queue_name: string, status?: string, page?: number }',
+    'Return one queue and its matching page of jobs, filtered by status',
   ],
   [
     'retry_job',
-    '{ source_id: string, queue_name: string, job_id: string }',
-    "PUT queues/:queue/:jobId/retry on the source's proxy",
+    '{ connector_id: string, queue_name: string, job_id: string }',
+    'Retry a failed or completed job on that connector',
   ],
-  [
-    'pause_queue',
-    '{ source_id: string, queue_name: string }',
-    "PUT queues/:queue/pause on the source's proxy",
-  ],
-  [
-    'resume_queue',
-    '{ source_id: string, queue_name: string }',
-    "PUT queues/:queue/resume on the source's proxy",
-  ],
+  ['pause_queue', '{ connector_id: string, queue_name: string }', "Stop a queue's processing"],
+  ['resume_queue', '{ connector_id: string, queue_name: string }', 'Resume a paused queue'],
 ];
 
 export const outro = `
-All tools that take a \`source_id\` forward the request to that source's registered
-proxy (or standalone board) URL, authenticated with the bearer token stored for it
-at \`add_source\` time. The same path \`/s/:sourceId/api/*\` on the hub's own web UI
-uses. \`status\` on \`get_queue\` accepts a comma-separated list of job statuses, same
+All tools that take a \`connector_id\` relay the request to that connector over
+its live WebSocket connection (web → gateway → connector), the same path the
+per-connector dashboard uses. A connector with no live connection fails the
+call immediately with "connector disconnected" rather than queuing it.
+\`status\` on \`get_queue\` accepts a comma-separated list of job statuses, same
 as the REST \`GET /api/queues\` \`status\` param. See [REST API](/docs/api).
 `;

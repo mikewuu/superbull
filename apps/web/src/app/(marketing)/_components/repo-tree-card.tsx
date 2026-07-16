@@ -2,7 +2,7 @@ const tree = `superbull/
 ├── packages/
 │   ├── api/       adapter interfaces, createBoard()
 │   ├── react/     the dashboard UI
-│   ├── proxy/     headless agent, no UI
+│   ├── connector/ outbound WS agent, no inbound port
 │   ├── express/
 │   ├── fastify/
 │   ├── hono/
@@ -13,7 +13,8 @@ const tree = `superbull/
 │   ├── bun/
 │   └── nestjs/
 └── apps/
-    └── hub/       alerts, analytics, status pages`;
+    ├── web/       hosted app: workspaces, alerts, analytics, status pages
+    └── gateway/   WebSocket termination for connectors`;
 
 export function RepoTreeCard(): React.ReactElement {
   return (

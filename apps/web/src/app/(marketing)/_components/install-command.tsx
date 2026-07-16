@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { cn } from '../../../lib/cn';
 import { CopyButton } from './copy-button';
 
-type ModeId = 'embed' | 'proxy';
+type ModeId = 'embed' | 'connector';
 
 const modes: Record<ModeId, { label: string; command: string }> = {
   embed: { label: 'Embed', command: 'npm install @superbull/api @superbull/express' },
-  proxy: { label: 'Proxy', command: 'npx superbull-proxy -n "my-app" -t $SUPERBULL_TOKEN' },
+  connector: { label: 'Connector', command: 'npx @superbull/connector --token $SUPERBULL_TOKEN' },
 };
 
 export function InstallCommand(): React.ReactElement {

@@ -6,21 +6,24 @@ existing Node app through a thin server adapter and renders a React SPA that pol
 a REST API driven by your own \`bullmq\` \`Queue\` instances. Job mutations (retry,
 promote, remove, clean) always run against the exact BullMQ version your workers use.
 
-There are three ways to run it:
+There are two ways to run it:
 
+- **Hosted**: sign in with Google, create a connector in your workspace, and run
+  one command next to your workers: \`npx @superbull/connector --token ...\`. It
+  opens a single outbound WebSocket, no inbound port, no public URL. Your
+  connector's dashboard goes live at
+  \`/app/[workspaceSlug]/connectors/[connectorId]\`, alongside ingest-driven
+  analytics, error tracking, email alerts, dashboards, and public status pages
+  for every connector in the workspace. See [Getting started](/docs/getting-started),
+  [Connector](/docs/connector), and [Hub](/docs/hub).
 - **Standalone**: mount an adapter (Express, Fastify, Hono, Koa, h3, Hapi, Elysia,
   Bun, or NestJS) directly in your app. Serves the UI and the REST API from that
-  process. See [Standalone](/docs/standalone).
-- **Proxy**: run \`@superbull/proxy\` as a headless agent next to your workers. It
-  exposes the same REST API over a bearer token, with no UI, meant to sit behind a
-  hub or your own tooling. See [Proxy](/docs/proxy).
-- **Hub**: a separate Next.js app that federates multiple proxies into one place,
-  with ingest-driven analytics, error tracking, email alerts, dashboards, and public
-  status pages, all stored in Convex. See [Hub](/docs/hub).
+  process, no sign-in, no hosted app involved. See [Standalone](/docs/standalone).
 
-All three modes share the same core: \`@superbull/api\` defines the route table, the
+Both modes share the same core: \`@superbull/api\` defines the route table, the
 \`BaseAdapter\`/\`BullMQAdapter\` queue wrapper, and \`createBoard()\`; \`@superbull/react\`
-is the SPA served by every standalone adapter and by the hub's per-source dashboards.
+is the SPA served by every standalone adapter and by the hub's per-connector
+dashboards.
 `;
 
 export const quickstartContent = `
@@ -67,9 +70,9 @@ the same shape. See [Standalone](/docs/standalone) for all nine.
 ## Where to go next
 
 - New to SuperBull: start with [Getting started](/docs/getting-started).
-- Embedding in your app: [Standalone](/docs/standalone).
-- Running next to workers with no UI: [Proxy](/docs/proxy).
-- Centralizing multiple sources: [Hub](/docs/hub).
+- Embedding in your app instead: [Standalone](/docs/standalone).
+- Running the outbound agent next to workers: [Connector](/docs/connector).
+- The hosted app: workspaces, analytics, alerts, status pages: [Hub](/docs/hub).
 - Every endpoint: [REST API](/docs/api).
 - Driving SuperBull from an agent: [MCP](/docs/mcp).
 `;

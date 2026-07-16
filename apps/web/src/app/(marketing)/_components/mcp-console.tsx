@@ -9,59 +9,58 @@ type ToolId =
   | 'retry_job'
   | 'pause_queue'
   | 'resume_queue'
-  | 'list_sources'
-  | 'add_source'
-  | 'remove_source';
+  | 'list_connectors'
+  | 'add_connector'
+  | 'remove_connector';
 
 const tools: Record<ToolId, { desc: string; request: string; response: string }> = {
   list_queues: {
-    desc: 'Queue names, job counts, and paused state for one source.',
-    request: '{ "tool": "list_queues", "arguments": { "source_id": "src_9f2a" } }',
+    desc: 'Queue names, job counts, and paused state for one connector.',
+    request: '{ "tool": "list_queues", "arguments": { "connector_id": "cnn_9f2a" } }',
     response:
       '{ "queues": [\n    { "name": "send-emails", "counts": { "waiting": 5, "failed": 0 }, "is_paused": false },\n    { "name": "process-videos", "counts": { "waiting": 0, "failed": 0 }, "is_paused": false },\n    { "name": "sync-contacts", "counts": { "waiting": 0, "failed": 0 }, "is_paused": true }\n  ] }',
   },
   get_queue: {
     desc: "One queue's current page of jobs, filtered by status.",
     request:
-      '{ "tool": "get_queue", "arguments": {\n    "source_id": "src_9f2a", "queue_name": "send-emails", "status": "failed" } }',
+      '{ "tool": "get_queue", "arguments": {\n    "connector_id": "cnn_9f2a", "queue_name": "send-emails", "status": "failed" } }',
     response:
       '{ "queue": { "name": "send-emails", "jobs": [\n    { "id": "482", "attempts": 3,\n      "failed_reason": "connect ECONNREFUSED 127.0.0.1:587",\n      "is_failed": true } ] } }',
   },
   retry_job: {
     desc: 'Retry a failed or completed job.',
     request:
-      '{ "tool": "retry_job", "arguments": {\n    "source_id": "src_9f2a", "queue_name": "send-emails", "job_id": "482" } }',
+      '{ "tool": "retry_job", "arguments": {\n    "connector_id": "cnn_9f2a", "queue_name": "send-emails", "job_id": "482" } }',
     response: '{ "retried": true, "job_id": "482" }',
   },
   pause_queue: {
     desc: "Stop a queue's processing.",
     request:
-      '{ "tool": "pause_queue", "arguments": { "source_id": "src_9f2a", "queue_name": "process-videos" } }',
+      '{ "tool": "pause_queue", "arguments": { "connector_id": "cnn_9f2a", "queue_name": "process-videos" } }',
     response: '{ "paused": true, "queue_name": "process-videos" }',
   },
   resume_queue: {
     desc: 'Resume a paused queue.',
     request:
-      '{ "tool": "resume_queue", "arguments": { "source_id": "src_9f2a", "queue_name": "sync-contacts" } }',
+      '{ "tool": "resume_queue", "arguments": { "connector_id": "cnn_9f2a", "queue_name": "sync-contacts" } }',
     response: '{ "resumed": true, "queue_name": "sync-contacts" }',
   },
-  list_sources: {
-    desc: 'List the proxy sources the hub federates, without their bearer tokens.',
-    request: '{ "tool": "list_sources", "arguments": {} }',
+  list_connectors: {
+    desc: 'List the connectors in the workspace, without their tokens.',
+    request: '{ "tool": "list_connectors", "arguments": {} }',
     response:
-      '{ "sources": [\n    { "id": "src_9f2a", "name": "my-app", "url": "https://proxy.example.com",\n      "created_at": "2026-03-02T18:04:00.000Z" } ] }',
+      '{ "connectors": [\n    { "id": "cnn_9f2a", "name": "my-app", "is_connected": true,\n      "created_at": "2026-03-02T18:04:00.000Z" } ] }',
   },
-  add_source: {
-    desc: 'Register a remote proxy; stores its token, never returns it.',
-    request:
-      '{ "tool": "add_source", "arguments": {\n    "name": "my-app", "url": "https://proxy.example.com", "token": "..." } }',
+  add_connector: {
+    desc: 'Create a connector; returns its one-time enrollment token, shown only here.',
+    request: '{ "tool": "add_connector", "arguments": { "name": "my-app" } }',
     response:
-      '{ "id": "src_9f2a", "name": "my-app", "url": "https://proxy.example.com",\n  "created_at": "2026-03-02T18:04:00.000Z" }',
+      '{ "id": "cnn_9f2a", "name": "my-app", "token": "sbc_...",\n  "created_at": "2026-03-02T18:04:00.000Z" }',
   },
-  remove_source: {
-    desc: 'Remove a proxy source the hub federates.',
-    request: '{ "tool": "remove_source", "arguments": { "source_id": "src_9f2a" } }',
-    response: '{ "removed": true, "source_id": "src_9f2a" }',
+  remove_connector: {
+    desc: 'Remove a connector from the workspace.',
+    request: '{ "tool": "remove_connector", "arguments": { "connector_id": "cnn_9f2a" } }',
+    response: '{ "removed": true, "connector_id": "cnn_9f2a" }',
   },
 };
 

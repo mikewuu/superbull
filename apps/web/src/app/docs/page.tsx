@@ -6,7 +6,7 @@ import { introContent, quickstartContent } from './content';
 export const metadata: Metadata = {
   title: 'SuperBull docs',
   description:
-    'Monitor and operate BullMQ queues: standalone board, headless proxy, or a federated hub.',
+    'Monitor and operate BullMQ queues: a standalone board, or the hosted app with an outbound connector.',
 };
 
 export default function DocsOverviewPage() {

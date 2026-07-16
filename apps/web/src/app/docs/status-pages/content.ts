@@ -2,19 +2,20 @@ export const content = `
 # Status pages
 
 A status page is a public, unauthenticated page at \`/status/:slug\` on the hub,
-showing 90-day uptime for one source's queues, derived entirely from ingested
+showing 90-day uptime for one connector's queues, derived entirely from ingested
 events. There's no separate "incident" model to maintain by hand.
 
 ## Configure
 
-From the hub's **Status pages** section, pick a source, a slug, a title, an
+From the hub's **Status pages** section, pick a connector, a slug, a title, an
 optional logo, and which queues to include (empty means all queues on that
-source). Configuration lives in Convex as \`StatusPageConfig\`:
+connector). Configuration lives in Convex as \`StatusPageConfig\`:
 
 \`\`\`ts
 interface StatusPageConfig {
   id: string;
-  source_id: string;
+  workspace_id: string;
+  connector_id: string;
   slug: string;
   is_enabled: boolean;
   title: string;
@@ -38,8 +39,8 @@ export const rows = [
 ];
 
 export const outro = `
-Each day's rate comes from ingested queue-health events for that source (and, if
-scoped, that queue) over the previous 90 days, rendered as a strip of daily bars
+Each day's rate comes from ingested queue-health events for that connector (and,
+if scoped, that queue) over the previous 90 days, rendered as a strip of daily bars
 plus a rolling 90-day percentage. If a status page includes more than one queue,
 each gets its own uptime strip below the overall one.
 

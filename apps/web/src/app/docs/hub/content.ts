@@ -1,118 +1,83 @@
 export const intro = `
 # Hub
 
-\`apps/hub\` is a Next.js 16 app (port 4600, Vercel-deployable) that federates
-multiple **sources**, proxies or standalone boards, into one place. Everything
-the hub stores (sources, ingested events, error groups, alert rules, dashboards,
-status page configs, users) lives in **Convex**, not Postgres. The hub has no
-database of its own beyond that.
+The hub is the hosted SuperBull app at superbull.com: sign in with Google,
+create connectors, and get history, analytics, error tracking, email alerts,
+and public status pages across every connector in your workspace, without
+deploying anything yourself.
 
-## Deploy
+Three pieces make it up:
 
-\`\`\`bash
-cd apps/hub
-npx convex dev   # creates/links a Convex deployment, writes NEXT_PUBLIC_CONVEX_URL
-npx @convex-dev/auth   # generates and sets JWT_PRIVATE_KEY / JWKS on the deployment
-\`\`\`
+- **Web app** (Vercel) — marketing, docs, the product itself under
+  \`/app/[workspaceSlug]/...\`, and public status pages at \`/status/[slug]\`.
+- **Gateway** (\`connect.superbull.com\`) — the always-on service each
+  connector opens its one outbound WebSocket to. Terminates every connector's
+  connection and relays requests from the web app to the right one.
+- **Convex** — the datastore for everything: workspaces, members, connectors,
+  ingested events, alert rules, dashboards, status page configs.
 
-Then set the app's own env (see [Configuration](/docs/configuration) for the full
-list): \`NEXT_PUBLIC_CONVEX_URL\`, \`CONVEX_INTERNAL_TOKEN\`, \`SUPERBULL_API_TOKEN\`. Deploy
-the Next app anywhere that runs Next 16 (\`npm run dev\` binds port 4600 locally).
-There's no platform cron config. The alert/digest jobs need
-\`apps/hub/src/scripts/start-queue-worker.ts\` running as its own long-lived
-process alongside the Next app (see "Background jobs" below).
+There's no separate hub-side Redis and no long-lived worker process to run
+yourself; the pieces above are all that's needed.
 
-## Auth: first-user gate
+## Workspaces
 
-The hub is single-tenant. Sign-up (\`@convex-dev/auth\`, credentials provider,
-password hashed with \`Scrypt\`) is only accepted while no user exists yet. The
-first person to sign up becomes the only account. After that, sign-up requests are
-rejected with "Ask an existing user to invite you." There's no in-app invite flow.
-
-## Registering a source
-
-A source is a proxy (or standalone board) the hub can reach and forward requests
-to. Register one with the management REST API or the \`add_source\` MCP tool (see
-[MCP](/docs/mcp)):
-
-\`\`\`bash
-curl -X POST https://your-hub.example.com/api/sources \\
-  -H "Authorization: Bearer $SUPERBULL_API_TOKEN" \\
-  -H "Content-Type: application/json" \\
-  -d '{"name":"payments-prod","url":"https://proxy.internal:4650","token":"<proxy bearer token>"}'
-\`\`\`
-
-A proxy started with \`--hub-url\`/\`--hub-token\` (see [Proxy](/docs/proxy))
-self-registers this way on startup instead. \`POST /api/sources/register\` upserts
-by \`name\` so restarts don't create duplicates.
-
-## Management REST API
-
-Every route below is authenticated with \`Authorization: Bearer $SUPERBULL_API_TOKEN\`
-(timing-safe compare), except \`/api/health\` and \`/api/ingest\` (see below).
+Signing in for the first time creates a personal workspace automatically. A
+workspace has members, each holding one of three roles:
 `;
 
-export const headers = ['Method', 'Path', 'Body / query', 'Response'];
+export const headers = ['Role', 'Typical permissions'];
 export const rows = [
-  ['GET', '/api/sources', '-', '{ sources: [{ id, name, url, created_at }] }'],
-  ['POST', '/api/sources', '{ name, url, token }', '201 { id, name, url, created_at }'],
   [
-    'POST',
-    '/api/sources/register',
-    '{ name, url, token }',
-    '200 { source_id, name, url }: upserts by name',
+    'owner',
+    'Everything an admin can do, plus manage billing, delete the workspace, and change other members’ roles',
   ],
-  ['DELETE', '/api/sources/:sourceId', '-', '204; 404 if unknown'],
-  [
-    'GET',
-    '/api/annotations',
-    'source_id, from_ts?, to_ts?',
-    '{ annotations: [{ id, source_id, label, ts }] }',
-  ],
-  [
-    'POST',
-    '/api/annotations',
-    '{ source_id, label, ts: number | null }',
-    '201 { id, source_id, label, ts }: null ts becomes now',
-  ],
-  ['GET', '/api/health', '-', '{ ok: true }: unauthenticated'],
+  ['admin', 'Invite members, create and remove connectors, manage alerts/dashboards/status pages'],
+  ['member', 'View dashboards and analytics, operate connectors (retry/pause/etc.)'],
 ];
 
 export const ingestSection = `
+Invite teammates by email from workspace settings; an invite carries the role
+it was sent with. Every workspace query and mutation checks membership first
+(\`convex/access.ts\`), so one user's workspaces never see another's data.
+
+## Creating a connector
+
+**Connectors → New connector** in a workspace gives you a one-time enrollment
+token, shown exactly once. Paste it into \`npx @superbull/connector --token
+...\` (see [Connector](/docs/connector)) and the dashboard for that connector
+goes live at \`/app/[workspaceSlug]/connectors/[connectorId]\` as soon as it
+connects. The same flow is available to an agent through the \`add_connector\`
+MCP tool (see [MCP](/docs/mcp)).
+
 ## Ingest
 
-\`POST /api/ingest\` is authenticated differently: with the **source's own token**
-(the one you registered it with), not \`SUPERBULL_API_TOKEN\`:
+Connectors don't get polled. Each one streams \`job.completed\`/\`job.failed\`
+events and 60-second \`queue.snapshot\`s over its WebSocket as \`events\` frames;
+the gateway acknowledges with \`events_ack\` and forwards the batch to Convex's
+\`ingest:recordBatch\`, deduped by event \`uuid\` (at-least-once delivery, so
+duplicates are expected and harmless). Up to 500 events per batch.
 
-\`\`\`
-POST /api/ingest
-{ "source_id": "...", "events": [ { "uuid", "type", "queue_name", "ts", ... } ] }
-\`\`\`
+## Per-connector dashboard
 
-Up to 500 events per batch. Each event: \`uuid, type, queue_name, ts\` required,
-plus \`job_name?, job_id?, duration_ms?, wait_ms?, failed_reason?, counts?,
-worker_count?, oldest_waiting_ms?\`. Events are deduped on \`uuid\` before any
-accounting. Responds \`{ accepted, deduped }\`; \`401\` for an unknown \`source_id\` or
-a token mismatch.
-
-## Per-source dashboard
-
-\`GET /s/:sourceId/*\` serves the \`@superbull/react\` SPA from the hub, with
-\`basePath: /s/:sourceId/\` injected. The same UI a standalone board serves,
-pointed at a remote source. \`GET|POST|PUT|PATCH|DELETE /s/:sourceId/api/*\` forwards
-to that source's proxy URL with its stored bearer token attached, passing through
-method, query string, body, and content type; a \`204\` upstream forwards with no
-body. Unreachable proxies respond \`502 { "error": "proxy unreachable" }\`.
+\`/app/[workspaceSlug]/connectors/[connectorId]\` serves the same
+\`@superbull/react\` SPA a standalone board serves, pointed at that connector.
+The web app relays each request to the gateway, which forwards it over that
+connector's live WebSocket and waits for a response; there's no direct HTTP
+hop to the connector, since it never accepts inbound connections. If the
+connector is offline, requests fail fast with \`502 { "error": "connector
+disconnected" }\` rather than queuing; a connector that doesn't answer in time
+fails with \`504\`.
 
 ## Background jobs
 
-\`apps/hub/src/scripts/start-queue-worker.ts\` runs two crons (single queue, worker
-concurrency 5):
+Alert evaluation and digests run as Convex crons, not a separate worker
+process:
 
-- **evaluate-alerts**: every 5 minutes. Evaluates every enabled alert rule against
-  recent ingest data and sends alert emails for state transitions.
-- **send-digest**: daily at 9am. Sends each alert rule's owner a 24-hour digest
-  summary.
+- **evaluateAlerts**: every 5 minutes. Evaluates every enabled alert rule
+  against recent ingest data and sends alert emails for state transitions.
+- **sendDigest**: daily at 9am. Sends each alert rule's owner a 24-hour digest
+  summary, rendered with React Email and sent through Resend from a
+  \`"use node"\` Convex action.
 
 See [Alerts](/docs/alerts) for rule types and email behavior.
 `;

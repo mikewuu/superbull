@@ -13,7 +13,7 @@ const entries: Entry[] = [
     id: 'get-queue',
     kind: 'call',
     tool: 'get_queue',
-    args: '{ source_id: "src_9f2a", queue_name: "email", status: "failed" }',
+    args: '{ connector_id: "cnn_9f2a", queue_name: "email", status: "failed" }',
     result:
       '{ "queue": { "name": "email", "jobs": [\n    { "id": "482", "attempts": 3,\n      "failed_reason": "connect ECONNREFUSED 127.0.0.1:587",\n      "stacktrace": ["at TCPConnectWrap.afterConnect (node:net:1494:16)"],\n      "is_failed": true } ] } }',
   },
@@ -27,7 +27,7 @@ const entries: Entry[] = [
     id: 'retry-job',
     kind: 'call',
     tool: 'retry_job',
-    args: '{ source_id: "src_9f2a", queue_name: "email", job_id: "482" }',
+    args: '{ connector_id: "cnn_9f2a", queue_name: "email", job_id: "482" }',
     result: '{ "retried": true, "job_id": "482" }',
   },
   {

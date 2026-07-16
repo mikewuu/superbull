@@ -2,7 +2,7 @@ export const intro = `
 # Analytics
 
 The hub's **Analytics** page, dashboard cards, and status page uptime all read
-from the same \`ingestEvents\` table that events post to via
+from the same \`ingestEvents\` table that connectors stream into via
 [ingest](/docs/hub#ingest). There's no separate rollup job; series are computed
 from raw events per request.
 
@@ -19,9 +19,10 @@ export const rangeRows = [
 export const mid = `
 Wider ranges use coarser buckets automatically. There's no manual granularity
 control. \`throughput\` and \`latency\` take
-\`{ source_id, queue_name?, from_ts, to_ts, bucket_minutes }\` (\`queue_name\` omitted
-scopes to every queue on the source); \`totals\` and \`heatmap\` take only
-\`{ source_id, from_ts, to_ts }\`. They aren't bucketed and aren't queue-scoped.
+\`{ connector_id, queue_name?, from_ts, to_ts, bucket_minutes }\` (\`queue_name\`
+omitted scopes to every queue on the connector); \`totals\` and \`heatmap\` take
+only \`{ connector_id, from_ts, to_ts }\`. They aren't bucketed and aren't
+queue-scoped.
 
 ## Series
 `;
@@ -43,5 +44,5 @@ These are internal Convex query calls (\`analytics.throughputSeries\`,
 \`analytics.latencySeries\`, \`analytics.queueTotals\`, \`analytics.heatmap\`), not
 public REST endpoints. The hub's Analytics page and dashboard cards call them
 server-side. Use [dashboards](/docs/dashboards) to save a fixed view, or the hub's
-Analytics page for ad hoc source/queue/range filtering.
+Analytics page for ad hoc connector/queue/range filtering.
 `;

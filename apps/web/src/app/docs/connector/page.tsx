@@ -4,11 +4,11 @@ import { DocsTable } from '../_components/docs-table';
 import { behavior, flagHeaders, flagRows, intro } from './content';
 
 export const metadata: Metadata = {
-  title: 'Proxy: SuperBull docs',
-  description: 'Run superbull-proxy as a headless agent next to your workers.',
+  title: 'Connector: SuperBull docs',
+  description: 'Run superbull-connector next to your workers, outbound-only, no inbound port.',
 };
 
-export default function ProxyPage() {
+export default function ConnectorPage() {
   return (
     <>
       <DocsMarkdown content={intro} />

@@ -31,6 +31,7 @@ import {
   rows as configurationRows,
   redaction,
 } from '../configuration/content';
+import { behavior, intro as connectorIntro, flagHeaders, flagRows } from '../connector/content';
 import {
   introContent as overviewIntroContent,
   quickstartContent as overviewQuickstartContent,
@@ -54,7 +55,6 @@ import {
   outro as mcpOutro,
   rows as mcpRows,
 } from '../mcp/content';
-import { behavior, flagHeaders, flagRows, intro as proxyIntro } from '../proxy/content';
 import {
   adapterHeaders,
   adapterRows,
@@ -131,8 +131,8 @@ export const docsSearchIndex: DocsSearchPage[] = [
     [standaloneIntro, tableMarkdown(adapterHeaders, adapterRows), perAdapter].join('\n\n'),
   ),
   buildPage(
-    '/docs/proxy',
-    [proxyIntro, tableMarkdown(flagHeaders, flagRows), behavior].join('\n\n'),
+    '/docs/connector',
+    [connectorIntro, tableMarkdown(flagHeaders, flagRows), behavior].join('\n\n'),
   ),
   buildPage(
     '/docs/hub',

@@ -1,8 +1,8 @@
 export const intro = `
 # Alerts
 
-Alert rules live in the hub (\`apps/hub\`) and are evaluated against ingested
-events every 5 minutes by the \`evaluate-alerts\` cron. Create rules from the hub's
+Alert rules live in the hub and are evaluated against ingested events every 5
+minutes by Convex's \`evaluateAlerts\` cron. Create rules from the hub's
 **Alerts** page or through Convex directly; there's no REST/MCP route for rule
 management yet. Evaluation and notification are the automated half.
 
@@ -28,13 +28,13 @@ export const rows = [
   ],
   [
     'new_error_group',
-    'an error group first seen within window_minutes exists for the rule’s source(s)',
+    'an error group first seen within window_minutes exists for the rule’s connector(s)',
     'window_minutes: queue_name and threshold are not read',
   ],
 ];
 
 export const outro = `
-Every rule has: \`id, source_id | null (null = all sources), type, queue_name | null, threshold | null, window_minutes | null, email, is_enabled\`.
+Every rule has: \`id, connector_id | null (null = every connector in the workspace), type, queue_name | null, threshold | null, window_minutes | null, email, is_enabled\`.
 
 ## State machine
 

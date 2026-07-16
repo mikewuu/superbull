@@ -22,8 +22,8 @@ const faqs = [
     a: "Yes. An agent with an MCP token can watch your queues, open a failed job, and read the stack trace. It can retry that job itself, or pause a queue that's failing fast: the same 8 tools you'd otherwise click through the board for.",
   },
   {
-    q: 'Do I need the hub to use SuperBull?',
-    a: 'No. Mount an adapter in your app and you have a full board and REST API in one process. The hub is only for federating multiple proxy sources behind one login, with history, alerts, and status pages.',
+    q: 'Do I need the hosted app to use SuperBull?',
+    a: 'No. Mount an adapter in your app and you have a full board and REST API in one process, no sign-in, no outbound connection anywhere. The hub is the hosted option: sign in, create a connector, and get history, analytics, alerts, and status pages across every connector in your workspace.',
   },
   {
     q: 'Is bullmq bundled with SuperBull?',
@@ -218,10 +218,10 @@ export default function LandingPage(): React.ReactElement {
                     <span className="text-content-muted">the board too.</span>
                   </h2>
                   <p className="mt-5 max-w-md text-lg leading-8 text-content-default">
-                    The hub exposes 8 MCP tools over one authenticated endpoint: list sources, watch
-                    queues, open a failed job, read its stack trace, retry it, or pause a queue
-                    that&apos;s failing fast. Same actions as the board, reachable by anything that
-                    speaks MCP.
+                    The hub exposes 8 MCP tools over one authenticated endpoint: list connectors,
+                    watch queues, open a failed job, read its stack trace, retry it, or pause a
+                    queue that&apos;s failing fast. Same actions as the board, reachable by anything
+                    that speaks MCP.
                   </p>
                 </div>
                 <AgentTranscript />
@@ -257,7 +257,7 @@ export default function LandingPage(): React.ReactElement {
                 <span className="text-white/50">You get the alert.</span>
               </h2>
               <p className="mt-5 max-w-md text-lg leading-8 text-white/70">
-                The hub watches every federated queue for failure spikes, stalled processing, and
+                The hub watches every connected queue for failure spikes, stalled processing, and
                 duration regressions. Email alerts fire the moment something breaks; a daily digest
                 rounds up what changed overnight.
               </p>
@@ -281,9 +281,9 @@ export default function LandingPage(): React.ReactElement {
                 <span className="text-content-muted">No seat limits, no pricing page.</span>
               </h2>
               <p className="mt-5 max-w-lg text-lg leading-8 text-content-default">
-                Fork it, self-host it, read every line. SuperBull&apos;s adapter architecture is
-                derived from bull-board (MIT, credited in the repo); the board, the proxy, and the
-                hub are all in the same public repository.
+                Fork it, self-host the standalone board, read every line. SuperBull&apos;s adapter
+                architecture is derived from bull-board (MIT, credited in the repo); the board, the
+                connector, and the hosted app are all in the same public repository.
               </p>
               <a
                 href={githubUrl}

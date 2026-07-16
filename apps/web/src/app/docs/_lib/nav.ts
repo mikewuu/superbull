@@ -20,7 +20,7 @@ export const docsNav: DocsNavGroup[] = [
     label: 'Modes',
     items: [
       { href: '/docs/standalone', label: 'Standalone' },
-      { href: '/docs/proxy', label: 'Proxy' },
+      { href: '/docs/connector', label: 'Connector' },
       { href: '/docs/hub', label: 'Hub' },
     ],
   },

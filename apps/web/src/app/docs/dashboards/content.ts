@@ -2,7 +2,7 @@ export const content = `
 # Dashboards
 
 Saved dashboards live in the hub: a named collection of cards, each pulling from
-one source's ingested data over a fixed range. There's no drag-to-resize grid
+one connector's ingested data over a fixed range. There's no drag-to-resize grid
 builder; a dashboard is just an ordered list of cards you add and remove.
 
 \`\`\`ts
@@ -15,8 +15,8 @@ interface SavedDashboard {
 
 interface DashboardCard {
   type: 'throughput' | 'latency' | 'totals' | 'heatmap';
-  source_id: string;
-  queue_name?: string;   // omit for all queues on the source
+  connector_id: string;
+  queue_name?: string;   // omit for all queues on the connector
   range: '24h' | '7d' | '30d';
 }
 \`\`\`
@@ -33,7 +33,7 @@ export const rows = [
 ];
 
 export const outro = `
-Create a dashboard, then add cards one at a time, each scoped to a source (and
+Create a dashboard, then add cards one at a time, each scoped to a connector (and
 optionally a single queue within it) and a range. Deleting a dashboard removes all
 its cards with it. Cards aren't independently addressable. See
 [Analytics](/docs/analytics) for what each underlying series computes.

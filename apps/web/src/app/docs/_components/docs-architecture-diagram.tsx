@@ -28,8 +28,8 @@ export function DocsArchitectureDiagram() {
               →
             </span>
             <div className="flex-1 rounded-lg border border-border-subtle bg-bg-default p-3 text-center">
-              <p className="font-mono text-[11px] font-medium text-content-emphasis">proxy :4650</p>
-              <p className="mt-1 font-mono text-[10px] text-content-muted">JSON only</p>
+              <p className="font-mono text-[11px] font-medium text-content-emphasis">connector</p>
+              <p className="mt-1 font-mono text-[10px] text-content-muted">no inbound port</p>
             </div>
           </div>
         </div>
@@ -41,13 +41,15 @@ export function DocsArchitectureDiagram() {
           <span aria-hidden className="hidden font-mono text-base sm:inline">
             →
           </span>
-          <p className="font-mono text-[10px] text-content-subtle">bearer token</p>
-          <p className="font-mono text-[10px] text-content-subtle">polls REST</p>
+          <p className="font-mono text-[10px] text-content-subtle">outbound WS</p>
+          <p className="font-mono text-[10px] text-content-subtle">one-time token</p>
         </div>
 
         <div className="mx-auto w-full max-w-[200px] rounded-lg border border-border-emphasis bg-bg-default p-4 text-center sm:mx-0">
-          <p className="font-mono text-[11px] font-medium text-content-emphasis">hub :4600</p>
-          <p className="mt-1 font-mono text-[10px] text-content-muted">federates sources</p>
+          <p className="font-mono text-[11px] font-medium text-content-emphasis">
+            connect.superbull.com
+          </p>
+          <p className="mt-1 font-mono text-[10px] text-content-muted">gateway + hub</p>
         </div>
       </div>
     </figure>

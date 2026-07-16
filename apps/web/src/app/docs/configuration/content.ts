@@ -88,9 +88,9 @@ sensitive payloads.
 
 ## Multi-Redis
 
-There's no dedicated "multi-Redis" option. It falls out of how queues are wrapped.
-Each \`bullmq.Queue\` carries its own \`connection\`, and \`createBoard()\` (or
-\`startProxy()\`) just takes an array of \`BaseAdapter\`s:
+There's no dedicated "multi-Redis" option in standalone mode. It falls out of
+how queues are wrapped: each \`bullmq.Queue\` carries its own \`connection\`, and
+\`createBoard()\` just takes an array of \`BaseAdapter\`s:
 
 \`\`\`ts
 const usQueue = new Queue('orders', { connection: { host: 'redis-us.internal' } });
