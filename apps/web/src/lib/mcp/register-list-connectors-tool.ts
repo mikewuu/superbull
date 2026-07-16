@@ -14,7 +14,7 @@ export function registerListConnectorsTool(server: McpServer): void {
     'list_connectors',
     {
       title: 'List connectors',
-      description: 'List every connector the hub federates, without their bearer tokens.',
+      description: 'List every registered connector, without their bearer tokens.',
       inputSchema: {},
       annotations: { readOnlyHint: true },
     },

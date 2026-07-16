@@ -10,7 +10,7 @@ export function registerRemoveConnectorTool(server: McpServer): void {
     'remove_connector',
     {
       title: 'Remove connector',
-      description: 'Remove a connector the hub federates.',
+      description: 'Delete a registered connector and its stored credential.',
       inputSchema: { connector_id: z.string() },
       annotations: { destructiveHint: true },
     },
