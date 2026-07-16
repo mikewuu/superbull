@@ -1,10 +1,10 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { findConnectorByIdLegacy } from '../../src/lib/connectors/find-connector-by-id-legacy';
-import { forwardToProxy } from '../../src/lib/forwarding/forward-to-proxy';
+import { callGatewayRpc } from '../../src/lib/gateway/call-gateway-rpc';
 import { registerGetJobLogsTool } from '../../src/lib/mcp/register-get-job-logs-tool';
 
-vi.mock('../../src/lib/forwarding/forward-to-proxy', () => ({ forwardToProxy: vi.fn() }));
+vi.mock('../../src/lib/gateway/call-gateway-rpc', () => ({ callGatewayRpc: vi.fn() }));
 vi.mock('../../src/lib/connectors/find-connector-by-id-legacy', () => ({
   findConnectorByIdLegacy: vi.fn(),
 }));
@@ -47,15 +47,13 @@ describe('registerGetJobLogsTool', () => {
       id: 'src_1',
       workspaceId: 'ws_1',
       name: 'proxy-a',
-      url: 'https://proxy-a.example.com',
-      token: 'secret',
       version: null,
       queues: null,
       lastConnectedAt: null,
       lastDisconnectedAt: null,
       created_at: new Date(),
     });
-    vi.mocked(forwardToProxy).mockResolvedValue({
+    vi.mocked(callGatewayRpc).mockResolvedValue({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ logs: ['starting', 'sending to smtp'] }),
@@ -69,7 +67,7 @@ describe('registerGetJobLogsTool', () => {
     const body = JSON.parse(result?.content[0]?.text ?? '{}');
 
     expect(body.logs).toEqual(['starting', 'sending to smtp']);
-    expect(forwardToProxy).toHaveBeenCalledWith(
+    expect(callGatewayRpc).toHaveBeenCalledWith(
       expect.objectContaining({ method: 'GET', path: ['queues', 'jobs', '42', 'logs'] }),
     );
   });

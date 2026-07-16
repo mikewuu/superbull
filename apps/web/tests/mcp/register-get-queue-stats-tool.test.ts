@@ -1,10 +1,10 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { findConnectorByIdLegacy } from '../../src/lib/connectors/find-connector-by-id-legacy';
-import { forwardToProxy } from '../../src/lib/forwarding/forward-to-proxy';
+import { callGatewayRpc } from '../../src/lib/gateway/call-gateway-rpc';
 import { registerGetQueueStatsTool } from '../../src/lib/mcp/register-get-queue-stats-tool';
 
-vi.mock('../../src/lib/forwarding/forward-to-proxy', () => ({ forwardToProxy: vi.fn() }));
+vi.mock('../../src/lib/gateway/call-gateway-rpc', () => ({ callGatewayRpc: vi.fn() }));
 vi.mock('../../src/lib/connectors/find-connector-by-id-legacy', () => ({
   findConnectorByIdLegacy: vi.fn(),
 }));
@@ -47,15 +47,13 @@ describe('registerGetQueueStatsTool', () => {
       id: 'src_1',
       workspaceId: 'ws_1',
       name: 'proxy-a',
-      url: 'https://proxy-a.example.com',
-      token: 'secret',
       version: null,
       queues: null,
       lastConnectedAt: null,
       lastDisconnectedAt: null,
       created_at: new Date(),
     });
-    vi.mocked(forwardToProxy).mockResolvedValue({
+    vi.mocked(callGatewayRpc).mockResolvedValue({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
@@ -79,25 +77,23 @@ describe('registerGetQueueStatsTool', () => {
 
     expect(body.stats.wait_ms).toEqual({ p50: 120, p95: 900 });
     expect(body.stats.top_errors[0]?.count).toBe(3);
-    expect(forwardToProxy).toHaveBeenCalledWith(
+    expect(callGatewayRpc).toHaveBeenCalledWith(
       expect.objectContaining({ method: 'GET', path: ['queues', 'jobs', 'stats'] }),
     );
   });
 
-  it('returns an error result when the proxy rejects the request', async () => {
+  it('returns an error result when the connector rejects the request', async () => {
     vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
       workspaceId: 'ws_1',
       name: 'proxy-a',
-      url: 'https://proxy-a.example.com',
-      token: 'secret',
       version: null,
       queues: null,
       lastConnectedAt: null,
       lastDisconnectedAt: null,
       created_at: new Date(),
     });
-    vi.mocked(forwardToProxy).mockResolvedValue({
+    vi.mocked(callGatewayRpc).mockResolvedValue({
       status: 404,
       contentType: 'application/json',
       body: JSON.stringify({ error: 'queue not found' }),

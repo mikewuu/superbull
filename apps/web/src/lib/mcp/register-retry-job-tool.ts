@@ -2,6 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { findConnectorByIdLegacy } from '../connectors/find-connector-by-id-legacy';
 import { callGatewayRpc } from '../gateway/call-gateway-rpc';
+import { describeForwardFailure } from './describe-forward-failure';
 import { errorResult } from './error-result';
 import { jsonResult } from './json-result';
 
@@ -40,13 +41,4 @@ export function registerRetryJobTool(server: McpServer): void {
       }
     },
   );
-}
-
-function describeForwardFailure(result: { status: number; body: string }): string {
-  try {
-    const parsed = JSON.parse(result.body) as { error?: string };
-    return parsed.error ?? `connector returned ${result.status}`;
-  } catch {
-    return `connector returned ${result.status}`;
-  }
 }

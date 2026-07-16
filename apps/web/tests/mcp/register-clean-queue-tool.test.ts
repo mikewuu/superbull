@@ -1,10 +1,10 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { findConnectorByIdLegacy } from '../../src/lib/connectors/find-connector-by-id-legacy';
-import { forwardToProxy } from '../../src/lib/forwarding/forward-to-proxy';
+import { callGatewayRpc } from '../../src/lib/gateway/call-gateway-rpc';
 import { registerCleanQueueTool } from '../../src/lib/mcp/register-clean-queue-tool';
 
-vi.mock('../../src/lib/forwarding/forward-to-proxy', () => ({ forwardToProxy: vi.fn() }));
+vi.mock('../../src/lib/gateway/call-gateway-rpc', () => ({ callGatewayRpc: vi.fn() }));
 vi.mock('../../src/lib/connectors/find-connector-by-id-legacy', () => ({
   findConnectorByIdLegacy: vi.fn(),
 }));
@@ -47,15 +47,13 @@ describe('registerCleanQueueTool', () => {
       id: 'src_1',
       workspaceId: 'ws_1',
       name: 'proxy-a',
-      url: 'https://proxy-a.example.com',
-      token: 'secret',
       version: null,
       queues: null,
       lastConnectedAt: null,
       lastDisconnectedAt: null,
       created_at: new Date(),
     });
-    vi.mocked(forwardToProxy).mockResolvedValue({ status: 204, contentType: null, body: '' });
+    vi.mocked(callGatewayRpc).mockResolvedValue({ status: 204, contentType: null, body: '' });
     const { server, tools } = createFakeServer();
     registerCleanQueueTool(server);
 
@@ -65,7 +63,7 @@ describe('registerCleanQueueTool', () => {
     const body = JSON.parse(result?.content[0]?.text ?? '{}');
 
     expect(body).toEqual({ cleaned: true, queue_name: 'jobs', status: 'failed' });
-    expect(forwardToProxy).toHaveBeenCalledWith(
+    expect(callGatewayRpc).toHaveBeenCalledWith(
       expect.objectContaining({ method: 'PUT', path: ['queues', 'jobs', 'clean', 'failed'] }),
     );
   });
@@ -75,15 +73,13 @@ describe('registerCleanQueueTool', () => {
       id: 'src_1',
       workspaceId: 'ws_1',
       name: 'proxy-a',
-      url: 'https://proxy-a.example.com',
-      token: 'secret',
       version: null,
       queues: null,
       lastConnectedAt: null,
       lastDisconnectedAt: null,
       created_at: new Date(),
     });
-    vi.mocked(forwardToProxy).mockResolvedValue({
+    vi.mocked(callGatewayRpc).mockResolvedValue({
       status: 405,
       contentType: 'application/json',
       body: JSON.stringify({ error: 'queue is read-only' }),
