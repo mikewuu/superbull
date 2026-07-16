@@ -32,7 +32,10 @@ export const rows = [
     'owner',
     'Everything an admin can do, plus delete the workspace (with name confirmation). The owner cannot be removed from the workspace',
   ],
-  ['admin', 'Everything a member can do, plus invite members, revoke invites, remove members, and delete connectors'],
+  [
+    'admin',
+    'Everything a member can do, plus invite members, revoke invites, remove members, and delete connectors',
+  ],
   [
     'member',
     'Everything else: create connectors, operate their dashboards (retry/pause/etc.), and manage alerts, dashboards, and status pages',

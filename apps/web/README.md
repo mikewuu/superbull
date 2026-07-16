@@ -11,6 +11,8 @@ Sign-in is Google via `@convex-dev/auth`; a personal workspace is created on fir
 | `NEXT_PUBLIC_CONVEX_URL` | The Convex deployment the app reads and writes against |
 | `CONVEX_INTERNAL_TOKEN` | Shared secret for internal Convex calls (also held by the gateway) |
 | `SUPERBULL_API_TOKEN` | Bearer token guarding the management REST API and `/api/mcp` |
+| `GATEWAY_URL` | Where this app reaches the gateway's internal RPC API |
+| `GATEWAY_INTERNAL_TOKEN` | Bearer token sent on those RPC calls (also held by the gateway) |
 | `RESEND_API_KEY`, `EMAIL_FROM` | Alert and digest email delivery (set on the Convex deployment) |
 
 ## Development

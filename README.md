@@ -143,7 +143,8 @@ Env vars (names only):
 | `CONVEX_INTERNAL_TOKEN` | web, gateway, Convex | Shared secret sent with internal Convex calls |
 | `SUPERBULL_API_TOKEN` | web | Bearer token guarding the management REST API and the MCP endpoint |
 | `CONVEX_URL` | gateway | The Convex deployment the gateway records events into |
-| `GATEWAY_INTERNAL_TOKEN` | gateway | Bearer token guarding the gateway's internal RPC API |
+| `GATEWAY_URL` | web | Where the web app reaches the gateway's internal RPC API |
+| `GATEWAY_INTERNAL_TOKEN` | web, gateway | Bearer token guarding the gateway's internal RPC API |
 | `PORT` | gateway | Listen port (default 4650) |
 | `RESEND_API_KEY`, `EMAIL_FROM` | Convex | Alert/digest email delivery (emails are skipped when unset) |
 

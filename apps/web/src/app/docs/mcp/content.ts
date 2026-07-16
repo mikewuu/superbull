@@ -175,11 +175,7 @@ export const toolGroups = [
         '{ connector_id: string, queue_name: string, job_id: string }',
         'Permanently delete one job',
       ],
-      [
-        'pause_queue',
-        '{ connector_id: string, queue_name: string }',
-        "Stop a queue's processing",
-      ],
+      ['pause_queue', '{ connector_id: string, queue_name: string }', "Stop a queue's processing"],
       ['resume_queue', '{ connector_id: string, queue_name: string }', 'Resume a paused queue'],
       [
         'clean_queue',
@@ -188,7 +184,6 @@ export const toolGroups = [
       ],
     ],
   },
-
 ];
 
 export const outro = `

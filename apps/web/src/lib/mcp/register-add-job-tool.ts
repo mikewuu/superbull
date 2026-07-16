@@ -20,8 +20,18 @@ export function registerAddJobTool(server: McpServer): void {
         data: z.unknown().describe('The job payload, any JSON value.'),
         options: z
           .object({
-            delay: z.number().int().nonnegative().optional().describe('Milliseconds to wait before the job becomes runnable.'),
-            attempts: z.number().int().positive().optional().describe('Total attempts before the job is marked failed.'),
+            delay: z
+              .number()
+              .int()
+              .nonnegative()
+              .optional()
+              .describe('Milliseconds to wait before the job becomes runnable.'),
+            attempts: z
+              .number()
+              .int()
+              .positive()
+              .optional()
+              .describe('Total attempts before the job is marked failed.'),
             priority: z.number().int().optional().describe('Lower runs first among waiting jobs.'),
           })
           .optional(),

@@ -272,9 +272,11 @@ Bun.serve({
 npm install @superbull/api @superbull/nestjs @superbull/express @superbull/react bullmq @nestjs/bullmq
 \`\`\`
 
-\`BoardModule.forRoot()\` wires an adapter class (anything implementing
-\`IServerAdapter\` + \`setBasePath\`. Express's, Fastify's, and Bun's adapters
-qualify; Elysia's doesn't, since it lacks \`setBasePath\`):
+\`BoardModule.forRoot()\` wires an adapter class. Only \`ExpressAdapter\` (on
+Nest's default Express platform) and \`FastifyAdapter\` (on Fastify) work: the
+module mounts through \`getRouter\` or \`registerPlugin\` respectively, and the
+other adapters either lack those methods or target servers Nest doesn't run
+on:
 
 \`\`\`ts
 import { Module } from '@nestjs/common';
