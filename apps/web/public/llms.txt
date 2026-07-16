@@ -1,0 +1,37 @@
+# SuperBull
+
+> A restyled, feature-rich dashboard for BullMQ. Run it standalone by mounting a server adapter (Express, Fastify, Hono, Koa, h3, hapi, Elysia, Bun, NestJS) inside your own app, or hosted at superbull.com by running the outbound-only connector next to your workers (one outbound WebSocket, no inbound port), which adds workspaces, analytics, alerts, dashboards, and public status pages.
+
+## Docs
+
+- [Overview](https://superbull.com/docs): what SuperBull is and how the pieces fit
+- [Getting started](https://superbull.com/docs/getting-started): standalone and hosted quick starts
+- [Standalone](https://superbull.com/docs/standalone): mount the dashboard in your own app with a server adapter
+- [Connector](https://superbull.com/docs/connector): the hosted agent, flags, env vars, and delivery semantics
+- [Hub](https://superbull.com/docs/hub): the hosted app, workspaces, and connector dashboards
+- [Alerts](https://superbull.com/docs/alerts): failure and queue-depth alert rules with email delivery
+- [Status pages](https://superbull.com/docs/status-pages): public per-connector status pages
+- [Dashboards](https://superbull.com/docs/dashboards): saved dashboards over ingested events
+- [Analytics](https://superbull.com/docs/analytics): throughput, durations, and failure analytics
+- [REST API](https://superbull.com/docs/api): the embedded dashboard's full HTTP route reference
+- [MCP](https://superbull.com/docs/mcp): MCP tools and setup
+- [Configuration](https://superbull.com/docs/configuration): createBoard options, per-queue options, env vars
+
+## MCP
+
+- Endpoint: https://superbull.com/api/mcp (streamable HTTP)
+- Auth: `Authorization: Bearer` token, set via the `SUPERBULL_API_TOKEN` env var on the deployment
+- Tools: list_connectors, add_connector, remove_connector, list_queues, get_queue, retry_job, pause_queue, resume_queue
+
+## Packages (npm)
+
+- [@superbull/api](https://www.npmjs.com/package/@superbull/api): framework-agnostic core (createBoard, BullMQAdapter, route table)
+- [@superbull/connector](https://www.npmjs.com/package/@superbull/connector): outbound WebSocket agent for the hosted app (`npx @superbull/connector`)
+- [@superbull/express](https://www.npmjs.com/package/@superbull/express), [@superbull/fastify](https://www.npmjs.com/package/@superbull/fastify), [@superbull/hono](https://www.npmjs.com/package/@superbull/hono), [@superbull/koa](https://www.npmjs.com/package/@superbull/koa), [@superbull/h3](https://www.npmjs.com/package/@superbull/h3), [@superbull/hapi](https://www.npmjs.com/package/@superbull/hapi), [@superbull/elysia](https://www.npmjs.com/package/@superbull/elysia), [@superbull/bun](https://www.npmjs.com/package/@superbull/bun), [@superbull/nestjs](https://www.npmjs.com/package/@superbull/nestjs): server adapters
+- [@superbull/react](https://www.npmjs.com/package/@superbull/react): the prebuilt dashboard UI served by the adapters
+- [@superbull/protocol](https://www.npmjs.com/package/@superbull/protocol): the gateway/connector WebSocket frame contract
+- [@superbull/proxy](https://www.npmjs.com/package/@superbull/proxy): legacy inbound-HTTP agent, superseded by @superbull/connector
+
+## Source
+
+- [GitHub](https://github.com/mikewuu/superbull): the superbull monorepo (MIT)
