@@ -44,9 +44,11 @@ export async function startGateway(args: StartGatewayArgs): Promise<RunningGatew
   const server = createServer((req, res) => {
     handleInternalRequest({ registry, internalToken, rpcTimeoutMs }, req, res).catch((error) => {
       console.error('superbull-gateway: internal request failed', error);
-      if (!res.headersSent) {
-        res.writeHead(500, { 'content-type': 'application/json' });
+      if (res.headersSent) {
+        res.end();
+        return;
       }
+      res.writeHead(500, { 'content-type': 'application/json' });
       res.end(JSON.stringify({ error: 'internal error' }));
     });
   });
