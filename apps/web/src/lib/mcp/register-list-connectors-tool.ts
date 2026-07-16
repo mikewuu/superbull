@@ -1,12 +1,14 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { listConnectorsLegacy } from '../connectors/list-connectors-legacy';
+import type { Connector } from '../connectors/types';
+import { getConnectorStatusFromGateway } from '../gateway/get-connector-status';
 import { errorResult } from './error-result';
 import { jsonResult } from './json-result';
 
-// TODO(round-3+): the global SUPERBULL_API_TOKEN currently lists connectors
+// TODO(7.2e): the global SUPERBULL_API_TOKEN currently lists connectors
 // across every workspace on the deployment (matching the pre-multi-tenant
-// hub API). Round 3+ should switch MCP auth to per-workspace API keys and
-// scope this listing accordingly.
+// hub API). Pending the owner's auth-model decision, MCP auth should move to
+// per-workspace API keys and scope this listing accordingly.
 export function registerListConnectorsTool(server: McpServer): void {
   server.registerTool(
     'list_connectors',
@@ -20,19 +22,34 @@ export function registerListConnectorsTool(server: McpServer): void {
       try {
         const connectors = await listConnectorsLegacy();
         return jsonResult({
-          connectors: connectors.map((connector) => ({
-            id: connector.id,
-            name: connector.name,
-            is_connected:
-              connector.lastConnectedAt !== null &&
-              (connector.lastDisconnectedAt === null ||
-                connector.lastDisconnectedAt < connector.lastConnectedAt),
-            created_at: connector.created_at.toISOString(),
-          })),
+          connectors: await Promise.all(
+            connectors.map(async (connector) => ({
+              id: connector.id,
+              name: connector.name,
+              is_connected: await isConnected(connector),
+              created_at: connector.created_at.toISOString(),
+            })),
+          ),
         });
       } catch (error) {
         return errorResult(error);
       }
     },
+  );
+}
+
+// Same derivation as the connectors page: the gateway's live session
+// registry is the source of truth; the Convex connection stamps are only a
+// fallback for when the gateway is unreachable (a dead gateway never runs
+// markDisconnected, so stamps alone would report stale-online forever).
+async function isConnected(connector: Connector): Promise<boolean> {
+  const live = await getConnectorStatusFromGateway(connector.id);
+  if (live) {
+    return live.connected;
+  }
+  return (
+    connector.lastConnectedAt !== null &&
+    (connector.lastDisconnectedAt === null ||
+      connector.lastDisconnectedAt < connector.lastConnectedAt)
   );
 }
