@@ -121,6 +121,9 @@ importers:
       '@react-email/render':
         specifier: ^2.0.10
         version: 2.0.10(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@superbull/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
       '@superbull/react':
         specifier: workspace:*
         version: link:../../packages/react
@@ -194,9 +197,6 @@ importers:
       '@superbull/api':
         specifier: workspace:*
         version: link:../../packages/api
-      '@superbull/proxy':
-        specifier: workspace:*
-        version: link:../../packages/proxy
       '@superbull/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/tsconfig
@@ -700,34 +700,6 @@ importers:
       '@types/node':
         specifier: ^22.10.2
         version: 22.20.1
-      tsup:
-        specifier: ^8.3.5
-        version: 8.5.1(jiti@2.7.0)(postcss@8.5.16)(tsx@4.23.0)(typescript@5.9.3)(yaml@2.9.0)
-      typescript:
-        specifier: ^5.7.2
-        version: 5.9.3
-      vitest:
-        specifier: ^2.1.8
-        version: 2.1.9(@edge-runtime/vm@5.0.0)(@types/node@22.20.1)(jsdom@25.0.1)(lightningcss@1.32.0)
-
-  packages/proxy:
-    dependencies:
-      '@superbull/api':
-        specifier: workspace:*
-        version: link:../api
-      ioredis:
-        specifier: ^5.10.1
-        version: 5.10.1
-    devDependencies:
-      '@superbull/tsconfig':
-        specifier: workspace:*
-        version: link:../../tooling/tsconfig
-      '@types/node':
-        specifier: ^22.10.2
-        version: 22.20.1
-      bullmq:
-        specifier: ^5.34.0
-        version: 5.79.3
       tsup:
         specifier: ^8.3.5
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.16)(tsx@4.23.0)(typescript@5.9.3)(yaml@2.9.0)
