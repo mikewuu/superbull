@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "@superbull/ui/tokens.css";
+@source "../../../../packages/ui/src";
 
 @theme {
   --font-sans: var(--font-geist-sans);
@@ -9,23 +11,41 @@
 
   --ease-snout: cubic-bezier(0.16, 1, 0.3, 1);
 
-  --color-bg-default: #ffffff;
-  --color-bg-muted: #fafafa;
-  --color-bg-subtle: #f5f5f5;
-  --color-bg-inverted: #171717;
-  --color-border-subtle: #e5e5e5;
-  --color-border-default: #d4d4d4;
-  --color-border-emphasis: #a3a3a3;
-  --color-content-emphasis: #171717;
-  --color-content-default: #404040;
-  --color-content-subtle: #737373;
-  --color-content-muted: #a3a3a3;
-  --color-brand: #171717;
-  --color-brand-deep: #000000;
-  --color-candy-blue: #58a6ff;
-  --color-candy-green: #4cc38a;
-  --color-candy-yellow: #f5c344;
-  --color-candy-orange: #f0793a;
+  --color-bg-default: rgb(var(--bg-default));
+  --color-bg-muted: rgb(var(--bg-muted));
+  --color-bg-subtle: rgb(var(--bg-subtle));
+  --color-bg-emphasis: rgb(var(--bg-emphasis));
+  --color-bg-inverted: rgb(var(--bg-inverted));
+  --color-bg-info: rgb(var(--bg-info));
+  --color-bg-success: rgb(var(--bg-success));
+  --color-bg-attention: rgb(var(--bg-attention));
+  --color-bg-warning: rgb(var(--bg-warning));
+  --color-bg-error: rgb(var(--bg-error));
+
+  --color-border-subtle: rgb(var(--border-subtle));
+  --color-border-default: rgb(var(--border-default));
+  --color-border-emphasis: rgb(var(--border-emphasis));
+  --color-border-muted: rgb(var(--border-muted));
+
+  --color-content-inverted: rgb(var(--content-inverted));
+  --color-content-muted: rgb(var(--content-muted));
+  --color-content-subtle: rgb(var(--content-subtle));
+  --color-content-default: rgb(var(--content-default));
+  --color-content-emphasis: rgb(var(--content-emphasis));
+  --color-content-info: rgb(var(--content-info));
+  --color-content-success: rgb(var(--content-success));
+  --color-content-attention: rgb(var(--content-attention));
+  --color-content-warning: rgb(var(--content-warning));
+  --color-content-error: rgb(var(--content-error));
+
+  /* marketing-only: not part of the hub's token set, mapped onto the same
+     packages/ui/src/styles/tokens.css tokens so light/dark stay in sync. */
+  --color-brand: rgb(var(--brand));
+  --color-brand-deep: rgb(var(--brand-deep));
+  --color-candy-blue: rgb(var(--candy-blue));
+  --color-candy-green: rgb(var(--candy-green));
+  --color-candy-yellow: rgb(var(--candy-yellow));
+  --color-candy-orange: rgb(var(--candy-orange));
 }
 
 @layer components {

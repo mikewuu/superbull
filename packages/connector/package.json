@@ -1,0 +1,58 @@
+{
+  "name": "@superbull/connector",
+  "version": "0.0.0",
+  "description": "Outbound WebSocket connector — dials the SuperBull gateway, exposes the queue API for RPC and streams ingest events",
+  "keywords": ["bullmq", "dashboard", "monitoring", "queue", "redis", "connector", "agent"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikewu/superbull.git",
+    "directory": "packages/connector"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "bin": {
+    "superbull-connector": "./dist/cli.js"
+  },
+  "files": ["dist"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup && chmod +x dist/cli.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@superbull/api": "workspace:*",
+    "@superbull/protocol": "workspace:*",
+    "ioredis": "^5.10.1",
+    "ws": "^8.18.0"
+  },
+  "peerDependencies": {
+    "bullmq": "^5.0.0"
+  },
+  "devDependencies": {
+    "@superbull/tsconfig": "workspace:*",
+    "@types/node": "^22.10.2",
+    "@types/ws": "^8.5.13",
+    "bullmq": "^5.34.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

@@ -189,7 +189,7 @@ test('replaying a job enqueues a fresh copy with the same payload', async ({ pag
   const jobName = (await firstRow.locator('span span').first().textContent()) ?? '';
   await firstRow.click();
 
-  await expect(page.getByRole('heading', { name: /./ })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await page.getByRole('button', { name: 'Replay' }).click();
 
   await page.goto('/queue/process-videos?status=waiting');

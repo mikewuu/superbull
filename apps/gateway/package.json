@@ -1,0 +1,28 @@
+{
+  "name": "@superbull/gateway",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Always-on WebSocket gateway connecting SuperBull connectors to the hosted hub",
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@superbull/protocol": "workspace:*",
+    "convex": "^1.42.1",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@superbull/tsconfig": "workspace:*",
+    "@types/node": "^22.10.2",
+    "@types/ws": "^8.5.13",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

@@ -158,8 +158,8 @@ jobs:
       - name: Test UI
         run: pnpm --filter @superbull/react test
 
-  test-hub:
-    name: Test hub (MCP + two-hop e2e)
+  test-web:
+    name: Test web (MCP + two-hop e2e)
     runs-on: ubuntu-latest
 
     services:
@@ -189,15 +189,15 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Unit test hub
-        run: pnpm --filter @superbull/hub test
+      - name: Unit test web
+        run: pnpm --filter @superbull/web test
 
       - name: Install Playwright chromium
-        run: pnpm --filter @superbull/hub exec playwright install --with-deps chromium
+        run: pnpm --filter @superbull/web exec playwright install --with-deps chromium
 
       # convex dev downloads a local-backend binary on first run; needs network access.
-      - name: Run hub e2e
-        run: pnpm --filter @superbull/hub e2e
+      - name: Run web e2e
+        run: pnpm --filter @superbull/web e2e
         env:
           REDIS_HOST: localhost
           REDIS_PORT: 6379
