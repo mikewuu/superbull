@@ -7,7 +7,9 @@ const { get, put, post } = vi.hoisted(() => ({
 }));
 
 vi.mock('axios', () => ({
-  default: { create: () => ({ get, put, post }) },
+  default: {
+    create: () => ({ get, put, post, interceptors: { response: { use: vi.fn() } } }),
+  },
 }));
 
 import {

@@ -177,16 +177,20 @@ function CopyButton(props: { value: string; label: string; selectTargetId: strin
       title={label}
       className="flex shrink-0 items-center gap-1 rounded-md p-1 text-content-subtle transition-colors hover:bg-bg-default hover:text-content-emphasis"
       onClick={() => {
-        navigator.clipboard.writeText(value).then(
-          () => setStatus('copied'),
-          () => {
-            // The write can reject (permission denied, unfocused document).
-            // Select the text so a manual Ctrl/Cmd+C still works, and never
-            // let the user believe a one-time token copied when it didn't.
-            selectNodeContents(selectTargetId);
-            setStatus('failed');
-          },
-        );
+        // The write can reject (permission denied, unfocused document) and
+        // navigator.clipboard is undefined entirely in non-secure contexts.
+        // Either way: select the text so a manual Ctrl/Cmd+C still works,
+        // and never let the user believe a one-time token copied when it
+        // didn't.
+        const fail = () => {
+          selectNodeContents(selectTargetId);
+          setStatus('failed');
+        };
+        if (!navigator.clipboard) {
+          fail();
+          return;
+        }
+        navigator.clipboard.writeText(value).then(() => setStatus('copied'), fail);
       }}
     >
       {status === 'failed' && (
