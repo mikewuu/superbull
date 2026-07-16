@@ -25,18 +25,30 @@ export function OverviewPage() {
   const { data: metrics } = useOverviewMetrics(queues?.map((queue) => queue.name) ?? []);
   const pausedCount = queues?.filter((queue) => queue.is_paused).length ?? 0;
 
+  // Early-return INSTEAD of the dashboard: keepPreviousData would otherwise
+  // keep stale "Active"/green tiles on screen under a "disconnected" notice.
+  // The queues hook stays mounted, so polling still runs and the page swaps
+  // back to the live dashboard as soon as the connector reconnects.
+  if (error && isConnectorDisconnectedError(error)) {
+    return (
+      <>
+        <PageHeader title="Overview" subtitle="Real-time activity across your queues." />
+        <div className="flex w-full flex-col gap-4 px-4 py-4 lg:px-6">
+          <ConnectorDisconnectedNotice />
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <PageHeader title="Overview" subtitle="Real-time activity across your queues." />
       <div className="flex w-full flex-col gap-4 px-4 py-4 lg:px-6">
-        {error &&
-          (isConnectorDisconnectedError(error) ? (
-            <ConnectorDisconnectedNotice />
-          ) : (
-            <p className="rounded-lg border border-border-subtle bg-bg-error/50 px-4 py-3 text-sm text-content-error">
-              Failed to load queues: {error.message}
-            </p>
-          ))}
+        {error && (
+          <p className="rounded-lg border border-border-subtle bg-bg-error/50 px-4 py-3 text-sm text-content-error">
+            Failed to load queues: {error.message}
+          </p>
+        )}
 
         {isLoading && (
           <>
@@ -103,7 +115,7 @@ export function OverviewPage() {
             ) : (
               <div className="candy-card rounded-lg">
                 <EmptyState
-                  icon={Inbox}
+                  icon={<Inbox className="size-5 text-content-muted" />}
                   title="No queues registered"
                   description="Register your BullMQ queues with createBoard to see them here."
                 />

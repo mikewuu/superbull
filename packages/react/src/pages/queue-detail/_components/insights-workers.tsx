@@ -19,7 +19,7 @@ export function InsightsWorkers(props: InsightsWorkersProps) {
       ) : !workers || workers.length === 0 ? (
         <div className="rounded-lg bg-bg-warning/40">
           <EmptyState
-            icon={UserX}
+            icon={<UserX className="size-5 text-content-muted" />}
             title="No workers connected"
             description="Jobs won't be processed until a worker connects to this queue."
           />

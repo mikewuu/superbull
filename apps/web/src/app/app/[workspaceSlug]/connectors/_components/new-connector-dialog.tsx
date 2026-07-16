@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, Dialog } from '@superbull/ui';
-import { Check, Copy, Plus } from 'lucide-react';
+import { Check, Copy, Plus, TriangleAlert } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
 import { type CreateConnectorActionState, createConnectorAction } from '../actions';
@@ -80,18 +80,31 @@ function NewConnectorFlow(props: NewConnectorFlowProps) {
             <p className="font-medium text-content-emphasis">
               This token is shown once. Save it now.
             </p>
-            <CopyButton value={state.result.token} label="Copy token" />
+            <CopyButton
+              value={state.result.token}
+              label="Copy token"
+              selectTargetId="add-connector-token"
+            />
           </div>
-          <p className="mt-1 break-all font-mono text-[11px]" data-testid="add-connector-token">
+          <p
+            id="add-connector-token"
+            className="mt-1 break-all font-mono text-[11px]"
+            data-testid="add-connector-token"
+          >
             {state.result.token}
           </p>
         </div>
         <div className="rounded-lg border border-border-subtle bg-bg-muted p-3 text-xs text-content-subtle">
           <div className="flex items-start justify-between gap-2">
             <p className="font-medium text-content-emphasis">Run the connector</p>
-            <CopyButton value={command} label="Copy command" />
+            <CopyButton
+              value={command}
+              label="Copy command"
+              selectTargetId="add-connector-command"
+            />
           </div>
           <pre
+            id="add-connector-command"
             data-testid="add-connector-command"
             className="mt-2 overflow-x-auto rounded-md bg-bg-default p-2 font-mono text-[11px] text-content-default"
           >
@@ -143,32 +156,72 @@ function NewConnectorFlow(props: NewConnectorFlowProps) {
   );
 }
 
-function CopyButton(props: { value: string; label: string }) {
-  const { value, label } = props;
-  const [copied, setCopied] = useState(false);
+type CopyStatus = 'idle' | 'copied' | 'failed';
+
+function CopyButton(props: { value: string; label: string; selectTargetId: string }) {
+  const { value, label, selectTargetId } = props;
+  const [status, setStatus] = useState<CopyStatus>('idle');
 
   useEffect(() => {
-    if (!copied) {
+    if (status !== 'copied') {
       return;
     }
-    const timer = setTimeout(() => setCopied(false), 1500);
+    const timer = setTimeout(() => setStatus('idle'), 1500);
     return () => clearTimeout(timer);
-  }, [copied]);
+  }, [status]);
 
   return (
     <button
       type="button"
-      aria-label={copied ? 'Copied' : label}
+      aria-label={copyAriaLabel(status, label)}
       title={label}
-      className="shrink-0 rounded-md p-1 text-content-subtle transition-colors hover:bg-bg-default hover:text-content-emphasis"
+      className="flex shrink-0 items-center gap-1 rounded-md p-1 text-content-subtle transition-colors hover:bg-bg-default hover:text-content-emphasis"
       onClick={() => {
-        void navigator.clipboard.writeText(value).then(() => setCopied(true));
+        navigator.clipboard.writeText(value).then(
+          () => setStatus('copied'),
+          () => {
+            // The write can reject (permission denied, unfocused document).
+            // Select the text so a manual Ctrl/Cmd+C still works, and never
+            // let the user believe a one-time token copied when it didn't.
+            selectNodeContents(selectTargetId);
+            setStatus('failed');
+          },
+        );
       }}
     >
-      {copied ? <Check className="size-3.5 text-content-success" /> : <Copy className="size-3.5" />}
+      {status === 'failed' && (
+        <span className="text-[10px] font-medium text-content-error">Press Ctrl/⌘+C</span>
+      )}
+      {status === 'copied' && <Check className="size-3.5 text-content-success" />}
+      {status === 'failed' && <TriangleAlert className="size-3.5 text-content-error" />}
+      {status === 'idle' && <Copy className="size-3.5" />}
       <span aria-live="polite" className="sr-only">
-        {copied ? 'Copied to clipboard' : ''}
+        {status === 'copied' && 'Copied to clipboard'}
+        {status === 'failed' &&
+          'Copy failed. The text is selected; press Control C or Command C to copy it.'}
       </span>
     </button>
   );
+}
+
+function copyAriaLabel(status: CopyStatus, label: string): string {
+  if (status === 'copied') {
+    return 'Copied';
+  }
+  if (status === 'failed') {
+    return 'Copy failed, text selected, press Control C or Command C';
+  }
+  return label;
+}
+
+function selectNodeContents(id: string): void {
+  const node = document.getElementById(id);
+  const selection = window.getSelection();
+  if (!node || !selection) {
+    return;
+  }
+  const range = document.createRange();
+  range.selectNodeContents(node);
+  selection.removeAllRanges();
+  selection.addRange(range);
 }

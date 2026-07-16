@@ -41,7 +41,7 @@ export default async function AlertsPage(props: AlertsPageProps) {
       <div className="flex w-full flex-col gap-4 px-4 py-4 lg:px-6">
         {rows.length === 0 ? (
           <EmptyState
-            icon={Bell}
+            icon={<Bell className="size-5 text-content-muted" />}
             title="No alert rules yet"
             description="Create a rule to get emailed when a queue backs up, workers disappear, or new errors start."
           />

@@ -25,7 +25,7 @@ export function JobTable(props: JobTableProps) {
     return (
       <div data-testid="job-table" className="candy-card rounded-lg">
         <EmptyState
-          icon={Inbox}
+          icon={<Inbox className="size-5 text-content-muted" />}
           title={selectedStatus === 'latest' ? 'No jobs yet' : `No ${selectedStatus} jobs`}
           description={
             selectedStatus === 'latest'

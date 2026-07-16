@@ -8,7 +8,7 @@ export function ConnectorDisconnectedNotice() {
   return (
     <div className="candy-card rounded-lg">
       <EmptyState
-        icon={Unplug}
+        icon={<Unplug className="size-5 text-content-muted" />}
         title="Connector disconnected"
         description="Restart npx @superbull/connector next to your Redis. This page recovers automatically as soon as it reconnects."
       />

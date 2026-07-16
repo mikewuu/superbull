@@ -39,7 +39,7 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
           subtitle="Throughput, latency, and activity across ingested job events."
         />
         <EmptyState
-          icon={ChartLine}
+          icon={<ChartLine className="size-5 text-content-muted" />}
           title="No ingested data yet"
           description="Connect a proxy with ingest enabled."
         />
@@ -107,7 +107,7 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
           </>
         ) : (
           <EmptyState
-            icon={ChartLine}
+            icon={<ChartLine className="size-5 text-content-muted" />}
             title="No ingested data yet"
             description="Connect a proxy with ingest enabled."
           />

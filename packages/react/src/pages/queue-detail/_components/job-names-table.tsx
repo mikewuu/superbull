@@ -26,7 +26,7 @@ export function JobNamesTable(props: JobNamesTableProps) {
     return (
       <div data-testid="job-names-table" className="candy-card rounded-lg">
         <EmptyState
-          icon={ListTodo}
+          icon={<ListTodo className="size-5 text-content-muted" />}
           title="No jobs yet"
           description="Add a job to see its name aggregated here."
         />

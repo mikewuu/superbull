@@ -37,7 +37,7 @@ export function ConnectorsTable(props: ConnectorsTableProps) {
               <tr>
                 <td colSpan={6}>
                   <EmptyState
-                    icon={Cable}
+                    icon={<Cable className="size-5 text-content-muted" />}
                     title="No connectors yet"
                     description="Create one and run the enrollment command next to your Redis."
                   />

@@ -32,7 +32,7 @@ export default async function ErrorsPage(props: ErrorsPageProps) {
       <>
         <PageHeader title="Errors" subtitle="Grouped job failures across your connectors." />
         <EmptyState
-          icon={AlertTriangle}
+          icon={<AlertTriangle className="size-5 text-content-muted" />}
           title="No connectors yet"
           description="Add a connector from the Connectors page to start tracking errors."
         />
@@ -73,7 +73,10 @@ export default async function ErrorsPage(props: ErrorsPageProps) {
           counts={counts}
         />
         {visibleGroups.length === 0 ? (
-          <EmptyState icon={AlertTriangle} title="No errors ingested." />
+          <EmptyState
+            icon={<AlertTriangle className="size-5 text-content-muted" />}
+            title="No errors ingested."
+          />
         ) : (
           <ErrorGroupsTable workspaceSlug={workspaceSlug} groups={visibleGroups} />
         )}

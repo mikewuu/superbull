@@ -33,7 +33,7 @@ export default async function StatusPagesPage(props: StatusPagesPageProps) {
       <div className="flex w-full flex-col gap-4 px-4 py-4 lg:px-6">
         {rows.length === 0 ? (
           <EmptyState
-            icon={Globe}
+            icon={<Globe className="size-5 text-content-muted" />}
             title="No connectors yet"
             description="Add a connector before you can publish a status page."
           />

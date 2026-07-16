@@ -26,7 +26,7 @@ export default async function DashboardsPage(props: DashboardsPageProps) {
       <div className="flex w-full flex-col gap-4 px-4 py-4 lg:px-6">
         {dashboards.length === 0 ? (
           <EmptyState
-            icon={LayoutDashboard}
+            icon={<LayoutDashboard className="size-5 text-content-muted" />}
             title="No dashboards yet"
             description="Create one to pin charts you check often."
           />

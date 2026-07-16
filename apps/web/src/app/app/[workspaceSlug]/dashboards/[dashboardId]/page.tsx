@@ -65,7 +65,7 @@ export default async function DashboardDetailPage(props: DashboardDetailPageProp
       <div className="px-4 py-4 lg:px-6">
         {dashboard.cards.length === 0 ? (
           <EmptyState
-            icon={LayoutDashboard}
+            icon={<LayoutDashboard className="size-5 text-content-muted" />}
             title="No cards yet"
             description="Add a chart card to start building this dashboard."
           />
