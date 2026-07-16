@@ -31,13 +31,17 @@ export async function callGatewayRpc(args: CallGatewayRpcArgs): Promise<CallGate
   const request: RpcRequest = {
     connector_id: args.connectorId,
     method: args.method,
-    path: args.path,
+    // The connector executor matches the frame path against @superbull/api
+    // appRoutes, whose patterns carry the /api prefix ('/api/queues', ...) —
+    // callers pass bare paths and the prefix is added once, here.
+    path: ['api', ...args.path],
     search: args.search,
     body: args.body,
     content_type: args.contentType,
   };
 
   let response: Response;
+  let text: string;
   try {
     response = await fetch(`${gateway.url}/internal/rpc`, {
       method: 'POST',
@@ -50,11 +54,12 @@ export async function callGatewayRpc(args: CallGatewayRpcArgs): Promise<CallGate
       // bounds a gateway that never answers at all.
       signal: AbortSignal.timeout(RPC_TIMEOUT_MS + 5_000),
     });
+    // Inside the try: a connection that dies mid-body rejects text(), and
+    // that's the same "gateway unreachable" failure as a refused connect.
+    text = await response.text();
   } catch {
     return jsonError(502, 'gateway unreachable');
   }
-
-  const text = await response.text();
   if (response.status !== 200) {
     return {
       status: response.status,

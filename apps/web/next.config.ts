@@ -2,7 +2,9 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
-    '/s/[sourceId]/[[...rest]]': ['./node_modules/@superbull/react/dist/**'],
+    '/app/[workspaceSlug]/connectors/[connectorId]/[[...rest]]': [
+      './node_modules/@superbull/react/dist/**',
+    ],
   },
 };
 

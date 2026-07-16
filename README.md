@@ -89,8 +89,8 @@ npx @superbull/connector --token <the-one-time-token-from-your-workspace>
 ```
 
 The bin is `superbull-connector`. Create a connector from your workspace (**Connectors → New
-connector**) or the `add_connector` MCP tool to get that token — it's shown exactly once, and
-the workspace only ever stores a hash of it.
+connector**) to get that token — it's shown exactly once, and the workspace only ever stores
+a hash of it.
 
 ```
 Flag                  Env var           Default
@@ -149,7 +149,6 @@ an unset `SUPERBULL_API_TOKEN` rejects all requests.
 | Tool | Effect |
 | --- | --- |
 | `list_connectors` | List connectors in the workspace (no tokens) |
-| `add_connector` | Create a connector (`{ name }`); returns its one-time token, shown only here |
 | `remove_connector` | Delete a connector |
 | `list_queues` | Queue name/counts/paused state for a connector |
 | `get_queue` | One queue's current page of jobs (`status`, `page` filters) |

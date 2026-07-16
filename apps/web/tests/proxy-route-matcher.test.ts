@@ -41,12 +41,8 @@ describe('isPublicRoute', () => {
     '/signin',
     '/status/my-status-page',
     '/api/health',
-    '/api/ingest',
-    '/api/sources/register',
     '/api/annotations',
     '/api/mcp',
-    '/api/sources',
-    '/api/sources/source-1',
   ])('treats %s as public', (pathname) => {
     expect(isPublicRoute(requestFor(pathname))).toBe(true);
   });
