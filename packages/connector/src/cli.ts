@@ -16,10 +16,10 @@ const connectorVersion = (require('../package.json') as { version: string }).ver
 
 const helpText = `superbull-connector — outbound WebSocket connector for SuperBull
 
-Usage: superbull-connector --url <gateway-url> --token <enrollment-token> [options]
+Usage: superbull-connector --token <enrollment-token> [options]
 
 Options:
-  -u, --url <url>               Gateway WebSocket URL (SUPERBULL_URL, required)
+  -u, --url <url>               Gateway WebSocket URL (SUPERBULL_URL, default wss://connect.superbull.com)
   -t, --token <token>           Enrollment token (SUPERBULL_TOKEN, required)
   -n, --name <name>             Connector name shown on the hub (SUPERBULL_NAME, default hostname)
       --queues <a,b,c>          Explicit queue names, comma separated (SUPERBULL_QUEUES)

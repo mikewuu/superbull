@@ -85,8 +85,9 @@ describe('parseCliArgs', () => {
     expect(config.queueNames).toEqual(['default-name', 'custom:renamed']);
   });
 
-  it('throws when no url is provided', () => {
-    expect(() => parseCliArgs(['--token', 'secret'], {})).toThrow(/url/);
+  it('defaults the url to the hosted gateway when neither --url nor SUPERBULL_URL is set', () => {
+    const config = parseCliArgs(['--token', 'secret'], {});
+    expect(config.url).toBe('wss://connect.superbull.com');
   });
 
   it('throws when no token is provided', () => {

@@ -1,6 +1,11 @@
 import { hostname } from 'node:os';
 import { parseArgs } from 'node:util';
 
+// The hosted gateway (REWRITE_PLAN target architecture). Documented as the
+// --url default in the README and docs quickstarts, so a bare
+// `npx @superbull/connector --token <token>` connects to the hosted service.
+export const DEFAULT_GATEWAY_URL = 'wss://connect.superbull.com';
+
 export interface CliConfig {
   help: boolean;
   url: string;
@@ -51,10 +56,7 @@ export function parseCliArgs(argv: string[], env: NodeJS.ProcessEnv = process.en
     };
   }
 
-  const url = values.url ?? env.SUPERBULL_URL;
-  if (!url) {
-    throw new Error('superbull-connector requires a gateway url (-u/--url or SUPERBULL_URL)');
-  }
+  const url = values.url ?? env.SUPERBULL_URL ?? DEFAULT_GATEWAY_URL;
 
   const token = values.token ?? env.SUPERBULL_TOKEN;
   if (!token) {
