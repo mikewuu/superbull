@@ -1,16 +1,15 @@
 export const content = `
 # Dashboards
 
-Saved dashboards live in the hub: a named collection of cards, each pulling from
-one connector's ingested data over a fixed range. There's no drag-to-resize grid
-builder; a dashboard is just an ordered list of cards you add and remove.
+Saved dashboards live in your workspace: a named collection of cards, each
+pulling from one connector's ingested data over a fixed range. There's no
+drag-to-resize grid builder; a dashboard is just an ordered list of cards you
+add and remove.
 
 \`\`\`ts
 interface SavedDashboard {
-  id: string;
   name: string;
   cards: DashboardCard[];
-  created_at: Date;
 }
 
 interface DashboardCard {
@@ -26,15 +25,17 @@ interface DashboardCard {
 
 export const headers = ['Type', 'Shows', 'Backed by'];
 export const rows = [
-  ['throughput', 'Completed vs. failed jobs per time bucket', 'analytics.get-throughput-series'],
-  ['latency', 'Wait/run p50 and p95 per time bucket', 'analytics.get-latency-series'],
-  ['totals', 'Completed / failed / total compute time per queue', 'analytics.get-queue-totals'],
-  ['heatmap', 'Activity matrix over the range', 'analytics.get-heatmap'],
+  ['throughput', 'Completed vs. failed jobs per time bucket', 'analytics.throughputSeries'],
+  ['latency', 'Wait/run p50 and p95 per time bucket', 'analytics.latencySeries'],
+  ['totals', 'Completed / failed / total compute time per queue', 'analytics.queueTotals'],
+  ['heatmap', 'Activity matrix over the range', 'analytics.heatmap'],
 ];
 
 export const outro = `
-Create a dashboard, then add cards one at a time, each scoped to a connector (and
-optionally a single queue within it) and a range. Deleting a dashboard removes all
-its cards with it. Cards aren't independently addressable. See
-[Analytics](/docs/analytics) for what each underlying series computes.
+Create a dashboard, then add cards one at a time, each scoped to a connector
+(and optionally a single queue within it) and a range. \`totals\` and \`heatmap\`
+cards ignore \`queue_name\`; they always cover the whole connector. Deleting a
+dashboard removes all its cards with it; cards aren't independently
+addressable. See [Analytics](/docs/analytics) for what each underlying series
+computes.
 `;
