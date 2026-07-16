@@ -41,7 +41,7 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
         <EmptyState
           icon={<ChartLine className="size-5 text-content-muted" />}
           title="No ingested data yet"
-          description="Connect a proxy with ingest enabled."
+          description="Enroll a connector to start collecting analytics."
         />
       </>
     );
@@ -109,7 +109,7 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
           <EmptyState
             icon={<ChartLine className="size-5 text-content-muted" />}
             title="No ingested data yet"
-            description="Connect a proxy with ingest enabled."
+            description="Enroll a connector to start collecting analytics."
           />
         )}
       </div>
