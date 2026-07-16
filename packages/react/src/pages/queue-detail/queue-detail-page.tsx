@@ -3,8 +3,10 @@ import { CirclePause } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router';
 import { Breadcrumbs } from '../../components/breadcrumbs';
+import { ConnectorDisconnectedNotice } from '../../components/connector-disconnected-notice';
 import { useDocumentTitle } from '../../hooks/use-document-title';
 import { useQueues } from '../../hooks/use-queues';
+import { isConnectorDisconnectedError } from '../../lib/api-client';
 import { type JobStatus, jobStatuses } from '../../lib/api-types';
 import { AddJobDialog } from './_components/add-job-dialog';
 import { BulkActionsBar } from './_components/bulk-actions-bar';
@@ -90,9 +92,13 @@ export function QueueDetailPage() {
     return (
       <>
         <PageHeader title={queueName} />
-        <p className="px-6 py-6 text-sm text-content-error">
-          Failed to load queue: {error.message}
-        </p>
+        <div className="px-4 py-4 lg:px-6">
+          {isConnectorDisconnectedError(error) ? (
+            <ConnectorDisconnectedNotice />
+          ) : (
+            <p className="text-sm text-content-error">Failed to load queue: {error.message}</p>
+          )}
+        </div>
       </>
     );
   }

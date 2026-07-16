@@ -8,9 +8,11 @@ import {
   PauseCircle,
   Users,
 } from 'lucide-react';
+import { ConnectorDisconnectedNotice } from '../../components/connector-disconnected-notice';
 import { useDocumentTitle } from '../../hooks/use-document-title';
 import { useOverviewMetrics } from '../../hooks/use-overview-metrics';
 import { useQueues } from '../../hooks/use-queues';
+import { isConnectorDisconnectedError } from '../../lib/api-client';
 import type { AppQueue } from '../../lib/api-types';
 import { RedisStatsCard } from './_components/redis-stats-card';
 import { StatTile } from './_components/stat-tile';
@@ -27,11 +29,14 @@ export function OverviewPage() {
     <>
       <PageHeader title="Overview" subtitle="Real-time activity across your queues." />
       <div className="flex w-full flex-col gap-4 px-4 py-4 lg:px-6">
-        {error && (
-          <p className="rounded-lg border border-red-200 bg-bg-error/50 px-4 py-3 text-sm text-content-error">
-            Failed to load queues: {error.message}
-          </p>
-        )}
+        {error &&
+          (isConnectorDisconnectedError(error) ? (
+            <ConnectorDisconnectedNotice />
+          ) : (
+            <p className="rounded-lg border border-border-subtle bg-bg-error/50 px-4 py-3 text-sm text-content-error">
+              Failed to load queues: {error.message}
+            </p>
+          ))}
 
         {isLoading && (
           <>

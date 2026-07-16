@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import type {
   AppJob,
   AppQueue,
@@ -18,6 +18,42 @@ import type {
 import { readBasePath } from './read-base-path';
 
 const client = axios.create({ baseURL: readBasePath() });
+
+// Non-2xx board API responses carry an {error: string} body (e.g. the hosted
+// gateway's 502 {"error":"connector disconnected"}). Surface that string as
+// the Error message instead of axios's generic "Request failed with status
+// code NNN" so error states can tell the user what actually happened.
+client.interceptors.response.use(undefined, (error: unknown) => {
+  if (isAxiosError(error)) {
+    const body: unknown = error.response?.data;
+    if (isErrorBody(body)) {
+      error.message = body.error;
+    }
+  }
+  return Promise.reject(error);
+});
+
+function isErrorBody(body: unknown): body is { error: string } {
+  return (
+    typeof body === 'object' &&
+    body !== null &&
+    'error' in body &&
+    typeof (body as { error: unknown }).error === 'string' &&
+    (body as { error: string }).error.length > 0
+  );
+}
+
+// The hosted gateway fails RPCs fast with this exact body when the connector
+// has no live WebSocket session; the SPA shows a dedicated recovery state
+// for it (polling retries mean it clears on its own once the connector
+// reconnects).
+export function isConnectorDisconnectedError(error: unknown): boolean {
+  if (!isAxiosError(error)) {
+    return false;
+  }
+  const body: unknown = error.response?.data;
+  return isErrorBody(body) && body.error === 'connector disconnected';
+}
 
 export interface GetQueuesParams {
   activeQueue?: string;
