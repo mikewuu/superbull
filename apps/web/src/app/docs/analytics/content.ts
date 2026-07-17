@@ -4,8 +4,12 @@ export const intro = `
 The workspace's **Analytics** page, dashboard cards, and status page uptime all
 read from the same ingested-events table that connectors stream into via
 [ingest](/docs/hub#ingest). There's no separate rollup job; series are computed
-from raw events per request (bounded at the most recent 1,000 events in the
-requested window per query — when a window holds more, the oldest are dropped).
+from raw events per request. Each analytics query aggregates over the most
+recent 1,000 events in the requested window — when a window holds more, the
+oldest are dropped and the response's \`truncated\` flag is \`true\` (the UI shows
+a note when that happens). Responses carry buckets or totals, never raw event
+pages, so there is no cursor to page through. Status page uptime has its own
+separate bound.
 
 ## Range → bucket size
 `;
@@ -28,18 +32,18 @@ bucketed and aren't queue-scoped.
 ## Series
 `;
 
-export const seriesHeaders = ['Series', 'Point shape'];
+export const seriesHeaders = ['Series', 'Response shape'];
 export const seriesRows = [
-  ['throughput', '{ bucket_ts, completed, failed }'],
+  ['throughput', '{ points: { bucket_ts, completed, failed }[], truncated }'],
   [
     'latency',
-    '{ bucket_ts, wait_p50, wait_p95, run_p50, run_p95 }: null when a bucket has no samples',
+    '{ points: { bucket_ts, wait_p50, wait_p95, run_p50, run_p95 }[], truncated }: percentiles are null when a bucket has no samples',
   ],
   [
     'totals (per queue, whole range, no buckets)',
-    '{ queue_name, completed, failed, job_seconds }: job_seconds is null when no durations were reported',
+    '{ totals: { queue_name, completed, failed, job_seconds }[], truncated }: sorted by queue_name; job_seconds is null when no durations were reported',
   ],
-  ['heatmap', '{ matrix: number[7][24], timezone: "UTC" }'],
+  ['heatmap', '{ matrix: number[7][24], timezone: "UTC", truncated }'],
 ];
 
 export const outro = `

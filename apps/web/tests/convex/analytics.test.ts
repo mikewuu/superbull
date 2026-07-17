@@ -56,11 +56,14 @@ describe('analytics.throughputSeries', () => {
       bucketMinutes: 60,
     });
 
-    expect(result).toEqual([
-      { bucket_ts: 0, completed: 2, failed: 1 },
-      { bucket_ts: HOUR, completed: 1, failed: 0 },
-      { bucket_ts: 2 * HOUR, completed: 0, failed: 1 },
-    ]);
+    expect(result).toEqual({
+      points: [
+        { bucket_ts: 0, completed: 2, failed: 1 },
+        { bucket_ts: HOUR, completed: 1, failed: 0 },
+        { bucket_ts: 2 * HOUR, completed: 0, failed: 1 },
+      ],
+      truncated: false,
+    });
   });
 
   it('zero-fills buckets with no events', async () => {
@@ -79,11 +82,14 @@ describe('analytics.throughputSeries', () => {
       bucketMinutes: 60,
     });
 
-    expect(result).toEqual([
-      { bucket_ts: 0, completed: 1, failed: 0 },
-      { bucket_ts: HOUR, completed: 0, failed: 0 },
-      { bucket_ts: 2 * HOUR, completed: 0, failed: 0 },
-    ]);
+    expect(result).toEqual({
+      points: [
+        { bucket_ts: 0, completed: 1, failed: 0 },
+        { bucket_ts: HOUR, completed: 0, failed: 0 },
+        { bucket_ts: 2 * HOUR, completed: 0, failed: 0 },
+      ],
+      truncated: false,
+    });
   });
 
   it('filters by queueName when provided', async () => {
@@ -105,7 +111,10 @@ describe('analytics.throughputSeries', () => {
       bucketMinutes: 60,
     });
 
-    expect(result).toEqual([{ bucket_ts: 0, completed: 2, failed: 0 }]);
+    expect(result).toEqual({
+      points: [{ bucket_ts: 0, completed: 2, failed: 0 }],
+      truncated: false,
+    });
   });
 
   it('rejects a connector from a different workspace', async () => {
@@ -162,9 +171,10 @@ describe('analytics.latencySeries', () => {
       bucketMinutes: 60,
     });
 
-    expect(result).toEqual([
-      { bucket_ts: 0, wait_p50: 30, wait_p95: 40, run_p50: 300, run_p95: 500 },
-    ]);
+    expect(result).toEqual({
+      points: [{ bucket_ts: 0, wait_p50: 30, wait_p95: 40, run_p50: 300, run_p95: 500 }],
+      truncated: false,
+    });
   });
 
   it('returns null percentiles for buckets with no terminal events', async () => {
@@ -180,10 +190,13 @@ describe('analytics.latencySeries', () => {
       bucketMinutes: 60,
     });
 
-    expect(result).toEqual([
-      { bucket_ts: 0, wait_p50: null, wait_p95: null, run_p50: null, run_p95: null },
-      { bucket_ts: HOUR, wait_p50: null, wait_p95: null, run_p50: null, run_p95: null },
-    ]);
+    expect(result).toEqual({
+      points: [
+        { bucket_ts: 0, wait_p50: null, wait_p95: null, run_p50: null, run_p95: null },
+        { bucket_ts: HOUR, wait_p50: null, wait_p95: null, run_p50: null, run_p95: null },
+      ],
+      truncated: false,
+    });
   });
 });
 
@@ -206,13 +219,13 @@ describe('analytics.queueTotals', () => {
       toTs: 0,
     });
 
-    expect(result).toEqual(
-      expect.arrayContaining([
+    expect(result).toEqual({
+      totals: [
         { queue_name: 'q1', completed: 2, failed: 1, job_seconds: 3 },
         { queue_name: 'q2', completed: 0, failed: 1, job_seconds: null },
-      ]),
-    );
-    expect(result).toHaveLength(2);
+      ],
+      truncated: false,
+    });
   });
 });
 
@@ -237,6 +250,7 @@ describe('analytics.heatmap', () => {
     });
 
     expect(result.timezone).toBe('UTC');
+    expect(result.truncated).toBe(false);
     expect(result.matrix[0]?.[10]).toBe(1);
     expect(result.matrix[1]?.[15]).toBe(1);
     const total = result.matrix.flat().reduce((sum, count) => sum + count, 0);

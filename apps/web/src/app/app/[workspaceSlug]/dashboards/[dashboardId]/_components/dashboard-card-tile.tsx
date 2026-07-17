@@ -15,10 +15,15 @@ import { ThroughputChart } from '../../../analytics/_components/throughput-chart
 import { removeDashboardCardAction } from '../../actions';
 
 export type CardData =
-  | { type: 'throughput'; points: ThroughputPoint[] }
-  | { type: 'latency'; points: LatencyPoint[] }
-  | { type: 'totals'; totals: QueueTotal[] }
-  | { type: 'heatmap'; matrix: HeatmapResult['matrix']; timezone: HeatmapResult['timezone'] };
+  | { type: 'throughput'; points: ThroughputPoint[]; truncated: boolean }
+  | { type: 'latency'; points: LatencyPoint[]; truncated: boolean }
+  | { type: 'totals'; totals: QueueTotal[]; truncated: boolean }
+  | {
+      type: 'heatmap';
+      matrix: HeatmapResult['matrix'];
+      timezone: HeatmapResult['timezone'];
+      truncated: boolean;
+    };
 
 interface DashboardCardTileProps {
   workspaceSlug: string;
@@ -59,6 +64,11 @@ export function DashboardCardTile(props: DashboardCardTileProps) {
       {data.type === 'latency' && <LatencyChart points={data.points} />}
       {data.type === 'totals' && <QueueTotalsTable totals={data.totals} />}
       {data.type === 'heatmap' && <HeatmapGrid matrix={data.matrix} timezone={data.timezone} />}
+      {data.truncated && (
+        <span className="text-[11px] text-content-muted">
+          Computed from the most recent 1,000 events in this range.
+        </span>
+      )}
     </div>
   );
 }

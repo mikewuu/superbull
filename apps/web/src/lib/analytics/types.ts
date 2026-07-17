@@ -21,7 +21,23 @@ export interface QueueTotal {
   job_seconds: number | null;
 }
 
+export interface ThroughputSeriesResult {
+  points: ThroughputPoint[];
+  truncated: boolean;
+}
+
+export interface LatencySeriesResult {
+  points: LatencyPoint[];
+  truncated: boolean;
+}
+
+export interface QueueTotalsResult {
+  totals: QueueTotal[];
+  truncated: boolean;
+}
+
 export interface HeatmapResult {
   matrix: number[][];
   timezone: 'UTC';
+  truncated: boolean;
 }

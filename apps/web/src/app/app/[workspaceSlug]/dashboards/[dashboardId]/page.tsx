@@ -99,7 +99,7 @@ async function loadCardData(workspaceId: Id<'workspaces'>, card: DashboardCard):
   const connectorId = card.connector_id as Id<'connectors'>;
 
   if (card.type === 'throughput') {
-    const points = await getThroughputSeries({
+    const series = await getThroughputSeries({
       workspaceId,
       connectorId,
       queueName: card.queue_name,
@@ -107,11 +107,11 @@ async function loadCardData(workspaceId: Id<'workspaces'>, card: DashboardCard):
       toTs: window.toTs,
       bucketMinutes: window.bucketMinutes,
     });
-    return { type: 'throughput', points };
+    return { type: 'throughput', points: series.points, truncated: series.truncated };
   }
 
   if (card.type === 'latency') {
-    const points = await getLatencySeries({
+    const series = await getLatencySeries({
       workspaceId,
       connectorId,
       queueName: card.queue_name,
@@ -119,17 +119,17 @@ async function loadCardData(workspaceId: Id<'workspaces'>, card: DashboardCard):
       toTs: window.toTs,
       bucketMinutes: window.bucketMinutes,
     });
-    return { type: 'latency', points };
+    return { type: 'latency', points: series.points, truncated: series.truncated };
   }
 
   if (card.type === 'totals') {
-    const totals = await getQueueTotals({
+    const result = await getQueueTotals({
       workspaceId,
       connectorId,
       fromTs: window.fromTs,
       toTs: window.toTs,
     });
-    return { type: 'totals', totals };
+    return { type: 'totals', totals: result.totals, truncated: result.truncated };
   }
 
   const heatmap = await getHeatmap({
@@ -138,5 +138,10 @@ async function loadCardData(workspaceId: Id<'workspaces'>, card: DashboardCard):
     fromTs: window.fromTs,
     toTs: window.toTs,
   });
-  return { type: 'heatmap', matrix: heatmap.matrix, timezone: heatmap.timezone };
+  return {
+    type: 'heatmap',
+    matrix: heatmap.matrix,
+    timezone: heatmap.timezone,
+    truncated: heatmap.truncated,
+  };
 }

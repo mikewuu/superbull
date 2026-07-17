@@ -2,7 +2,7 @@ import { convexAuthNextjsToken } from '@convex-dev/auth/nextjs/server';
 import { fetchQuery } from 'convex/nextjs';
 import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
-import type { LatencyPoint } from './types';
+import type { LatencySeriesResult } from './types';
 
 export async function getLatencySeries(args: {
   workspaceId: Id<'workspaces'>;
@@ -11,7 +11,7 @@ export async function getLatencySeries(args: {
   fromTs: number;
   toTs: number;
   bucketMinutes: number;
-}): Promise<LatencyPoint[]> {
+}): Promise<LatencySeriesResult> {
   const token = await convexAuthNextjsToken();
   return await fetchQuery(api.analytics.latencySeries, args, { token });
 }

@@ -82,7 +82,9 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
     }),
   ]);
 
-  const hasData = throughput.some((point) => point.completed > 0 || point.failed > 0);
+  const hasData = throughput.points.some((point) => point.completed > 0 || point.failed > 0);
+  const truncated =
+    throughput.truncated || latency.truncated || totals.truncated || heatmap.truncated;
 
   return (
     <>
@@ -100,9 +102,15 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
       <div className="flex w-full flex-col gap-5 px-4 py-4 lg:px-6">
         {hasData ? (
           <>
-            <ThroughputChart points={throughput} />
-            <LatencyChart points={latency} />
-            <QueueTotalsTable totals={totals} />
+            {truncated && (
+              <p className="text-xs text-content-muted">
+                This window holds more events than one query reads — charts are computed from the
+                most recent 1,000 events; older activity in the range is not included.
+              </p>
+            )}
+            <ThroughputChart points={throughput.points} />
+            <LatencyChart points={latency.points} />
+            <QueueTotalsTable totals={totals.totals} />
             <HeatmapGrid matrix={heatmap.matrix} timezone={heatmap.timezone} />
           </>
         ) : (

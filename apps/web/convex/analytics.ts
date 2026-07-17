@@ -18,7 +18,8 @@ async function guardConnector(
 }
 
 // Descending so that when a window holds more than the cap, truncation drops
-// the oldest events and keeps the most recent activity.
+// the oldest events and keeps the most recent activity. Callers surface this
+// via the `truncated` flag on every query response.
 async function queryEvents(
   ctx: QueryCtx,
   connectorId: Id<'connectors'>,
@@ -117,10 +118,13 @@ export const throughputSeries = query({
       }
     }
 
-    return timestamps.map((bucket_ts) => {
-      const bucket = counts.get(bucket_ts);
-      return { bucket_ts, completed: bucket?.completed ?? 0, failed: bucket?.failed ?? 0 };
-    });
+    return {
+      points: timestamps.map((bucket_ts) => {
+        const bucket = counts.get(bucket_ts);
+        return { bucket_ts, completed: bucket?.completed ?? 0, failed: bucket?.failed ?? 0 };
+      }),
+      truncated: events.length === maxEventsPerQuery,
+    };
   },
 });
 
@@ -159,18 +163,21 @@ export const latencySeries = query({
       }
     }
 
-    return timestamps.map((bucket_ts) => {
-      const bucket = samples.get(bucket_ts);
-      const wait = bucket?.wait ?? [];
-      const run = bucket?.run ?? [];
-      return {
-        bucket_ts,
-        wait_p50: percentileOrNull(wait, 0.5),
-        wait_p95: percentileOrNull(wait, 0.95),
-        run_p50: percentileOrNull(run, 0.5),
-        run_p95: percentileOrNull(run, 0.95),
-      };
-    });
+    return {
+      points: timestamps.map((bucket_ts) => {
+        const bucket = samples.get(bucket_ts);
+        const wait = bucket?.wait ?? [];
+        const run = bucket?.run ?? [];
+        return {
+          bucket_ts,
+          wait_p50: percentileOrNull(wait, 0.5),
+          wait_p95: percentileOrNull(wait, 0.95),
+          run_p50: percentileOrNull(run, 0.5),
+          run_p95: percentileOrNull(run, 0.95),
+        };
+      }),
+      truncated: events.length === maxEventsPerQuery,
+    };
   },
 });
 
@@ -212,12 +219,17 @@ export const queueTotals = query({
       totals.set(event.queueName, existing);
     }
 
-    return Array.from(totals.entries()).map(([queue_name, queueTotal]) => ({
-      queue_name,
-      completed: queueTotal.completed,
-      failed: queueTotal.failed,
-      job_seconds: queueTotal.durationCount > 0 ? queueTotal.durationMsSum / 1000 : null,
-    }));
+    return {
+      totals: Array.from(totals.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([queue_name, queueTotal]) => ({
+          queue_name,
+          completed: queueTotal.completed,
+          failed: queueTotal.failed,
+          job_seconds: queueTotal.durationCount > 0 ? queueTotal.durationMsSum / 1000 : null,
+        })),
+      truncated: events.length === maxEventsPerQuery,
+    };
   },
 });
 
@@ -247,6 +259,6 @@ export const heatmap = query({
       weekdayRow[hour] = (weekdayRow[hour] ?? 0) + 1;
     }
 
-    return { matrix, timezone: 'UTC' as const };
+    return { matrix, timezone: 'UTC' as const, truncated: events.length === maxEventsPerQuery };
   },
 });
