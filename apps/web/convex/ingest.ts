@@ -34,7 +34,9 @@ async function insertEvents(
     // lookup must keep deduping rather than throw on every later batch.
     const existing = await ctx.db
       .query('ingestEvents')
-      .withIndex('by_connector_uuid', (q) => q.eq('connectorId', connectorId).eq('uuid', event.uuid))
+      .withIndex('by_connector_uuid', (q) =>
+        q.eq('connectorId', connectorId).eq('uuid', event.uuid),
+      )
       .first();
     if (existing) {
       deduped++;
