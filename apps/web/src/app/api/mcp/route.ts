@@ -75,13 +75,10 @@ const authedHandler = withMcpAuth(handler, verifyToken, { required: true });
 // REST), so one shared budget. A 429 must be answered out here — anything
 // thrown or refused inside verifyToken renders as a 401.
 async function rateLimitedHandler(req: Request): Promise<Response> {
-  const bearerToken =
-    req.headers
-      .get('authorization')
-      ?.match(/^Bearer\s+(.+)$/i)?.[1]
-      ?.trim() ?? '';
+  const header = req.headers.get('authorization') ?? '';
+  const bearerToken = header.startsWith('Bearer ') ? header.slice('Bearer '.length) : '';
 
-  if (isValidHubToken(bearerToken) && !(await isWithinRateLimit('hub'))) {
+  if (isValidHubToken(bearerToken) && !(await isWithinRateLimit())) {
     return Response.json(
       {
         type: 'rate_limited',

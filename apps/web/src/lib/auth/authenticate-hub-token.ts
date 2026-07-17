@@ -31,9 +31,8 @@ export async function authenticateHubToken<TReq extends { headers: Headers }>(
     throw new UnauthorizedException();
   }
 
-  // One fixed window shared with MCP, keyed by the deployment's single
-  // authenticated principal until per-workspace keys land.
-  if (!(await isWithinRateLimit('hub'))) {
+  // One fixed window shared with MCP.
+  if (!(await isWithinRateLimit())) {
     return NextResponse.json(
       {
         type: 'rate_limited',
