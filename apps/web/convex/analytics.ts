@@ -3,7 +3,7 @@ import type { Id } from './_generated/dataModel';
 import { type QueryCtx, query } from './_generated/server';
 import { requireWorkspaceMember } from './access';
 
-const maxEventsPerQuery = 10000;
+const maxEventsPerQuery = 1000;
 const maxBuckets = 3000;
 
 async function guardConnector(
@@ -17,6 +17,8 @@ async function guardConnector(
   }
 }
 
+// Descending so that when a window holds more than the cap, truncation drops
+// the oldest events and keeps the most recent activity.
 async function queryEvents(
   ctx: QueryCtx,
   connectorId: Id<'connectors'>,
@@ -34,6 +36,7 @@ async function queryEvents(
           .gte('ts', fromTs)
           .lte('ts', toTs),
       )
+      .order('desc')
       .take(maxEventsPerQuery);
   }
   return await ctx.db
@@ -41,6 +44,7 @@ async function queryEvents(
     .withIndex('by_connector_ts', (q) =>
       q.eq('connectorId', connectorId).gte('ts', fromTs).lte('ts', toTs),
     )
+    .order('desc')
     .take(maxEventsPerQuery);
 }
 
