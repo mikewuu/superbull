@@ -60,7 +60,9 @@ exposes.)
 Every call must carry \`Authorization: Bearer\` with the deployment's
 \`SUPERBULL_API_TOKEN\`, the same token the management REST API uses. The
 server compares it with a timing-safe check and rejects a missing or wrong
-token with 401 before any tool runs.
+token with 401 before any tool runs. Authenticated calls are rate limited to
+120 requests/minute in one window shared with the management REST API; over
+it you get a \`429\` with a \`retry-after\` header in seconds.
 
 One caveat, stated plainly: this token is deployment-wide, not per workspace
 or per user. Anyone holding it can list and act on every connector on the

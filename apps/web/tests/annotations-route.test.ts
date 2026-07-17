@@ -14,6 +14,21 @@ const { annotations } = vi.hoisted(() => {
   return { annotations: [] as FakeAnnotation[] };
 });
 
+// The auth middleware now meters authenticated calls; keep the suite
+// infra-free with an in-memory counter in place of redis.
+const rateLimitCounters = vi.hoisted(() => new Map<string, number>());
+
+vi.mock('../src/lib/redis/connect-redis', () => ({
+  connectRedis: async () => ({
+    incr: async (key: string) => {
+      const next = (rateLimitCounters.get(key) ?? 0) + 1;
+      rateLimitCounters.set(key, next);
+      return next;
+    },
+    expire: async () => 1,
+  }),
+}));
+
 vi.mock('../src/lib/deploy-annotations/create-deploy-annotation', () => {
   return {
     async createDeployAnnotation(args: { connectorId: string; label: string; ts: number }) {
@@ -46,6 +61,7 @@ vi.mock('../src/lib/deploy-annotations/list-deploy-annotations', () => {
 beforeEach(() => {
   vi.resetModules();
   annotations.length = 0;
+  rateLimitCounters.clear();
   vi.stubEnv('SUPERBULL_API_TOKEN', SUPERBULL_API_TOKEN);
 });
 

@@ -1,0 +1,87 @@
+import { NextRequest } from 'next/server';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+const SUPERBULL_API_TOKEN = 'rate-limit-test-token';
+
+// Deterministic in-memory redis: the suite runs without infra, and the test
+// drives the limit by seeding counters directly.
+const counters = vi.hoisted(() => new Map<string, number>());
+
+vi.mock('../src/lib/redis/connect-redis', () => ({
+  connectRedis: async () => ({
+    incr: async (key: string) => {
+      const next = (counters.get(key) ?? 0) + 1;
+      counters.set(key, next);
+      return next;
+    },
+    expire: async () => 1,
+  }),
+}));
+
+vi.mock('../src/lib/deploy-annotations/list-deploy-annotations', () => ({
+  async listDeployAnnotations() {
+    return [];
+  },
+}));
+
+beforeEach(() => {
+  vi.resetModules();
+  counters.clear();
+  vi.stubEnv('SUPERBULL_API_TOKEN', SUPERBULL_API_TOKEN);
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
+function listAnnotationsRequest(): NextRequest {
+  return new NextRequest('http://localhost/api/annotations?source_id=source-1', {
+    headers: { authorization: `Bearer ${SUPERBULL_API_TOKEN}` },
+  });
+}
+
+function mcpRequest(): Request {
+  return new Request('http://localhost/api/mcp', {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${SUPERBULL_API_TOKEN}`,
+      accept: 'application/json, text/event-stream',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }),
+  });
+}
+
+function exhaustRateLimit() {
+  const window = Math.floor(Date.now() / 60_000);
+  counters.set(`api-rate:hub:${window}`, 120);
+  counters.set(`api-rate:hub:${window + 1}`, 120);
+}
+
+describe('shared hub rate limit', () => {
+  it('lets an authenticated request through under the limit', async () => {
+    const route = await import('../src/app/api/annotations/route');
+
+    const response = await route.GET(listAnnotationsRequest(), { params: Promise.resolve({}) });
+
+    expect(response.status).toBe(200);
+  });
+
+  it('returns 429 + retry-after on both REST and MCP from the one shared window', async () => {
+    const route = await import('../src/app/api/annotations/route');
+    exhaustRateLimit();
+
+    const restResponse = await route.GET(listAnnotationsRequest(), {
+      params: Promise.resolve({}),
+    });
+    expect(restResponse.status).toBe(429);
+    expect(Number(restResponse.headers.get('retry-after'))).toBeGreaterThan(0);
+    const restBody = (await restResponse.json()) as { type: string };
+    expect(restBody.type).toBe('rate_limited');
+
+    const mcp = await import('../src/app/api/mcp/route');
+    const mcpResponse = await mcp.POST(mcpRequest());
+    expect(mcpResponse.status).toBe(429);
+    expect(Number(mcpResponse.headers.get('retry-after'))).toBeGreaterThan(0);
+  });
+});

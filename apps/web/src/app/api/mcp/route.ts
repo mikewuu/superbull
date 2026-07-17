@@ -1,6 +1,8 @@
-import { timingSafeEqual } from 'node:crypto';
 import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
 import { createMcpHandler, withMcpAuth } from 'mcp-handler';
+import { isWithinRateLimit } from '../../../lib/api/is-within-rate-limit';
+import { secondsUntilRateLimitReset } from '../../../lib/api/seconds-until-rate-limit-reset';
+import { isValidHubToken } from '../../../lib/auth/authenticate-hub-token';
 import { env } from '../../../lib/config/env';
 import { registerAddJobTool } from '../../../lib/mcp/register-add-job-tool';
 import { registerCleanQueueTool } from '../../../lib/mcp/register-clean-queue-tool';
@@ -59,15 +61,7 @@ const handler = createMcpHandler(
 );
 
 async function verifyToken(_req: Request, bearerToken?: string): Promise<AuthInfo | undefined> {
-  const token = env.SUPERBULL_API_TOKEN;
-  if (!token || !bearerToken) {
-    return undefined;
-  }
-
-  const presented = Buffer.from(bearerToken);
-  const expected = Buffer.from(token);
-  const authorized = presented.length === expected.length && timingSafeEqual(presented, expected);
-  if (!authorized) {
+  if (!bearerToken || !isValidHubToken(bearerToken)) {
     return undefined;
   }
 
@@ -76,4 +70,31 @@ async function verifyToken(_req: Request, bearerToken?: string): Promise<AuthInf
 
 const authedHandler = withMcpAuth(handler, verifyToken, { required: true });
 
-export { authedHandler as GET, authedHandler as POST, authedHandler as DELETE };
+// Same limit, mechanism, AND window as the REST API: both surfaces meter the
+// deployment's single authenticated principal (authenticate-hub-token.ts does
+// REST), so one shared budget. A 429 must be answered out here — anything
+// thrown or refused inside verifyToken renders as a 401.
+async function rateLimitedHandler(req: Request): Promise<Response> {
+  const bearerToken =
+    req.headers
+      .get('authorization')
+      ?.match(/^Bearer\s+(.+)$/i)?.[1]
+      ?.trim() ?? '';
+
+  if (isValidHubToken(bearerToken) && !(await isWithinRateLimit('hub'))) {
+    return Response.json(
+      {
+        type: 'rate_limited',
+        message: `Rate limit exceeded (${env.RATE_LIMIT_PER_MINUTE} requests/minute). Retry shortly.`,
+      },
+      {
+        status: 429,
+        headers: { 'retry-after': String(secondsUntilRateLimitReset()) },
+      },
+    );
+  }
+
+  return authedHandler(req);
+}
+
+export { rateLimitedHandler as GET, rateLimitedHandler as POST, rateLimitedHandler as DELETE };
