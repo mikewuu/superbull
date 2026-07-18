@@ -5,8 +5,8 @@ import type { Id } from '../../../convex/_generated/dataModel';
 import { toSavedDashboard } from './to-saved-dashboard';
 import type { SavedDashboard } from './types';
 
-export async function listDashboards(workspaceId: Id<'workspaces'>): Promise<SavedDashboard[]> {
+export async function listDashboards(projectId: Id<'projects'>): Promise<SavedDashboard[]> {
   const token = await convexAuthNextjsToken();
-  const docs = await fetchQuery(api.dashboards.list, { workspaceId }, { token });
+  const docs = await fetchQuery(api.dashboards.list, { projectId }, { token });
   return docs.map(toSavedDashboard);
 }

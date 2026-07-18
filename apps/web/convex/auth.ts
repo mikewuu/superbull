@@ -2,7 +2,7 @@ import Google from '@auth/core/providers/google';
 import { ConvexCredentials } from '@convex-dev/auth/providers/ConvexCredentials';
 import { convexAuth, createAccount, retrieveAccount } from '@convex-dev/auth/server';
 import type { MutationCtx } from './_generated/server';
-import { createWorkspaceForUser, workspaceNameForProfile } from './workspaces';
+import { createProjectForUser, projectNameForProfile } from './projects';
 
 const testLoginEmail = 'e2e@superbull.test';
 
@@ -34,7 +34,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [Google, ...(process.env.AUTH_TEST_LOGIN === 'true' ? [testLoginProvider] : [])],
   callbacks: {
     // Open signup: anyone who signs in with Google gets a personal
-    // workspace the first time their account is created. Idempotent by
+    // project the first time their account is created. Idempotent by
     // construction — existingUserId is only unset on the very first
     // sign-in for this user.
     async afterUserCreatedOrUpdated(ctx, { userId, existingUserId, profile }) {
@@ -42,9 +42,9 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
         return;
       }
 
-      await createWorkspaceForUser(ctx as MutationCtx, {
+      await createProjectForUser(ctx as MutationCtx, {
         userId,
-        name: workspaceNameForProfile(profile.email, profile.name as string | undefined),
+        name: projectNameForProfile(profile.email, profile.name as string | undefined),
       });
     },
   },

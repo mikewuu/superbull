@@ -3,34 +3,34 @@ export const intro = `
 
 The hosted app at superbull.com is the other way to run SuperBull: sign in with
 Google, create connectors, and get history, analytics, error tracking, email
-alerts, and public status pages across every connector in your workspace,
+alerts, and public status pages across every connector in your project,
 without deploying anything yourself. (Some UI and internals still call this
-the "hub", its pre-workspaces name.)
+the "hub", its pre-projects name.)
 
 Three pieces make it up:
 
 - **Web app** (Vercel): marketing, docs, the product itself under
-  \`/app/[workspaceSlug]/...\`, and public status pages at \`/status/[slug]\`.
+  \`/app/[projectSlug]/...\`, and public status pages at \`/status/[slug]\`.
 - **Gateway** (\`connect.superbull.com\`): the always-on service each
   connector opens its one outbound WebSocket to. It terminates every
   connector's connection and forwards their event batches into the datastore.
-- **Convex**: the datastore for everything: workspaces, members, connectors,
+- **Convex**: the datastore for everything: projects, members, connectors,
   ingested events, error groups, alert rules, dashboards, status page configs.
 
 There's no separate server-side Redis and no long-lived worker process to run
 yourself; the pieces above are all that's needed.
 
-## Workspaces
+## Projects
 
-Signing in for the first time creates a personal workspace automatically. A
-workspace has members, each holding one of three roles:
+Signing in for the first time creates a personal project automatically. A
+project has members, each holding one of three roles:
 `;
 
 export const headers = ['Role', 'Permissions'];
 export const rows = [
   [
     'owner',
-    'Everything an admin can do, plus delete the workspace (with name confirmation). The owner cannot be removed from the workspace',
+    'Everything an admin can do, plus delete the project (with name confirmation). The owner cannot be removed from the project',
   ],
   [
     'admin',
@@ -45,18 +45,18 @@ export const rows = [
 export const ingestSection = `
 Owners and admins invite teammates by email; an invite carries the role it was
 sent with, expires after 7 days, and can only be accepted by an account whose
-email matches. Every workspace query and mutation checks membership first, and
-a non-member gets the same "not found" as a bad id, so one workspace's
+email matches. Every project query and mutation checks membership first, and
+a non-member gets the same "not found" as a bad id, so one project's
 existence is never leaked to another's users.
 
 ## Creating a connector
 
-**Connectors → New connector** in a workspace gives you a one-time enrollment
+**Connectors → New connector** in a project gives you a one-time enrollment
 token, shown exactly once, plus the exact \`npx @superbull/connector\` command
 to run (see [Connector](/docs/connector)). As soon as it connects, everything
 ingest-driven (history, analytics, alerts, status pages; see Ingest below)
 goes live for it, and so does the embedded live dashboard at
-\`/app/[workspaceSlug]/connectors/[connectorId]\`. Until the connector dials in
+\`/app/[projectSlug]/connectors/[connectorId]\`. Until the connector dials in
 for the first time, that dashboard URL shows enrollment guidance instead and
 swaps itself for the dashboard as soon as the connector connects.
 
@@ -73,7 +73,7 @@ connected; nothing about it requires an inbound path to your infrastructure.
 
 ## Per-connector dashboard
 
-\`/app/[workspaceSlug]/connectors/[connectorId]\` serves the same
+\`/app/[projectSlug]/connectors/[connectorId]\` serves the same
 \`@superbull/react\` SPA a standalone board serves, pointed at that connector,
 and live actions there (retry, pause, add) run against your real queues. Every
 dashboard request, reads included, is relayed through the gateway's RPC bridge
@@ -92,7 +92,7 @@ process:
   against recent ingest data and sends an email for each rule that starts or
   stops firing.
 - **send daily digest**: daily at 09:00 UTC. Sends each distinct alert-rule
-  email address a digest of its workspace's connectors over the last 24 hours.
+  email address a digest of its project's connectors over the last 24 hours.
 
 See [Alerts](/docs/alerts) for rule types and email behavior.
 `;

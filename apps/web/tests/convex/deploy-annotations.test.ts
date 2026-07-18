@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { beforeEach, describe, expect, it } from 'vitest';
 import { api } from '../../convex/_generated/api';
-import { INTERNAL_TOKEN, makeTestClient, seedConnector, seedWorkspace } from './test-helpers';
+import { INTERNAL_TOKEN, makeTestClient, seedConnector, seedProject } from './test-helpers';
 
 beforeEach(() => {
   process.env.CONVEX_INTERNAL_TOKEN = INTERNAL_TOKEN;
@@ -10,8 +10,8 @@ beforeEach(() => {
 describe('deployAnnotations (TRANSITIONAL internalToken hub API)', () => {
   it('creates an annotation and returns the full object', async () => {
     const t = makeTestClient();
-    const { workspaceId } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
 
     const created = await t.mutation(api.deployAnnotations.create, {
       internalToken: INTERNAL_TOKEN,
@@ -20,7 +20,7 @@ describe('deployAnnotations (TRANSITIONAL internalToken hub API)', () => {
       ts: 1000,
     });
 
-    expect(created).toMatchObject({ workspaceId, connectorId, label: 'v1.2.3', ts: 1000 });
+    expect(created).toMatchObject({ projectId, connectorId, label: 'v1.2.3', ts: 1000 });
   });
 
   it('create throws for an unknown connector', async () => {
@@ -38,8 +38,8 @@ describe('deployAnnotations (TRANSITIONAL internalToken hub API)', () => {
 
   it('list returns annotations for a connector ordered most-recent-first and filters by range', async () => {
     const t = makeTestClient();
-    const { workspaceId } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
     await t.mutation(api.deployAnnotations.create, {
       internalToken: INTERNAL_TOKEN,
       connectorId,
@@ -70,8 +70,8 @@ describe('deployAnnotations (TRANSITIONAL internalToken hub API)', () => {
 
   it('remove deletes the annotation', async () => {
     const t = makeTestClient();
-    const { workspaceId } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
     const created = await t.mutation(api.deployAnnotations.create, {
       internalToken: INTERNAL_TOKEN,
       connectorId,
@@ -93,8 +93,8 @@ describe('deployAnnotations (TRANSITIONAL internalToken hub API)', () => {
 
   it('throws with the wrong internal token on every function', async () => {
     const t = makeTestClient();
-    const { workspaceId } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
 
     await expect(
       t.mutation(api.deployAnnotations.create, {
@@ -110,11 +110,11 @@ describe('deployAnnotations (TRANSITIONAL internalToken hub API)', () => {
   });
 });
 
-describe('deployAnnotations.listByWorkspace (user-facing)', () => {
-  it('is scoped to the caller workspace and connector', async () => {
+describe('deployAnnotations.listByProject (user-facing)', () => {
+  it('is scoped to the caller project and connector', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
     await t.mutation(api.deployAnnotations.create, {
       internalToken: INTERNAL_TOKEN,
       connectorId,
@@ -122,15 +122,15 @@ describe('deployAnnotations.listByWorkspace (user-facing)', () => {
       ts: 100,
     });
 
-    const listed = await asMember.query(api.deployAnnotations.listByWorkspace, {
-      workspaceId,
+    const listed = await asMember.query(api.deployAnnotations.listByProject, {
+      projectId,
       connectorId,
     });
     expect(listed).toHaveLength(1);
 
-    const outsider = await seedWorkspace(t);
+    const outsider = await seedProject(t);
     await expect(
-      outsider.asMember.query(api.deployAnnotations.listByWorkspace, { workspaceId, connectorId }),
+      outsider.asMember.query(api.deployAnnotations.listByProject, { projectId, connectorId }),
     ).rejects.toThrow();
   });
 });

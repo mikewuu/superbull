@@ -5,7 +5,7 @@ import type { Id } from '../../../convex/_generated/dataModel';
 import type { QueueTotalsResult } from './types';
 
 export async function getQueueTotals(args: {
-  workspaceId: Id<'workspaces'>;
+  projectId: Id<'projects'>;
   connectorId: Id<'connectors'>;
   fromTs: number;
   toTs: number;

@@ -46,7 +46,7 @@ describe('registerListConnectorsTool', () => {
     vi.mocked(listConnectorsLegacy).mockResolvedValue([
       {
         id: 'src_1',
-        workspaceId: 'ws_1',
+        projectId: 'ws_1',
         name: 'proxy-a',
         version: null,
         queues: null,

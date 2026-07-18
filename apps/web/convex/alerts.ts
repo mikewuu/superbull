@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import type { MutationCtx, QueryCtx } from './_generated/server';
-import { requireInternalToken, requireWorkspaceMember } from './access';
+import { requireInternalToken, requireProjectMember } from './access';
 
 const alertRuleType = v.union(
   v.literal('failed_threshold'),
@@ -29,27 +29,27 @@ function guardRuleFields(rule: {
 }
 
 // ---------------------------------------------------------------------------
-// User-facing (workspace + Convex-auth scoped)
+// User-facing (project + Convex-auth scoped)
 // ---------------------------------------------------------------------------
 
 export const list = query({
-  args: { workspaceId: v.id('workspaces') },
+  args: { projectId: v.id('projects') },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
+    await requireProjectMember(ctx, args.projectId);
     return await ctx.db
       .query('alertRules')
-      .withIndex('by_workspace', (q) => q.eq('workspaceId', args.workspaceId))
+      .withIndex('by_project', (q) => q.eq('projectId', args.projectId))
       .collect();
   },
 });
 
 export const listStates = query({
-  args: { workspaceId: v.id('workspaces') },
+  args: { projectId: v.id('projects') },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
+    await requireProjectMember(ctx, args.projectId);
     const rules = await ctx.db
       .query('alertRules')
-      .withIndex('by_workspace', (q) => q.eq('workspaceId', args.workspaceId))
+      .withIndex('by_project', (q) => q.eq('projectId', args.projectId))
       .collect();
     const states = [];
     for (const rule of rules) {
@@ -65,23 +65,23 @@ export const listStates = query({
   },
 });
 
-async function guardConnectorInWorkspace(
+async function guardConnectorInProject(
   ctx: QueryCtx | MutationCtx,
-  workspaceId: Id<'workspaces'>,
+  projectId: Id<'projects'>,
   connectorId: Id<'connectors'> | undefined,
 ): Promise<void> {
   if (!connectorId) {
     return;
   }
   const connector = await ctx.db.get(connectorId);
-  if (!connector || connector.workspaceId !== workspaceId) {
+  if (!connector || connector.projectId !== projectId) {
     throw new Error('unknown connector');
   }
 }
 
 export const create = mutation({
   args: {
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     connectorId: v.optional(v.id('connectors')),
     type: alertRuleType,
     queueName: v.optional(v.string()),
@@ -91,12 +91,12 @@ export const create = mutation({
     isEnabled: v.boolean(),
   },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
+    await requireProjectMember(ctx, args.projectId);
     guardRuleFields(args);
-    await guardConnectorInWorkspace(ctx, args.workspaceId, args.connectorId);
+    await guardConnectorInProject(ctx, args.projectId, args.connectorId);
 
     const id = await ctx.db.insert('alertRules', {
-      workspaceId: args.workspaceId,
+      projectId: args.projectId,
       connectorId: args.connectorId,
       type: args.type,
       queueName: args.queueName,
@@ -115,7 +115,7 @@ export const create = mutation({
 
 export const update = mutation({
   args: {
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     id: v.id('alertRules'),
     connectorId: v.optional(v.id('connectors')),
     type: v.optional(alertRuleType),
@@ -126,9 +126,9 @@ export const update = mutation({
     isEnabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
+    await requireProjectMember(ctx, args.projectId);
     const existing = await ctx.db.get(args.id);
-    if (!existing || existing.workspaceId !== args.workspaceId) {
+    if (!existing || existing.projectId !== args.projectId) {
       throw new Error('unknown alert rule');
     }
 
@@ -138,7 +138,7 @@ export const update = mutation({
     const windowMinutes =
       args.windowMinutes !== undefined ? args.windowMinutes : existing.windowMinutes;
     guardRuleFields({ type, queueName, threshold, windowMinutes });
-    await guardConnectorInWorkspace(ctx, args.workspaceId, args.connectorId);
+    await guardConnectorInProject(ctx, args.projectId, args.connectorId);
 
     await ctx.db.patch(args.id, {
       connectorId: args.connectorId !== undefined ? args.connectorId : existing.connectorId,
@@ -158,11 +158,11 @@ export const update = mutation({
 });
 
 export const remove = mutation({
-  args: { workspaceId: v.id('workspaces'), id: v.id('alertRules') },
+  args: { projectId: v.id('projects'), id: v.id('alertRules') },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
+    await requireProjectMember(ctx, args.projectId);
     const existing = await ctx.db.get(args.id);
-    if (!existing || existing.workspaceId !== args.workspaceId) {
+    if (!existing || existing.projectId !== args.projectId) {
       return null;
     }
     const states = await ctx.db
@@ -180,14 +180,14 @@ export const remove = mutation({
 // ---------------------------------------------------------------------------
 // internalToken-gated — called by the evaluateAlerts / sendDigest Convex
 // crons (Builder E's territory: convex/crons.ts + the "use node" email
-// actions). Evaluation stays a single sweep across every workspace's
-// enabled rules; email routing is per-rule (rule.email), so no workspace
+// actions). Evaluation stays a single sweep across every project's
+// enabled rules; email routing is per-rule (rule.email), so no project
 // filtering is needed here.
 // ---------------------------------------------------------------------------
 
 interface NotifyEntry {
   rule_id: Id<'alertRules'>;
-  workspace_id: Id<'workspaces'>;
+  project_id: Id<'projects'>;
   email: string;
   type: Doc<'alertRules'>['type'];
   queue_name: string | null;
@@ -196,16 +196,16 @@ interface NotifyEntry {
 }
 
 // For the daily-digest cron's recipient grouping (convex/alertNotifications.ts,
-// Builder E's territory): every rule's {email, workspaceId}, regardless of
+// Builder E's territory): every rule's {email, projectId}, regardless of
 // isEnabled — matches the pre-multi-tenant behavior of the deleted
 // @nextastic/queue job runner. Feeds convex/emails/digestRecipients.ts's
-// groupRecipientsByWorkspace.
+// groupRecipientsByProject.
 export const listAllRulesForDigest = query({
   args: { internalToken: v.string() },
   handler: async (ctx, args) => {
     requireInternalToken(args.internalToken);
     const rules = await ctx.db.query('alertRules').collect();
-    return rules.map((rule) => ({ email: rule.email, workspaceId: rule.workspaceId }));
+    return rules.map((rule) => ({ email: rule.email, projectId: rule.projectId }));
   },
 });
 
@@ -258,7 +258,7 @@ export const digestSummary = query({
         }));
 
       perConnector.push({
-        workspaceId: connector.workspaceId,
+        projectId: connector.projectId,
         connectorId: connector._id,
         connectorName: connector.name,
         completed: events.filter((event) => event.type === 'job.completed').length,
@@ -298,7 +298,7 @@ async function evaluateRule(
     }
     return {
       rule_id: rule._id,
-      workspace_id: rule.workspaceId,
+      project_id: rule.projectId,
       email: rule.email,
       type: rule.type,
       queue_name: rule.queueName ?? null,
@@ -311,7 +311,7 @@ async function evaluateRule(
     await ctx.db.patch(state._id, { state: 'resolved', lastNotifiedTs: Date.now() });
     return {
       rule_id: rule._id,
-      workspace_id: rule.workspaceId,
+      project_id: rule.projectId,
       email: rule.email,
       type: rule.type,
       queue_name: rule.queueName ?? null,
@@ -436,7 +436,7 @@ async function getRuleConnectorIds(
   }
   const connectors = await ctx.db
     .query('connectors')
-    .withIndex('by_workspace', (q) => q.eq('workspaceId', rule.workspaceId))
+    .withIndex('by_project', (q) => q.eq('projectId', rule.projectId))
     .collect();
   return connectors.map((connector) => connector._id);
 }

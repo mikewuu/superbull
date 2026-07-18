@@ -1,10 +1,10 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireInternalToken, requireWorkspaceMember } from './access';
+import { requireInternalToken, requireProjectMember } from './access';
 
 // TRANSITIONAL — internalToken-gated, used by /api/annotations (the global
 // SUPERBULL_API_TOKEN-authenticated route). Round 3 gives it real per-
-// workspace API keys; for now it trusts the connector lookup the route does
+// project API keys; for now it trusts the connector lookup the route does
 // before calling in.
 export const list = query({
   args: {
@@ -67,7 +67,7 @@ export const create = mutation({
     }
 
     const id = await ctx.db.insert('deployAnnotations', {
-      workspaceId: connector.workspaceId,
+      projectId: connector.projectId,
       connectorId,
       label: args.label,
       ts: args.ts,
@@ -80,13 +80,13 @@ export const create = mutation({
   },
 });
 
-// User-facing (dashboard) listing, workspace-scoped.
-export const listByWorkspace = query({
-  args: { workspaceId: v.id('workspaces'), connectorId: v.id('connectors') },
+// User-facing (dashboard) listing, project-scoped.
+export const listByProject = query({
+  args: { projectId: v.id('projects'), connectorId: v.id('connectors') },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
+    await requireProjectMember(ctx, args.projectId);
     const connector = await ctx.db.get(args.connectorId);
-    if (!connector || connector.workspaceId !== args.workspaceId) {
+    if (!connector || connector.projectId !== args.projectId) {
       return [];
     }
     return await ctx.db

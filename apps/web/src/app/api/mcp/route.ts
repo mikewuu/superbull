@@ -20,11 +20,11 @@ import { registerResumeQueueTool } from '../../../lib/mcp/register-resume-queue-
 import { registerRetryJobTool } from '../../../lib/mcp/register-retry-job-tool';
 
 // TODO(7.2e): list_connectors/remove_connector run under the single global
-// SUPERBULL_API_TOKEN, so they see connectors across every workspace on the
+// SUPERBULL_API_TOKEN, so they see connectors across every project on the
 // deployment (matching the pre-multi-tenant hub API this route replaces the
 // front door for). Pending the owner's auth-model decision, MCP auth should
-// move to per-workspace API keys and scope these tools to one workspace.
-const instructions = `superbull monitors BullMQ deployments through connectors, processes that stream queue activity into a workspace over the hosted gateway.
+// move to per-project API keys and scope these tools to one project.
+const instructions = `superbull monitors BullMQ deployments through connectors, processes that stream queue activity into a project over the hosted gateway.
 
 DISCOVER: list_connectors shows every connector in the deployment (never returns enrollment tokens); create new connectors in the web UI (Connectors, New connector). remove_connector deletes one.
 

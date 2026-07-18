@@ -12,7 +12,7 @@ export const isSignInPage = createRouteMatcher(['/signin']);
 // public status pages (recipient-facing) and every /api/* route below,
 // which authenticates headlessly with its own bearer token for CI/agents.
 // Everything under /app (the product, including the per-connector embedded
-// dashboards at /app/[workspaceSlug]/connectors/[connectorId]/**, which
+// dashboards at /app/[projectSlug]/connectors/[connectorId]/**, which
 // replaced the old top-level /s/[sourceId] routes) requires sign-in — the
 // /app(.*) prefix match below covers those nested routes automatically.
 // /invite/[token] is deliberately NOT in this list: it must require sign-in

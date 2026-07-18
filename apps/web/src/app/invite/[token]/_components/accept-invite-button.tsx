@@ -26,7 +26,7 @@ export function AcceptInviteButton(props: AcceptInviteButtonProps) {
     setError(null);
     try {
       const result = await acceptInvite({ tokenHash });
-      router.push(`/app/${result.workspace.slug}`);
+      router.push(`/app/${result.project.slug}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not accept this invite.');
       setPending(false);

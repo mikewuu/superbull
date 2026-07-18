@@ -1,18 +1,18 @@
 import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import { type QueryCtx, query } from './_generated/server';
-import { requireWorkspaceMember } from './access';
+import { requireProjectMember } from './access';
 
 const maxEventsPerQuery = 1000;
 const maxBuckets = 3000;
 
 async function guardConnector(
   ctx: QueryCtx,
-  workspaceId: Id<'workspaces'>,
+  projectId: Id<'projects'>,
   connectorId: Id<'connectors'>,
 ): Promise<void> {
   const connector = await ctx.db.get(connectorId);
-  if (!connector || connector.workspaceId !== workspaceId) {
+  if (!connector || connector.projectId !== projectId) {
     throw new Error('unknown connector');
   }
 }
@@ -91,7 +91,7 @@ function percentileOrNull(values: number[], p: number): number | null {
 
 export const throughputSeries = query({
   args: {
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     connectorId: v.id('connectors'),
     queueName: v.optional(v.string()),
     fromTs: v.number(),
@@ -99,8 +99,8 @@ export const throughputSeries = query({
     bucketMinutes: v.number(),
   },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
-    await guardConnector(ctx, args.workspaceId, args.connectorId);
+    await requireProjectMember(ctx, args.projectId);
+    await guardConnector(ctx, args.projectId, args.connectorId);
     const bucketMs = guardBucketMs(args.fromTs, args.toTs, args.bucketMinutes);
     const events = await queryEvents(ctx, args.connectorId, args.queueName, args.fromTs, args.toTs);
 
@@ -130,7 +130,7 @@ export const throughputSeries = query({
 
 export const latencySeries = query({
   args: {
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     connectorId: v.id('connectors'),
     queueName: v.optional(v.string()),
     fromTs: v.number(),
@@ -138,8 +138,8 @@ export const latencySeries = query({
     bucketMinutes: v.number(),
   },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
-    await guardConnector(ctx, args.workspaceId, args.connectorId);
+    await requireProjectMember(ctx, args.projectId);
+    await guardConnector(ctx, args.projectId, args.connectorId);
     const bucketMs = guardBucketMs(args.fromTs, args.toTs, args.bucketMinutes);
     const events = await queryEvents(ctx, args.connectorId, args.queueName, args.fromTs, args.toTs);
 
@@ -183,14 +183,14 @@ export const latencySeries = query({
 
 export const queueTotals = query({
   args: {
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     connectorId: v.id('connectors'),
     fromTs: v.number(),
     toTs: v.number(),
   },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
-    await guardConnector(ctx, args.workspaceId, args.connectorId);
+    await requireProjectMember(ctx, args.projectId);
+    await guardConnector(ctx, args.projectId, args.connectorId);
     const events = await queryEvents(ctx, args.connectorId, undefined, args.fromTs, args.toTs);
 
     const totals = new Map<
@@ -235,14 +235,14 @@ export const queueTotals = query({
 
 export const heatmap = query({
   args: {
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     connectorId: v.id('connectors'),
     fromTs: v.number(),
     toTs: v.number(),
   },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
-    await guardConnector(ctx, args.workspaceId, args.connectorId);
+    await requireProjectMember(ctx, args.projectId);
+    await guardConnector(ctx, args.projectId, args.connectorId);
     const events = await queryEvents(ctx, args.connectorId, undefined, args.fromTs, args.toTs);
 
     const matrix: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));

@@ -45,7 +45,7 @@ describe('registerRetryJobTool', () => {
   it('PUTs the retry route and reports success on 204', async () => {
     vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
-      workspaceId: 'ws_1',
+      projectId: 'ws_1',
       name: 'proxy-a',
       version: null,
       queues: null,
@@ -71,7 +71,7 @@ describe('registerRetryJobTool', () => {
   it('returns an error result when the proxy rejects the retry', async () => {
     vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
-      workspaceId: 'ws_1',
+      projectId: 'ws_1',
       name: 'proxy-a',
       version: null,
       queues: null,

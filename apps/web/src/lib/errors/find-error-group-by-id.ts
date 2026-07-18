@@ -6,10 +6,10 @@ import { toErrorGroup } from './to-error-group';
 import type { ErrorGroup } from './types';
 
 export async function findErrorGroupById(
-  workspaceId: Id<'workspaces'>,
+  projectId: Id<'projects'>,
   groupId: Id<'errorGroups'>,
 ): Promise<ErrorGroup | null> {
   const token = await convexAuthNextjsToken();
-  const doc = await fetchQuery(api.errors.getGroup, { workspaceId, groupId }, { token });
+  const doc = await fetchQuery(api.errors.getGroup, { projectId, groupId }, { token });
   return doc ? toErrorGroup(doc) : null;
 }

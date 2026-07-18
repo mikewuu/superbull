@@ -49,22 +49,22 @@ describe('isPublicRoute', () => {
 
   it.each([
     '/app',
-    '/app/my-workspace',
-    '/app/my-workspace/analytics',
-    '/app/my-workspace/errors',
-    '/app/my-workspace/alerts',
-    '/app/my-workspace/dashboards',
-    '/app/my-workspace/status-pages',
-    '/app/my-workspace/connectors',
-    '/app/my-workspace/connectors/connector-1/',
-    '/app/my-workspace/settings',
+    '/app/my-project',
+    '/app/my-project/analytics',
+    '/app/my-project/errors',
+    '/app/my-project/alerts',
+    '/app/my-project/dashboards',
+    '/app/my-project/status-pages',
+    '/app/my-project/connectors',
+    '/app/my-project/connectors/connector-1/',
+    '/app/my-project/settings',
     '/invite/some-token',
   ])('treats %s as protected', (pathname) => {
     expect(isPublicRoute(requestFor(pathname))).toBe(false);
   });
 
   it('protects the per-connector embedded dashboard API forwarding route', () => {
-    expect(isPublicRoute(requestFor('/app/my-workspace/connectors/connector-1/api/queues'))).toBe(
+    expect(isPublicRoute(requestFor('/app/my-project/connectors/connector-1/api/queues'))).toBe(
       false,
     );
   });

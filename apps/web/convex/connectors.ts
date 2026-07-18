@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
-import { requireInternalToken, requireRole, requireWorkspaceMember } from './access';
+import { requireInternalToken, requireProjectMember, requireRole } from './access';
 
 async function deleteConnectorChildren(ctx: MutationCtx, connectorId: Id<'connectors'>) {
   const [events, errorGroups, annotations, statusPages] = await Promise.all([
@@ -29,26 +29,26 @@ async function deleteConnectorChildren(ctx: MutationCtx, connectorId: Id<'connec
 }
 
 // ---------------------------------------------------------------------------
-// User-facing (workspace + Convex-auth scoped)
+// User-facing (project + Convex-auth scoped)
 // ---------------------------------------------------------------------------
 
-export const listByWorkspace = query({
-  args: { workspaceId: v.id('workspaces') },
+export const listByProject = query({
+  args: { projectId: v.id('projects') },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
+    await requireProjectMember(ctx, args.projectId);
     return await ctx.db
       .query('connectors')
-      .withIndex('by_workspace', (q) => q.eq('workspaceId', args.workspaceId))
+      .withIndex('by_project', (q) => q.eq('projectId', args.projectId))
       .collect();
   },
 });
 
 export const getById = query({
-  args: { workspaceId: v.id('workspaces'), connectorId: v.id('connectors') },
+  args: { projectId: v.id('projects'), connectorId: v.id('connectors') },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
+    await requireProjectMember(ctx, args.projectId);
     const connector = await ctx.db.get(args.connectorId);
-    if (!connector || connector.workspaceId !== args.workspaceId) {
+    if (!connector || connector.projectId !== args.projectId) {
       return null;
     }
     return connector;
@@ -60,9 +60,9 @@ export const getById = query({
 // The plaintext token is returned to the caller there and shown once in the
 // UI — it never reaches Convex, so this mutation cannot leak it.
 export const createConnector = mutation({
-  args: { workspaceId: v.id('workspaces'), name: v.string(), tokenHash: v.string() },
+  args: { projectId: v.id('projects'), name: v.string(), tokenHash: v.string() },
   handler: async (ctx, args) => {
-    const { member } = await requireWorkspaceMember(ctx, args.workspaceId);
+    const { member } = await requireProjectMember(ctx, args.projectId);
     requireRole(member, ['owner', 'admin', 'member']);
     const name = args.name.trim();
     if (!name) {
@@ -73,7 +73,7 @@ export const createConnector = mutation({
     }
 
     const id = await ctx.db.insert('connectors', {
-      workspaceId: args.workspaceId,
+      projectId: args.projectId,
       name,
       tokenHash: args.tokenHash,
     });
@@ -86,12 +86,12 @@ export const createConnector = mutation({
 });
 
 export const removeConnector = mutation({
-  args: { workspaceId: v.id('workspaces'), connectorId: v.id('connectors') },
+  args: { projectId: v.id('projects'), connectorId: v.id('connectors') },
   handler: async (ctx, args) => {
-    const { member } = await requireWorkspaceMember(ctx, args.workspaceId);
+    const { member } = await requireProjectMember(ctx, args.projectId);
     requireRole(member, ['owner', 'admin']);
     const connector = await ctx.db.get(args.connectorId);
-    if (!connector || connector.workspaceId !== args.workspaceId) {
+    if (!connector || connector.projectId !== args.projectId) {
       return null;
     }
     await deleteConnectorChildren(ctx, args.connectorId);
@@ -103,7 +103,7 @@ export const removeConnector = mutation({
 // TRANSITIONAL — internalToken-gated, unscoped-by-user surface backing ONLY
 // the MCP tools that still run under the global SUPERBULL_API_TOKEN (the
 // old HTTP proxy flow — /api/sources*, /api/ingest, url/token connectors —
-// is gone). Deleted once the per-workspace-API-keys-vs-global-token decision
+// is gone). Deleted once the per-project-API-keys-vs-global-token decision
 // lands (REWRITE_PLAN Round 3e, open with the owner).
 // ---------------------------------------------------------------------------
 
@@ -157,7 +157,7 @@ export const findByEnrollmentTokenHash = query({
     if (!connector) {
       return null;
     }
-    return { connectorId: connector._id, workspaceId: connector.workspaceId, name: connector.name };
+    return { connectorId: connector._id, projectId: connector.projectId, name: connector.name };
   },
 });
 

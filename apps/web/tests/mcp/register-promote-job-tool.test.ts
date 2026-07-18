@@ -45,7 +45,7 @@ describe('registerPromoteJobTool', () => {
   it('PUTs the promote route and reports success on 204', async () => {
     vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
-      workspaceId: 'ws_1',
+      projectId: 'ws_1',
       name: 'proxy-a',
       version: null,
       queues: null,
@@ -71,7 +71,7 @@ describe('registerPromoteJobTool', () => {
   it('returns an error result when the connector rejects the promotion', async () => {
     vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
-      workspaceId: 'ws_1',
+      projectId: 'ws_1',
       name: 'proxy-a',
       version: null,
       queues: null,

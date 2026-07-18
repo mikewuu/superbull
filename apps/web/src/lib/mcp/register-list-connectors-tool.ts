@@ -6,9 +6,9 @@ import { errorResult } from './error-result';
 import { jsonResult } from './json-result';
 
 // TODO(7.2e): the global SUPERBULL_API_TOKEN currently lists connectors
-// across every workspace on the deployment (matching the pre-multi-tenant
+// across every project on the deployment (matching the pre-multi-tenant
 // hub API). Pending the owner's auth-model decision, MCP auth should move to
-// per-workspace API keys and scope this listing accordingly.
+// per-project API keys and scope this listing accordingly.
 export function registerListConnectorsTool(server: McpServer): void {
   server.registerTool(
     'list_connectors',

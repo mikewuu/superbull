@@ -6,19 +6,19 @@ connector, run one command.
 
 ## 1. Sign in
 
-Sign in with Google. A personal workspace is created for you automatically on
+Sign in with Google. A personal project is created for you automatically on
 first sign-in, no separate signup step. From there you can invite teammates
-to that workspace, or create more workspaces for other teams or environments.
+to that project, or create more projects for other teams or environments.
 Members hold one of three roles: **owner**, **admin**, or **member**; owners
-and admins invite by email from workspace settings, and an invite carries the
+and admins invite by email from project settings, and an invite carries the
 role it was sent with. See [Hosted app](/docs/hub) for what each role can do.
 
 ## 2. Create a connector
 
-From your workspace, **Connectors → New connector** gives you a name field and,
+From your project, **Connectors → New connector** gives you a name field and,
 once submitted, a one-time enrollment token plus the exact command to run.
 The token is shown exactly once, so copy it before moving on. Behind the
-scenes the workspace only stores a hash of it.
+scenes the project only stores a hash of it.
 
 ## 3. Run it next to your workers
 
@@ -35,10 +35,10 @@ explicit queue names, etc.).
 ## 4. Watch it live
 
 As soon as the connector connects, its ingested events go live: history,
-workspace-wide [alerts](/docs/alerts), [analytics](/docs/analytics),
+project-wide [alerts](/docs/alerts), [analytics](/docs/analytics),
 [dashboards](/docs/dashboards), and [status pages](/docs/status-pages) all
 work over the outbound WebSocket alone. So does the embedded live dashboard at
-\`/app/[workspaceSlug]/connectors/[connectorId]\` (queues, jobs, retries,
+\`/app/[projectSlug]/connectors/[connectorId]\` (queues, jobs, retries,
 metrics, the same dense board either way you run SuperBull): its reads and
 actions are relayed to the connector over that WebSocket. See
 [Hosted app](/docs/hub) for details.
@@ -50,7 +50,7 @@ Rather have an agent do this instead of clicking through a UI? See
 
 None of the above requires the hosted app. **Standalone** mode mounts
 SuperBull's UI and REST API directly inside your own Node process, no
-workspace, no sign-in, no outbound connection to anywhere. \`bullmq\` is always
+project, no sign-in, no outbound connection to anywhere. \`bullmq\` is always
 a **peer dependency** there too, so job mutations (retry, promote, remove) run
 through the exact BullMQ version your workers use.
 

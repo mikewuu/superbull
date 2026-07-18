@@ -45,7 +45,7 @@ describe('registerGetJobLogsTool', () => {
   it('GETs the logs route and returns the log lines', async () => {
     vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
-      workspaceId: 'ws_1',
+      projectId: 'ws_1',
       name: 'proxy-a',
       version: null,
       queues: null,

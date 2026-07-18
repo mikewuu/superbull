@@ -1,7 +1,7 @@
 export const content = `
 # Dashboards
 
-Saved dashboards live in your workspace: a named collection of cards, each
+Saved dashboards live in your project: a named collection of cards, each
 pulling from one connector's ingested data over a fixed range. There's no
 drag-to-resize grid builder; a dashboard is just an ordered list of cards you
 add and remove.

@@ -1,7 +1,7 @@
 export const intro = `
 # Analytics
 
-The workspace's **Analytics** page, dashboard cards, and status page uptime all
+The project's **Analytics** page, dashboard cards, and status page uptime all
 read from the same ingested-events table that connectors stream into via
 [ingest](/docs/hub#ingest). There's no separate rollup job; series are computed
 from raw events per request. Each analytics query aggregates over the most
@@ -24,9 +24,9 @@ export const rangeRows = [
 export const mid = `
 Wider ranges use coarser buckets automatically; there's no manual granularity
 control in the UI. Under the hood, \`throughput\` and \`latency\` take
-\`{ workspaceId, connectorId, queueName?, fromTs, toTs, bucketMinutes }\`
+\`{ projectId, connectorId, queueName?, fromTs, toTs, bucketMinutes }\`
 (\`queueName\` omitted scopes to every queue on the connector); \`totals\` and
-\`heatmap\` take only \`{ workspaceId, connectorId, fromTs, toTs }\`. They aren't
+\`heatmap\` take only \`{ projectId, connectorId, fromTs, toTs }\`. They aren't
 bucketed and aren't queue-scoped.
 
 ## Series

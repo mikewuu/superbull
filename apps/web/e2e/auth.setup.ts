@@ -17,7 +17,7 @@ setup('sign in as the bootstrapped first user', async ({ page }) => {
   await page.goto('/signin');
   await page.getByTestId('signin-test-login').click();
 
-  // /app redirects into the caller's first workspace (/app/{slug}) once
+  // /app redirects into the caller's first project (/app/{slug}) once
   // signed in — the slug is generated from the bootstrapped profile, so wait
   // for the pattern rather than an exact path.
   await page.waitForURL(/\/app\/[^/]+/);

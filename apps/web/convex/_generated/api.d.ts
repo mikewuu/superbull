@@ -29,7 +29,7 @@ import type * as ingest from "../ingest.js";
 import type * as invites from "../invites.js";
 import type * as statusPages from "../statusPages.js";
 import type * as users from "../users.js";
-import type * as workspaces from "../workspaces.js";
+import type * as projects from "../projects.js";
 
 import type {
   ApiFromModules,
@@ -59,7 +59,7 @@ declare const fullApi: ApiFromModules<{
   invites: typeof invites;
   statusPages: typeof statusPages;
   users: typeof users;
-  workspaces: typeof workspaces;
+  projects: typeof projects;
 }>;
 
 /**

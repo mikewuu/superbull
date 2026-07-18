@@ -6,7 +6,7 @@ import { toStatusPageConfig } from './to-status-page-config';
 import type { StatusPageConfig } from './types';
 
 export async function upsertStatusPageConfig(args: {
-  workspaceId: Id<'workspaces'>;
+  projectId: Id<'projects'>;
   connectorId: Id<'connectors'>;
   slug: string;
   isEnabled: boolean;

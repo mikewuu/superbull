@@ -8,12 +8,12 @@ promote, remove, clean) always run against the exact BullMQ version your workers
 
 There are two ways to run it:
 
-- **Hosted**: sign in with Google, create a connector in your workspace, and run
+- **Hosted**: sign in with Google, create a connector in your project, and run
   one command next to your workers: \`npx @superbull/connector --token ...\`. It
   opens a single outbound WebSocket, no inbound port, no public URL. Ingest-driven
   history, analytics, error tracking, email alerts, dashboards, and public status
-  pages go live for every connector in the workspace, and the embedded live
-  dashboard at \`/app/[workspaceSlug]/connectors/[connectorId]\` operates your
+  pages go live for every connector in the project, and the embedded live
+  dashboard at \`/app/[projectSlug]/connectors/[connectorId]\` operates your
   queues over that same WebSocket. See
   [Getting started](/docs/getting-started),
   [Connector](/docs/connector), and [Hosted app](/docs/hub).
@@ -73,7 +73,7 @@ the same shape. See [Standalone](/docs/standalone) for all nine.
 - New to SuperBull: start with [Getting started](/docs/getting-started).
 - Embedding in your app instead: [Standalone](/docs/standalone).
 - Running the outbound agent next to workers: [Connector](/docs/connector).
-- The hosted app: workspaces, analytics, alerts, status pages: [Hosted app](/docs/hub).
+- The hosted app: projects, analytics, alerts, status pages: [Hosted app](/docs/hub).
 - Every endpoint: [REST API](/docs/api).
 - Driving SuperBull from an agent: [MCP](/docs/mcp).
 `;

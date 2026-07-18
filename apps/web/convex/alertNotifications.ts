@@ -15,7 +15,7 @@
 
 import { api } from './_generated/api';
 import { internalAction } from './_generated/server';
-import { groupRecipientsByWorkspace } from './emails/digestRecipients';
+import { groupRecipientsByProject } from './emails/digestRecipients';
 import { sendAlertEmail } from './emails/sendAlertEmail';
 import { sendDigestEmail } from './emails/sendDigestEmail';
 
@@ -59,16 +59,16 @@ export const evaluateAndNotify = internalAction({
 
 /**
  * Runs daily at 09:00 UTC (see crons.ts). Sends one digest email per
- * (workspace, distinct alert-rule email) pair, summarizing that workspace's
- * connectors over the last 24h. Scoped per-workspace so a recipient's inbox
- * never sees another workspace's connector stats.
+ * (project, distinct alert-rule email) pair, summarizing that project's
+ * connectors over the last 24h. Scoped per-project so a recipient's inbox
+ * never sees another project's connector stats.
  */
 export const sendDailyDigest = internalAction({
   args: {},
   handler: async (ctx) => {
     const internalToken = getInternalTokenOrThrow();
     const rules = await ctx.runQuery(api.alerts.listAllRulesForDigest, { internalToken });
-    const groups = groupRecipientsByWorkspace(rules);
+    const groups = groupRecipientsByProject(rules);
     if (groups.length === 0) {
       console.log('[alertNotifications.sendDailyDigest] no alert rule emails; skipping');
       return;
@@ -81,11 +81,11 @@ export const sendDailyDigest = internalAction({
 
     let sentCount = 0;
     for (const group of groups) {
-      const workspaceConnectors = perConnector.filter(
-        (connector) => connector.workspaceId === group.workspaceId,
+      const projectConnectors = perConnector.filter(
+        (connector) => connector.projectId === group.projectId,
       );
       for (const to of group.emails) {
-        await sendDigestEmail({ to, perConnector: workspaceConnectors });
+        await sendDigestEmail({ to, perConnector: projectConnectors });
         sentCount += 1;
       }
     }

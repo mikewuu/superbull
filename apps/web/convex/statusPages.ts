@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import { type QueryCtx, mutation, query } from './_generated/server';
-import { requireWorkspaceMember } from './access';
+import { requireProjectMember } from './access';
 
 const dayMs = 86_400_000;
 const maxEventsPerQuery = 20_000;
@@ -88,14 +88,14 @@ async function bucketQueueEvents(
 }
 
 export const getByConnector = query({
-  args: { workspaceId: v.id('workspaces'), connectorId: v.id('connectors') },
+  args: { projectId: v.id('projects'), connectorId: v.id('connectors') },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
+    await requireProjectMember(ctx, args.projectId);
     const config = await ctx.db
       .query('statusPageConfigs')
       .withIndex('by_connector', (q) => q.eq('connectorId', args.connectorId))
       .unique();
-    if (!config || config.workspaceId !== args.workspaceId) {
+    if (!config || config.projectId !== args.projectId) {
       return null;
     }
     return config;
@@ -104,7 +104,7 @@ export const getByConnector = query({
 
 export const upsert = mutation({
   args: {
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     connectorId: v.id('connectors'),
     slug: v.string(),
     isEnabled: v.boolean(),
@@ -112,12 +112,12 @@ export const upsert = mutation({
     queueNames: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
+    await requireProjectMember(ctx, args.projectId);
     if (!/^[a-z0-9-]{3,50}$/.test(args.slug)) {
       throw new Error('invalid slug');
     }
     const connector = await ctx.db.get(args.connectorId);
-    if (!connector || connector.workspaceId !== args.workspaceId) {
+    if (!connector || connector.projectId !== args.projectId) {
       throw new Error('unknown connector');
     }
 
@@ -137,7 +137,7 @@ export const upsert = mutation({
         .unique());
 
     const fields = {
-      workspaceId: args.workspaceId,
+      projectId: args.projectId,
       connectorId: args.connectorId,
       slug: args.slug,
       isEnabled: args.isEnabled,
@@ -165,14 +165,14 @@ export const upsert = mutation({
 
 export const setLogo = mutation({
   args: {
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     configId: v.id('statusPageConfigs'),
     storageId: v.id('_storage'),
   },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
+    await requireProjectMember(ctx, args.projectId);
     const config = await ctx.db.get(args.configId);
-    if (!config || config.workspaceId !== args.workspaceId) {
+    if (!config || config.projectId !== args.projectId) {
       throw new Error('unknown status page config');
     }
 
@@ -186,18 +186,18 @@ export const setLogo = mutation({
 });
 
 export const generateLogoUploadUrl = mutation({
-  args: { workspaceId: v.id('workspaces') },
+  args: { projectId: v.id('projects') },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
+    await requireProjectMember(ctx, args.projectId);
     return await ctx.storage.generateUploadUrl();
   },
 });
 
 // ---------------------------------------------------------------------------
 // Public — unauthenticated by design. Recipient-facing status pages must
-// stay reachable with no Convex Auth session; workspaceId is stored on the
+// stay reachable with no Convex Auth session; projectId is stored on the
 // config but never required by these two queries, so the public interface
-// is unchanged from before workspaces existed.
+// is unchanged from before projects existed.
 // ---------------------------------------------------------------------------
 
 export const getPublicPage = query({

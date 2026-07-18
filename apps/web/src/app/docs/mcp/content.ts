@@ -64,9 +64,9 @@ token with 401 before any tool runs. Authenticated calls are rate limited to
 120 requests/minute in one window shared with the management REST API; over
 it you get a \`429\` with a \`retry-after\` header in seconds.
 
-One caveat, stated plainly: this token is deployment-wide, not per workspace
+One caveat, stated plainly: this token is deployment-wide, not per project
 or per user. Anyone holding it can list and act on every connector on the
-deployment. Per-workspace API keys are planned; until they land, treat
+deployment. Per-project API keys are planned; until they land, treat
 \`SUPERBULL_API_TOKEN\` like a production credential.
 
 ## Diagnose and retry a failed job

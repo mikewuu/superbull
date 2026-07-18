@@ -6,7 +6,7 @@ import { toAlertRule } from './to-alert-rule';
 import type { AlertRule, AlertRuleType } from './types';
 
 export async function createAlertRule(args: {
-  workspaceId: Id<'workspaces'>;
+  projectId: Id<'projects'>;
   connectorId?: Id<'connectors'>;
   type: AlertRuleType;
   queueName?: string;

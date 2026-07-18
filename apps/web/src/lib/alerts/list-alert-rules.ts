@@ -5,8 +5,8 @@ import type { Id } from '../../../convex/_generated/dataModel';
 import { toAlertRule } from './to-alert-rule';
 import type { AlertRule } from './types';
 
-export async function listAlertRules(workspaceId: Id<'workspaces'>): Promise<AlertRule[]> {
+export async function listAlertRules(projectId: Id<'projects'>): Promise<AlertRule[]> {
   const token = await convexAuthNextjsToken();
-  const docs = await fetchQuery(api.alerts.list, { workspaceId }, { token });
+  const docs = await fetchQuery(api.alerts.list, { projectId }, { token });
   return docs.map(toAlertRule);
 }

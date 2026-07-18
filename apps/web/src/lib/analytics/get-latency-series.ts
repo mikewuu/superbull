@@ -5,7 +5,7 @@ import type { Id } from '../../../convex/_generated/dataModel';
 import type { LatencySeriesResult } from './types';
 
 export async function getLatencySeries(args: {
-  workspaceId: Id<'workspaces'>;
+  projectId: Id<'projects'>;
   connectorId: Id<'connectors'>;
   queueName?: string;
   fromTs: number;

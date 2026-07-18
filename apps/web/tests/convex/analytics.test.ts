@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { beforeEach, describe, expect, it } from 'vitest';
 import { api } from '../../convex/_generated/api';
-import { INTERNAL_TOKEN, makeTestClient, seedConnector, seedWorkspace } from './test-helpers';
+import { INTERNAL_TOKEN, makeTestClient, seedConnector, seedProject } from './test-helpers';
 
 const HOUR = 3_600_000;
 
@@ -38,8 +38,8 @@ async function recordEvents(
 describe('analytics.throughputSeries', () => {
   it('buckets completed and failed counts by bucketMinutes', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
     await recordEvents(t, connectorId, [
       { uuid: '1', type: 'job.completed', queueName: 'q', ts: 100 },
       { uuid: '2', type: 'job.completed', queueName: 'q', ts: 200 },
@@ -49,7 +49,7 @@ describe('analytics.throughputSeries', () => {
     ]);
 
     const result = await asMember.query(api.analytics.throughputSeries, {
-      workspaceId,
+      projectId,
       connectorId,
       fromTs: 0,
       toTs: 2 * HOUR,
@@ -68,14 +68,14 @@ describe('analytics.throughputSeries', () => {
 
   it('zero-fills buckets with no events', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
     await recordEvents(t, connectorId, [
       { uuid: '1', type: 'job.completed', queueName: 'q', ts: 0 },
     ]);
 
     const result = await asMember.query(api.analytics.throughputSeries, {
-      workspaceId,
+      projectId,
       connectorId,
       fromTs: 0,
       toTs: 2 * HOUR,
@@ -94,8 +94,8 @@ describe('analytics.throughputSeries', () => {
 
   it('filters by queueName when provided', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
     await recordEvents(t, connectorId, [
       { uuid: '1', type: 'job.completed', queueName: 'emails', ts: 0 },
       { uuid: '2', type: 'job.completed', queueName: 'exports', ts: 0 },
@@ -103,7 +103,7 @@ describe('analytics.throughputSeries', () => {
     ]);
 
     const result = await asMember.query(api.analytics.throughputSeries, {
-      workspaceId,
+      projectId,
       connectorId,
       queueName: 'exports',
       fromTs: 0,
@@ -117,15 +117,15 @@ describe('analytics.throughputSeries', () => {
     });
   });
 
-  it('rejects a connector from a different workspace', async () => {
+  it('rejects a connector from a different project', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const other = await seedWorkspace(t);
-    const foreignConnectorId = await seedConnector(t, other.workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const other = await seedProject(t);
+    const foreignConnectorId = await seedConnector(t, other.projectId);
 
     await expect(
       asMember.query(api.analytics.throughputSeries, {
-        workspaceId,
+        projectId,
         connectorId: foreignConnectorId,
         fromTs: 0,
         toTs: 0,
@@ -136,12 +136,12 @@ describe('analytics.throughputSeries', () => {
 
   it('rejects an unauthenticated caller', async () => {
     const t = makeTestClient();
-    const { workspaceId } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
 
     await expect(
       t.query(api.analytics.throughputSeries, {
-        workspaceId,
+        projectId,
         connectorId,
         fromTs: 0,
         toTs: 0,
@@ -154,8 +154,8 @@ describe('analytics.throughputSeries', () => {
 describe('analytics.latencySeries', () => {
   it('computes p50/p95 from waitMs and durationMs of terminal events', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
     await recordEvents(t, connectorId, [
       { uuid: '1', type: 'job.completed', queueName: 'q', ts: 0, waitMs: 40, durationMs: 500 },
       { uuid: '2', type: 'job.completed', queueName: 'q', ts: 0, waitMs: 10, durationMs: 100 },
@@ -164,7 +164,7 @@ describe('analytics.latencySeries', () => {
     ]);
 
     const result = await asMember.query(api.analytics.latencySeries, {
-      workspaceId,
+      projectId,
       connectorId,
       fromTs: 0,
       toTs: 0,
@@ -179,11 +179,11 @@ describe('analytics.latencySeries', () => {
 
   it('returns null percentiles for buckets with no terminal events', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
 
     const result = await asMember.query(api.analytics.latencySeries, {
-      workspaceId,
+      projectId,
       connectorId,
       fromTs: 0,
       toTs: HOUR,
@@ -203,8 +203,8 @@ describe('analytics.latencySeries', () => {
 describe('analytics.queueTotals', () => {
   it('aggregates completed/failed and sums job_seconds per queue', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
     await recordEvents(t, connectorId, [
       { uuid: '1', type: 'job.completed', queueName: 'q1', ts: 0, durationMs: 1000 },
       { uuid: '2', type: 'job.completed', queueName: 'q1', ts: 0, durationMs: 2000 },
@@ -213,7 +213,7 @@ describe('analytics.queueTotals', () => {
     ]);
 
     const result = await asMember.query(api.analytics.queueTotals, {
-      workspaceId,
+      projectId,
       connectorId,
       fromTs: 0,
       toTs: 0,
@@ -232,8 +232,8 @@ describe('analytics.queueTotals', () => {
 describe('analytics.heatmap', () => {
   it('builds a 7x24 UTC weekday x hour matrix from terminal events', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
     const sunday10am = Date.UTC(2024, 0, 7, 10, 30, 0);
     const monday3pm = Date.UTC(2024, 0, 8, 15, 0, 0);
     await recordEvents(t, connectorId, [
@@ -243,7 +243,7 @@ describe('analytics.heatmap', () => {
     ]);
 
     const result = await asMember.query(api.analytics.heatmap, {
-      workspaceId,
+      projectId,
       connectorId,
       fromTs: sunday10am,
       toTs: monday3pm,

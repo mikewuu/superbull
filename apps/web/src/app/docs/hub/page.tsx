@@ -8,7 +8,7 @@ import { headers, ingestSection, intro, rows } from './content';
 export const metadata: Metadata = {
   title: 'Hosted app: SuperBull docs',
   description:
-    'The hosted app: workspaces, connectors, analytics, alerts, error tracking, and status pages.',
+    'The hosted app: projects, connectors, analytics, alerts, error tracking, and status pages.',
 };
 
 const headings = [...getHeadings(intro), ...getHeadings(ingestSection)];

@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     q: 'Do I need the hosted app to use SuperBull?',
-    a: 'No. Mount an adapter in your app and you have a full board and REST API in one process, no sign-in, no outbound connection anywhere. The hub is the hosted option: sign in, create a connector, and get history, analytics, alerts, and status pages across every connector in your workspace.',
+    a: 'No. Mount an adapter in your app and you have a full board and REST API in one process, no sign-in, no outbound connection anywhere. The hub is the hosted option: sign in, create a connector, and get history, analytics, alerts, and status pages across every connector in your project.',
   },
   {
     q: 'Is bullmq bundled with SuperBull?',

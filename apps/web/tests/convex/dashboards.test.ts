@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { beforeEach, describe, expect, it } from 'vitest';
 import { api } from '../../convex/_generated/api';
-import { makeTestClient, seedWorkspace } from './test-helpers';
+import { makeTestClient, seedProject } from './test-helpers';
 
 beforeEach(() => {
   process.env.CONVEX_INTERNAL_TOKEN = 'test-internal-token';
@@ -14,28 +14,28 @@ const validCard = {
 };
 
 describe('dashboards.create', () => {
-  it('creates a dashboard scoped to the workspace', async () => {
+  it('creates a dashboard scoped to the project', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
+    const { projectId, asMember } = await seedProject(t);
 
     const dashboard = await asMember.mutation(api.dashboards.create, {
-      workspaceId,
+      projectId,
       name: 'ops overview',
       cards: [validCard],
     });
 
     expect(dashboard.name).toBe('ops overview');
     expect(dashboard.cards).toEqual([validCard]);
-    expect(dashboard.workspaceId).toBe(workspaceId);
+    expect(dashboard.projectId).toBe(projectId);
   });
 
   it('rejects an invalid card type', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
+    const { projectId, asMember } = await seedProject(t);
 
     await expect(
       asMember.mutation(api.dashboards.create, {
-        workspaceId,
+        projectId,
         name: 'bad',
         cards: [{ ...validCard, type: 'bogus' }] as never,
       }),
@@ -44,43 +44,43 @@ describe('dashboards.create', () => {
 
   it('rejects an unauthenticated caller', async () => {
     const t = makeTestClient();
-    const { workspaceId } = await seedWorkspace(t);
+    const { projectId } = await seedProject(t);
 
     await expect(
-      t.mutation(api.dashboards.create, { workspaceId, name: 'x', cards: [] }),
+      t.mutation(api.dashboards.create, { projectId, name: 'x', cards: [] }),
     ).rejects.toThrow();
   });
 });
 
 describe('dashboards.list and findById', () => {
-  it('lists only this workspace dashboards', async () => {
+  it('lists only this project dashboards', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const other = await seedWorkspace(t);
-    await asMember.mutation(api.dashboards.create, { workspaceId, name: 'a', cards: [] });
-    await asMember.mutation(api.dashboards.create, { workspaceId, name: 'b', cards: [] });
+    const { projectId, asMember } = await seedProject(t);
+    const other = await seedProject(t);
+    await asMember.mutation(api.dashboards.create, { projectId, name: 'a', cards: [] });
+    await asMember.mutation(api.dashboards.create, { projectId, name: 'b', cards: [] });
     await other.asMember.mutation(api.dashboards.create, {
-      workspaceId: other.workspaceId,
-      name: 'other workspace',
+      projectId: other.projectId,
+      name: 'other project',
       cards: [],
     });
 
-    const dashboards = await asMember.query(api.dashboards.list, { workspaceId });
+    const dashboards = await asMember.query(api.dashboards.list, { projectId });
     expect(dashboards).toHaveLength(2);
   });
 
-  it('findById returns null for a dashboard in a different workspace', async () => {
+  it('findById returns null for a dashboard in a different project', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const other = await seedWorkspace(t);
+    const { projectId, asMember } = await seedProject(t);
+    const other = await seedProject(t);
     const created = await asMember.mutation(api.dashboards.create, {
-      workspaceId,
+      projectId,
       name: 'a',
       cards: [],
     });
 
     const found = await other.asMember.query(api.dashboards.findById, {
-      workspaceId: other.workspaceId,
+      projectId: other.projectId,
       id: created._id,
     });
     expect(found).toBeNull();
@@ -90,15 +90,15 @@ describe('dashboards.list and findById', () => {
 describe('dashboards.update', () => {
   it('patches the name only, leaving cards intact', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
+    const { projectId, asMember } = await seedProject(t);
     const created = await asMember.mutation(api.dashboards.create, {
-      workspaceId,
+      projectId,
       name: 'old name',
       cards: [validCard],
     });
 
     const updated = await asMember.mutation(api.dashboards.update, {
-      workspaceId,
+      projectId,
       id: created._id,
       name: 'new name',
     });
@@ -107,19 +107,19 @@ describe('dashboards.update', () => {
     expect(updated.cards).toEqual([validCard]);
   });
 
-  it('throws for a dashboard in a different workspace', async () => {
+  it('throws for a dashboard in a different project', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const other = await seedWorkspace(t);
+    const { projectId, asMember } = await seedProject(t);
+    const other = await seedProject(t);
     const created = await asMember.mutation(api.dashboards.create, {
-      workspaceId,
+      projectId,
       name: 'x',
       cards: [],
     });
 
     await expect(
       other.asMember.mutation(api.dashboards.update, {
-        workspaceId: other.workspaceId,
+        projectId: other.projectId,
         id: created._id,
         name: 'y',
       }),
@@ -130,16 +130,16 @@ describe('dashboards.update', () => {
 describe('dashboards.remove', () => {
   it('deletes a dashboard', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
+    const { projectId, asMember } = await seedProject(t);
     const created = await asMember.mutation(api.dashboards.create, {
-      workspaceId,
+      projectId,
       name: 'to delete',
       cards: [],
     });
 
-    await asMember.mutation(api.dashboards.remove, { workspaceId, id: created._id });
+    await asMember.mutation(api.dashboards.remove, { projectId, id: created._id });
 
-    const found = await asMember.query(api.dashboards.findById, { workspaceId, id: created._id });
+    const found = await asMember.query(api.dashboards.findById, { projectId, id: created._id });
     expect(found).toBeNull();
   });
 });

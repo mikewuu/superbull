@@ -45,7 +45,7 @@ describe('registerCleanQueueTool', () => {
   it('PUTs the clean route with the status and reports success on 204', async () => {
     vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
-      workspaceId: 'ws_1',
+      projectId: 'ws_1',
       name: 'proxy-a',
       version: null,
       queues: null,
@@ -71,7 +71,7 @@ describe('registerCleanQueueTool', () => {
   it('returns an error result when the queue is read-only', async () => {
     vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
-      workspaceId: 'ws_1',
+      projectId: 'ws_1',
       name: 'proxy-a',
       version: null,
       queues: null,

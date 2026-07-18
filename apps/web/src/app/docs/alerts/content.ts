@@ -1,11 +1,11 @@
 export const intro = `
 # Alerts
 
-Alert rules live in your workspace and are evaluated against ingested events
-every 5 minutes by a Convex cron. Create rules from the workspace's **Alerts**
+Alert rules live in your project and are evaluated against ingested events
+every 5 minutes by a Convex cron. Create rules from the project's **Alerts**
 page; there's no REST/MCP route for rule management yet.
 
-A rule is scoped to one connector or to every connector in the workspace, and
+A rule is scoped to one connector or to every connector in the project, and
 always has a \`window_minutes\` (how far back evaluation looks) and a
 notification email. The other fields depend on the type:
 
@@ -60,7 +60,7 @@ account:
   per email, subject \`[superbull] alert firing: <summary>\` (or
   \`alert resolved\`).
 - **Digest email**: sent daily at 09:00 UTC, one per distinct alert-rule email
-  address per workspace, summarizing that workspace's connectors over the last
+  address per project, summarizing that project's connectors over the last
   24 hours: completed/failed counts and the top error groups per connector.
   Every rule's email gets a digest, including disabled rules'.
 

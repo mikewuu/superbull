@@ -11,7 +11,7 @@ test('redirects to /signin when logged out', async ({ page }) => {
   await expect(page).toHaveURL(/\/signin$/);
 });
 
-test('signin via test-login lands in a workspace', async ({ page }) => {
+test('signin via test-login lands in a project', async ({ page }) => {
   await page.goto('/signin');
   await page.getByTestId('signin-test-login').click();
 

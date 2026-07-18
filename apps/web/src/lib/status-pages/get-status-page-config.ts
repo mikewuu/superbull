@@ -6,7 +6,7 @@ import { toStatusPageConfig } from './to-status-page-config';
 import type { StatusPageConfig } from './types';
 
 export async function getStatusPageConfig(args: {
-  workspaceId: Id<'workspaces'>;
+  projectId: Id<'projects'>;
   connectorId: Id<'connectors'>;
 }): Promise<StatusPageConfig | null> {
   const token = await convexAuthNextjsToken();

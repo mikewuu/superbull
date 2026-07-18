@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
-import { requireWorkspaceMember } from './access';
+import { requireProjectMember } from './access';
 
 function normalizeFingerprintMessage(message: string): string {
   const firstLine = message.split('\n')[0] ?? '';
@@ -23,7 +23,7 @@ function computeFingerprint(message: string, queueName: string): string {
 export async function upsertErrorGroup(
   ctx: MutationCtx,
   args: {
-    workspaceId: Id<'workspaces'>;
+    projectId: Id<'projects'>;
     connectorId: Id<'connectors'>;
     queueName: string;
     jobName?: string;
@@ -51,7 +51,7 @@ export async function upsertErrorGroup(
   }
 
   await ctx.db.insert('errorGroups', {
-    workspaceId: args.workspaceId,
+    projectId: args.projectId,
     connectorId: args.connectorId,
     fingerprint,
     queueName: args.queueName,
@@ -68,14 +68,14 @@ export async function upsertErrorGroup(
 
 export const listGroups = query({
   args: {
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     connectorId: v.id('connectors'),
     state: v.optional(v.union(v.literal('open'), v.literal('resolved'), v.literal('ignored'))),
   },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
+    await requireProjectMember(ctx, args.projectId);
     const connector = await ctx.db.get(args.connectorId);
-    if (!connector || connector.workspaceId !== args.workspaceId) {
+    if (!connector || connector.projectId !== args.projectId) {
       return [];
     }
 
@@ -99,11 +99,11 @@ export const listGroups = query({
 });
 
 export const getGroup = query({
-  args: { workspaceId: v.id('workspaces'), groupId: v.id('errorGroups') },
+  args: { projectId: v.id('projects'), groupId: v.id('errorGroups') },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
+    await requireProjectMember(ctx, args.projectId);
     const group = await ctx.db.get(args.groupId);
-    if (!group || group.workspaceId !== args.workspaceId) {
+    if (!group || group.projectId !== args.projectId) {
       return null;
     }
     return group;
@@ -112,14 +112,14 @@ export const getGroup = query({
 
 export const setGroupState = mutation({
   args: {
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     groupId: v.id('errorGroups'),
     state: v.union(v.literal('open'), v.literal('resolved'), v.literal('ignored')),
   },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
+    await requireProjectMember(ctx, args.projectId);
     const group = await ctx.db.get(args.groupId);
-    if (!group || group.workspaceId !== args.workspaceId) {
+    if (!group || group.projectId !== args.projectId) {
       throw new Error('unknown group');
     }
 

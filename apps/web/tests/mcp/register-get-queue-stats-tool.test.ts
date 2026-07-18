@@ -45,7 +45,7 @@ describe('registerGetQueueStatsTool', () => {
   it('GETs the stats route and returns the stats payload', async () => {
     vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
-      workspaceId: 'ws_1',
+      projectId: 'ws_1',
       name: 'proxy-a',
       version: null,
       queues: null,
@@ -85,7 +85,7 @@ describe('registerGetQueueStatsTool', () => {
   it('returns an error result when the connector rejects the request', async () => {
     vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
-      workspaceId: 'ws_1',
+      projectId: 'ws_1',
       name: 'proxy-a',
       version: null,
       queues: null,

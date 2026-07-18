@@ -3,7 +3,7 @@ import { query } from './_generated/server';
 
 // Round 2: signup is open (multi-tenant, Google auth). The old
 // single-account `canSignUp` gate is gone — every sign-in bootstraps its own
-// workspace, see convex/auth.ts's afterUserCreatedOrUpdated.
+// project, see convex/auth.ts's afterUserCreatedOrUpdated.
 
 export const viewer = query({
   args: {},

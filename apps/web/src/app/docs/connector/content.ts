@@ -3,7 +3,7 @@ export const intro = `
 
 \`@superbull/connector\` is a headless SuperBull agent: it watches your real
 \`bullmq\` queues over your own Redis connection and streams what it sees to your
-workspace. It opens **one outbound WebSocket** to the SuperBull gateway and
+project. It opens **one outbound WebSocket** to the SuperBull gateway and
 nothing else: no inbound port, no public URL, nothing to put behind a load
 balancer or open a firewall rule for.
 
@@ -14,13 +14,13 @@ npx @superbull/connector --token <enrollment-token>
 The bin is \`superbull-connector\`. Only the enrollment token (\`--token\`) is
 required; \`--url\` defaults to the hosted gateway at
 \`wss://connect.superbull.com\`. Everything else has a default or is
-auto-discovered. The **New connector** dialog in your workspace prints this
+auto-discovered. The **New connector** dialog in your project prints this
 exact command with the token filled in.
 
 ## Getting a token
 
-Create a connector from your workspace (**Connectors → New connector**). You
-get a one-time enrollment token, shown exactly once. The workspace only ever stores
+Create a connector from your project (**Connectors → New connector**). You
+get a one-time enrollment token, shown exactly once. The project only ever stores
 a hash of it, so if you lose it before pasting it into \`--token\`, delete the
 connector and create a new one.
 `;
@@ -64,7 +64,7 @@ given explicitly, it exits with an error asking for \`--queues\`.
 ### Connector vs. connection
 
 A **connector** is the installed process: one \`npx @superbull/connector\`
-running next to a worker fleet, tied to one row in your workspace. A
+running next to a worker fleet, tied to one row in your project. A
 **connection** is that process's current live WebSocket session; a connector
 can exist with no open connection (stopped, crashed, between deploys). The
 dashboard reflects both: the connector always exists once created, the
@@ -101,7 +101,7 @@ Events batch client-side (batches of 100, flushed at least every 5 seconds,
 up to 500 per frame) and are only considered sent once the gateway replies
 with \`events_ack\`; the connector's per-queue \`QueueEvents\` cursor only
 advances on ack. A dropped ack means the same events ship again on reconnect,
-and the workspace dedupes incoming events by their \`uuid\` (scoped per
+and the project dedupes incoming events by their \`uuid\` (scoped per
 connector), so retries are safe. If more than 5000 events pile up while disconnected, the oldest are
 dropped with a warning rather than growing memory without bound.
 

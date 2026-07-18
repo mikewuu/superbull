@@ -6,14 +6,10 @@ import { toSavedDashboard } from './to-saved-dashboard';
 import type { SavedDashboard } from './types';
 
 export async function findDashboardById(
-  workspaceId: Id<'workspaces'>,
+  projectId: Id<'projects'>,
   dashboardId: Id<'savedDashboards'>,
 ): Promise<SavedDashboard | null> {
   const token = await convexAuthNextjsToken();
-  const doc = await fetchQuery(
-    api.dashboards.findById,
-    { workspaceId, id: dashboardId },
-    { token },
-  );
+  const doc = await fetchQuery(api.dashboards.findById, { projectId, id: dashboardId }, { token });
   return doc ? toSavedDashboard(doc) : null;
 }

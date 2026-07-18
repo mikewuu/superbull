@@ -5,7 +5,7 @@ import type { Id } from '../../../convex/_generated/dataModel';
 import type { ThroughputSeriesResult } from './types';
 
 export async function getThroughputSeries(args: {
-  workspaceId: Id<'workspaces'>;
+  projectId: Id<'projects'>;
   connectorId: Id<'connectors'>;
   queueName?: string;
   fromTs: number;

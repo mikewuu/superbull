@@ -6,7 +6,7 @@ import { toSavedDashboard } from './to-saved-dashboard';
 import type { DashboardCard, SavedDashboard } from './types';
 
 export async function createDashboard(args: {
-  workspaceId: Id<'workspaces'>;
+  projectId: Id<'projects'>;
   name: string;
   cards: DashboardCard[];
 }): Promise<SavedDashboard> {

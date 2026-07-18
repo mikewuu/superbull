@@ -15,7 +15,7 @@ export interface CreateConnectorResult {
 // Convex's runtime has no node:crypto, so the enrollment token is generated
 // here (the Next server action) and only its hash is ever sent to Convex.
 export async function createConnector(
-  workspaceId: Id<'workspaces'>,
+  projectId: Id<'projects'>,
   name: string,
 ): Promise<CreateConnectorResult> {
   const token = randomBytes(32).toString('hex');
@@ -24,7 +24,7 @@ export async function createConnector(
   const authToken = await convexAuthNextjsToken();
   const doc = await fetchMutation(
     api.connectors.createConnector,
-    { workspaceId, name, tokenHash },
+    { projectId, name, tokenHash },
     { token: authToken },
   );
 

@@ -6,7 +6,7 @@ import { toStatusPageConfig } from './to-status-page-config';
 import type { StatusPageConfig } from './types';
 
 export async function setStatusPageLogo(args: {
-  workspaceId: Id<'workspaces'>;
+  projectId: Id<'projects'>;
   configId: Id<'statusPageConfigs'>;
   storageId: Id<'_storage'>;
 }): Promise<StatusPageConfig> {

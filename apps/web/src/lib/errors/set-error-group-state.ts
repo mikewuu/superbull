@@ -6,7 +6,7 @@ import { toErrorGroup } from './to-error-group';
 import type { ErrorGroup, ErrorGroupState } from './types';
 
 export async function setErrorGroupState(args: {
-  workspaceId: Id<'workspaces'>;
+  projectId: Id<'projects'>;
   groupId: Id<'errorGroups'>;
   state: ErrorGroupState;
 }): Promise<ErrorGroup> {

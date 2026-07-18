@@ -7,7 +7,7 @@ import {
   assertDefined,
   makeTestClient,
   seedConnector,
-  seedWorkspace,
+  seedProject,
 } from './test-helpers';
 
 const DAY_MS = 86_400_000;
@@ -24,7 +24,7 @@ type TestClient = ReturnType<typeof makeTestClient>;
 async function insertEvent(
   t: TestClient,
   args: {
-    workspaceId: Id<'workspaces'>;
+    projectId: Id<'projects'>;
     connectorId: Id<'connectors'>;
     uuid: string;
     type: string;
@@ -40,11 +40,11 @@ async function insertEvent(
 describe('statusPages (user-facing config)', () => {
   it('upsert creates a config that getByConnector returns', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
 
     const created = await asMember.mutation(api.statusPages.upsert, {
-      workspaceId,
+      projectId,
       connectorId,
       slug: 'my-status-page',
       isEnabled: true,
@@ -52,7 +52,7 @@ describe('statusPages (user-facing config)', () => {
     });
 
     const found = await asMember.query(api.statusPages.getByConnector, {
-      workspaceId,
+      projectId,
       connectorId,
     });
     expect(found).toMatchObject({ _id: created._id, slug: 'my-status-page', title: 'My Status' });
@@ -60,13 +60,13 @@ describe('statusPages (user-facing config)', () => {
 
   it('upsert throws for invalid slug shapes', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
 
     for (const slug of ['ab', 'ABC-de', 'abc de']) {
       await expect(
         asMember.mutation(api.statusPages.upsert, {
-          workspaceId,
+          projectId,
           connectorId,
           slug,
           isEnabled: true,
@@ -78,12 +78,12 @@ describe('statusPages (user-facing config)', () => {
 
   it('rejects a slug already used by a different connector, but allows re-saving the same connector', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorA = await seedConnector(t, workspaceId, { name: 'connector-a' });
-    const connectorB = await seedConnector(t, workspaceId, { name: 'connector-b' });
+    const { projectId, asMember } = await seedProject(t);
+    const connectorA = await seedConnector(t, projectId, { name: 'connector-a' });
+    const connectorB = await seedConnector(t, projectId, { name: 'connector-b' });
 
     const configA = await asMember.mutation(api.statusPages.upsert, {
-      workspaceId,
+      projectId,
       connectorId: connectorA,
       slug: 'foo-bar',
       isEnabled: true,
@@ -92,7 +92,7 @@ describe('statusPages (user-facing config)', () => {
 
     await expect(
       asMember.mutation(api.statusPages.upsert, {
-        workspaceId,
+        projectId,
         connectorId: connectorB,
         slug: 'foo-bar',
         isEnabled: true,
@@ -101,7 +101,7 @@ describe('statusPages (user-facing config)', () => {
     ).rejects.toThrow();
 
     const resaved = await asMember.mutation(api.statusPages.upsert, {
-      workspaceId,
+      projectId,
       connectorId: connectorA,
       slug: 'foo-bar',
       isEnabled: true,
@@ -110,15 +110,15 @@ describe('statusPages (user-facing config)', () => {
     expect(resaved._id).toBe(configA._id);
   });
 
-  it('rejects a connector from a different workspace', async () => {
+  it('rejects a connector from a different project', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const other = await seedWorkspace(t);
-    const foreignConnectorId = await seedConnector(t, other.workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const other = await seedProject(t);
+    const foreignConnectorId = await seedConnector(t, other.projectId);
 
     await expect(
       asMember.mutation(api.statusPages.upsert, {
-        workspaceId,
+        projectId,
         connectorId: foreignConnectorId,
         slug: 'nope',
         isEnabled: true,
@@ -138,10 +138,10 @@ describe('statusPages public queries (unauthenticated, interface unchanged)', ()
 
   it('getPublicPage and getPublicUptime return null when the config is disabled', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
     await asMember.mutation(api.statusPages.upsert, {
-      workspaceId,
+      projectId,
       connectorId,
       slug: 'disabled-page',
       isEnabled: false,
@@ -154,10 +154,10 @@ describe('statusPages public queries (unauthenticated, interface unchanged)', ()
 
   it('getPublicPage returns title, null logo_url, and queues when enabled', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
     await asMember.mutation(api.statusPages.upsert, {
-      workspaceId,
+      projectId,
       connectorId,
       slug: 'enabled-page',
       isEnabled: true,
@@ -175,10 +175,10 @@ describe('statusPages public queries (unauthenticated, interface unchanged)', ()
 
   it('aggregates all queues into overall when queueNames is unset, with 90 daily buckets', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
     await asMember.mutation(api.statusPages.upsert, {
-      workspaceId,
+      projectId,
       connectorId,
       slug: 'uptime-all',
       isEnabled: true,
@@ -187,7 +187,7 @@ describe('statusPages public queries (unauthenticated, interface unchanged)', ()
 
     for (let i = 0; i < 9; i++) {
       await insertEvent(t, {
-        workspaceId,
+        projectId,
         connectorId,
         uuid: `completed-${i}`,
         type: 'job.completed',
@@ -196,7 +196,7 @@ describe('statusPages public queries (unauthenticated, interface unchanged)', ()
       });
     }
     await insertEvent(t, {
-      workspaceId,
+      projectId,
       connectorId,
       uuid: 'failed-0',
       type: 'job.failed',
@@ -221,10 +221,10 @@ describe('statusPages public queries (unauthenticated, interface unchanged)', ()
 
   it('scopes overall to configured queues, aggregating them while excluding other queues on the connector', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
     await asMember.mutation(api.statusPages.upsert, {
-      workspaceId,
+      projectId,
       connectorId,
       slug: 'uptime-scoped',
       isEnabled: true,
@@ -245,7 +245,7 @@ describe('statusPages public queries (unauthenticated, interface unchanged)', ()
       ['other-2', 'job.failed', 'other-queue'],
     ];
     for (const [uuid, type, queueName] of events) {
-      await insertEvent(t, { workspaceId, connectorId, uuid, type, queueName, ts: day });
+      await insertEvent(t, { projectId, connectorId, uuid, type, queueName, ts: day });
     }
 
     const uptime = await t.query(api.statusPages.getPublicUptime, { slug: 'uptime-scoped' });

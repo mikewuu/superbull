@@ -4,7 +4,7 @@ const { created, revalidated } = vi.hoisted(() => {
   return { created: [] as unknown[], revalidated: [] as string[] };
 });
 
-const fakeWorkspace = { _id: 'workspace-1', name: 'Acme', slug: 'acme' };
+const fakeProject = { _id: 'project-1', name: 'Acme', slug: 'acme' };
 
 vi.mock('next/cache', () => {
   return {
@@ -14,10 +14,10 @@ vi.mock('next/cache', () => {
   };
 });
 
-vi.mock('../src/lib/workspaces/require-workspace-for-slug', () => {
+vi.mock('../src/lib/projects/require-project-for-slug', () => {
   return {
-    async requireWorkspaceForSlug(slug: string) {
-      return { workspace: { ...fakeWorkspace, slug }, member: { role: 'owner' } };
+    async requireProjectForSlug(slug: string) {
+      return { project: { ...fakeProject, slug }, member: { role: 'owner' } };
     },
   };
 });
@@ -41,7 +41,7 @@ vi.mock('../src/lib/alerts/update-alert-rule', () => {
 
 vi.mock('../src/lib/alerts/delete-alert-rule', () => {
   return {
-    async deleteAlertRule(_workspaceId: string, _id: string) {
+    async deleteAlertRule(_projectId: string, _id: string) {
       return undefined;
     },
   };
@@ -63,7 +63,7 @@ function buildFormData(fields: Record<string, string>): FormData {
 
 describe('createAlertRuleAction', () => {
   it('rejects a missing email', async () => {
-    const { createAlertRuleAction } = await import('../src/app/app/[workspaceSlug]/alerts/actions');
+    const { createAlertRuleAction } = await import('../src/app/app/[projectSlug]/alerts/actions');
 
     const result = await createAlertRuleAction(
       'acme',
@@ -76,7 +76,7 @@ describe('createAlertRuleAction', () => {
   });
 
   it('rejects a missing or non-positive window', async () => {
-    const { createAlertRuleAction } = await import('../src/app/app/[workspaceSlug]/alerts/actions');
+    const { createAlertRuleAction } = await import('../src/app/app/[projectSlug]/alerts/actions');
 
     const result = await createAlertRuleAction(
       'acme',
@@ -88,7 +88,7 @@ describe('createAlertRuleAction', () => {
   });
 
   it('rejects a failed_threshold rule without a threshold', async () => {
-    const { createAlertRuleAction } = await import('../src/app/app/[workspaceSlug]/alerts/actions');
+    const { createAlertRuleAction } = await import('../src/app/app/[projectSlug]/alerts/actions');
 
     const result = await createAlertRuleAction(
       'acme',
@@ -100,7 +100,7 @@ describe('createAlertRuleAction', () => {
   });
 
   it('rejects a stuck_queue rule without a queue name', async () => {
-    const { createAlertRuleAction } = await import('../src/app/app/[workspaceSlug]/alerts/actions');
+    const { createAlertRuleAction } = await import('../src/app/app/[projectSlug]/alerts/actions');
 
     const result = await createAlertRuleAction(
       'acme',
@@ -112,7 +112,7 @@ describe('createAlertRuleAction', () => {
   });
 
   it('creates the rule and revalidates on a valid submission', async () => {
-    const { createAlertRuleAction } = await import('../src/app/app/[workspaceSlug]/alerts/actions');
+    const { createAlertRuleAction } = await import('../src/app/app/[projectSlug]/alerts/actions');
 
     const result = await createAlertRuleAction(
       'acme',
@@ -133,7 +133,7 @@ describe('createAlertRuleAction', () => {
 
 describe('setAlertRuleEnabledAction and deleteAlertRuleAction', () => {
   it('revalidates the alerts page after toggling a rule', async () => {
-    const actions = await import('../src/app/app/[workspaceSlug]/alerts/actions');
+    const actions = await import('../src/app/app/[projectSlug]/alerts/actions');
 
     await actions.setAlertRuleEnabledAction('acme', 'rule-1', false);
 
@@ -141,7 +141,7 @@ describe('setAlertRuleEnabledAction and deleteAlertRuleAction', () => {
   });
 
   it('revalidates the alerts page after deleting a rule', async () => {
-    const actions = await import('../src/app/app/[workspaceSlug]/alerts/actions');
+    const actions = await import('../src/app/app/[projectSlug]/alerts/actions');
 
     await actions.deleteAlertRuleAction('acme', 'rule-1');
 

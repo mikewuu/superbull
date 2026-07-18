@@ -7,12 +7,12 @@ ingested events. There's no separate "incident" model to maintain by hand.
 
 ## Configure
 
-From the workspace's **Status pages** section, pick a connector, a slug, a
+From the project's **Status pages** section, pick a connector, a slug, a
 title, an optional logo, and which queues to include (empty means all queues
 on that connector). One config per connector:
 
 - \`slug\`: 3-50 characters, lowercase letters, digits, and hyphens
-  (\`/^[a-z0-9-]{3,50}$/\`), globally unique across all workspaces.
+  (\`/^[a-z0-9-]{3,50}$/\`), globally unique across all projects.
 - \`is_enabled\`: a disabled page 404s publicly without losing its config.
 - \`queue_names\`: when set, the page shows one uptime strip per queue below
   the overall strip (per-queue strips only render when more than one queue is

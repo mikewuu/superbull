@@ -4,7 +4,7 @@ import type { Connector } from './types';
 export function toConnector(doc: Doc<'connectors'>): Connector {
   return {
     id: doc._id,
-    workspaceId: doc.workspaceId,
+    projectId: doc.projectId,
     name: doc.name,
     version: doc.version ?? null,
     queues: doc.queues ?? null,

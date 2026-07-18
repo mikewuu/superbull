@@ -4,9 +4,9 @@ import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
 
 export async function deleteAlertRule(
-  workspaceId: Id<'workspaces'>,
+  projectId: Id<'projects'>,
   id: Id<'alertRules'>,
 ): Promise<void> {
   const token = await convexAuthNextjsToken();
-  await fetchMutation(api.alerts.remove, { workspaceId, id }, { token });
+  await fetchMutation(api.alerts.remove, { projectId, id }, { token });
 }

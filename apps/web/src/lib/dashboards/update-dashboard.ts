@@ -6,7 +6,7 @@ import { toSavedDashboard } from './to-saved-dashboard';
 import type { DashboardCard, SavedDashboard } from './types';
 
 export async function updateDashboard(args: {
-  workspaceId: Id<'workspaces'>;
+  projectId: Id<'projects'>;
   id: Id<'savedDashboards'>;
   name?: string;
   cards?: DashboardCard[];

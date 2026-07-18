@@ -13,7 +13,7 @@ const annotationSchema = z.object({
 });
 
 // TRANSITIONAL — global SUPERBULL_API_TOKEN hub API. Round 3 gives this
-// per-workspace API keys. `source_id` on the wire is a connector id.
+// per-project API keys. `source_id` on the wire is a connector id.
 export const GET = buildRoute({
   query: z.object({
     source_id: z.string(),

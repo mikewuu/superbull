@@ -45,7 +45,7 @@ describe('registerListQueuesTool', () => {
   it('forwards to the proxy and returns a name/counts/is_paused summary', async () => {
     vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
-      workspaceId: 'ws_1',
+      projectId: 'ws_1',
       name: 'proxy-a',
       version: null,
       queues: null,

@@ -45,7 +45,7 @@ describe('registerPauseQueueTool', () => {
   it('PUTs the pause route and reports success on 204', async () => {
     vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
-      workspaceId: 'ws_1',
+      projectId: 'ws_1',
       name: 'proxy-a',
       version: null,
       queues: null,

@@ -8,7 +8,7 @@ const connectedOutput =
   '✓ connected to wss://connect.superbull.com\n✓ watching 2 queues, live in the dashboard';
 
 const enrollNote =
-  'Connectors → New connector in your workspace\n→ copy the one-time token it shows you\n→ paste it into --token above';
+  'Connectors → New connector in your project\n→ copy the one-time token it shows you\n→ paste it into --token above';
 
 export function ThreeWaysSection(): React.ReactElement {
   return (
@@ -69,8 +69,8 @@ export function ThreeWaysSection(): React.ReactElement {
           <div className="rounded-2xl border border-border-subtle bg-bg-default p-6 shadow-sm lg:col-span-1">
             <h3 className="text-lg font-semibold text-content-emphasis">Hub</h3>
             <p className="mt-2 text-2sm leading-6 text-content-default">
-              Sign in, and every connector in your workspace gets history, analytics, error
-              tracking, email alerts, and a public status page.
+              Sign in, and every connector in your project gets history, analytics, error tracking,
+              email alerts, and a public status page.
             </p>
           </div>
           <div className="relative min-w-0 lg:col-span-2">

@@ -35,63 +35,63 @@ export async function requireUser(
 }
 
 // 404-not-403: a non-member gets the same "not found" as a bad id, so
-// workspace membership is never leaked by the error shape.
-export async function requireWorkspaceMember(
+// project membership is never leaked by the error shape.
+export async function requireProjectMember(
   ctx: QueryCtx | MutationCtx,
-  workspaceId: Id<'workspaces'>,
+  projectId: Id<'projects'>,
 ): Promise<{
   userId: Id<'users'>;
   user: Doc<'users'>;
   member: Doc<'members'>;
-  workspace: Doc<'workspaces'>;
+  project: Doc<'projects'>;
 }> {
   const { userId, user } = await requireUser(ctx);
   const member = await ctx.db
     .query('members')
-    .withIndex('by_workspace_user', (q) => q.eq('workspaceId', workspaceId).eq('userId', userId))
+    .withIndex('by_project_user', (q) => q.eq('projectId', projectId).eq('userId', userId))
     .first();
 
   if (!member) {
-    throw new Error('Workspace not found');
+    throw new Error('Project not found');
   }
 
-  const workspace = await ctx.db.get(workspaceId);
-  if (!workspace) {
-    throw new Error('Workspace not found');
+  const project = await ctx.db.get(projectId);
+  if (!project) {
+    throw new Error('Project not found');
   }
 
-  return { userId, user, member, workspace };
+  return { userId, user, member, project };
 }
 
-export async function requireWorkspaceMemberBySlug(
+export async function requireProjectMemberBySlug(
   ctx: QueryCtx | MutationCtx,
   slug: string,
 ): Promise<{
   userId: Id<'users'>;
   user: Doc<'users'>;
   member: Doc<'members'>;
-  workspace: Doc<'workspaces'>;
+  project: Doc<'projects'>;
 }> {
   const { userId, user } = await requireUser(ctx);
-  const workspace = await ctx.db
-    .query('workspaces')
+  const project = await ctx.db
+    .query('projects')
     .withIndex('by_slug', (q) => q.eq('slug', slug))
     .first();
 
-  if (!workspace) {
-    throw new Error('Workspace not found');
+  if (!project) {
+    throw new Error('Project not found');
   }
 
   const member = await ctx.db
     .query('members')
-    .withIndex('by_workspace_user', (q) => q.eq('workspaceId', workspace._id).eq('userId', userId))
+    .withIndex('by_project_user', (q) => q.eq('projectId', project._id).eq('userId', userId))
     .first();
 
   if (!member) {
-    throw new Error('Workspace not found');
+    throw new Error('Project not found');
   }
 
-  return { userId, user, member, workspace };
+  return { userId, user, member, project };
 }
 
 export function requireRole(member: Doc<'members'>, roles: Array<Doc<'members'>['role']>): void {
@@ -100,10 +100,10 @@ export function requireRole(member: Doc<'members'>, roles: Array<Doc<'members'>[
   }
 }
 
-// Resolves a connector's workspace and checks the caller is a member of it.
+// Resolves a connector's project and checks the caller is a member of it.
 // Every connector-scoped query/mutation that takes a raw connectorId string
 // (as opposed to a validated v.id('connectors')) should route through this
-// so a client can never point a connectorId at a workspace it doesn't belong
+// so a client can never point a connectorId at a project it doesn't belong
 // to and read another tenant's data.
 export async function requireConnectorMember(
   ctx: QueryCtx | MutationCtx,
@@ -112,16 +112,13 @@ export async function requireConnectorMember(
   userId: Id<'users'>;
   user: Doc<'users'>;
   member: Doc<'members'>;
-  workspace: Doc<'workspaces'>;
+  project: Doc<'projects'>;
   connector: Doc<'connectors'>;
 }> {
   const connector = await ctx.db.get(connectorId);
   if (!connector) {
     throw new Error('Connector not found');
   }
-  const { userId, user, member, workspace } = await requireWorkspaceMember(
-    ctx,
-    connector.workspaceId,
-  );
-  return { userId, user, member, workspace, connector };
+  const { userId, user, member, project } = await requireProjectMember(ctx, connector.projectId);
+  return { userId, user, member, project, connector };
 }

@@ -45,7 +45,7 @@ describe('registerGetQueueTool', () => {
   it('forwards with active_queue/status/page query params and returns the matching queue', async () => {
     vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
-      workspaceId: 'ws_1',
+      projectId: 'ws_1',
       name: 'proxy-a',
       version: null,
       queues: null,

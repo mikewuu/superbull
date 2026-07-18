@@ -7,23 +7,23 @@ export const memberRole = v.union(v.literal('owner'), v.literal('admin'), v.lite
 export default defineSchema({
   ...authTables,
 
-  workspaces: defineTable({
+  projects: defineTable({
     name: v.string(),
     slug: v.string(),
     createdAt: v.number(),
   }).index('by_slug', ['slug']),
 
   members: defineTable({
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     userId: v.id('users'),
     role: memberRole,
   })
     .index('by_user', ['userId'])
-    .index('by_workspace', ['workspaceId'])
-    .index('by_workspace_user', ['workspaceId', 'userId']),
+    .index('by_project', ['projectId'])
+    .index('by_project_user', ['projectId', 'userId']),
 
   invites: defineTable({
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     email: v.string(),
     role: memberRole,
     tokenHash: v.string(),
@@ -31,7 +31,7 @@ export default defineSchema({
     expiresAt: v.number(),
     acceptedAt: v.optional(v.number()),
   })
-    .index('by_workspace', ['workspaceId'])
+    .index('by_project', ['projectId'])
     .index('by_token_hash', ['tokenHash'])
     .index('by_email', ['email']),
 
@@ -40,7 +40,7 @@ export default defineSchema({
   // stored) — connectors carry no URL and no plaintext credential; the only
   // transport is the outbound WS session they hold open to apps/gateway.
   connectors: defineTable({
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     name: v.string(),
     tokenHash: v.optional(v.string()),
     version: v.optional(v.string()),
@@ -48,12 +48,12 @@ export default defineSchema({
     lastConnectedAt: v.optional(v.number()),
     lastDisconnectedAt: v.optional(v.number()),
   })
-    .index('by_workspace', ['workspaceId'])
+    .index('by_project', ['projectId'])
     .index('by_token_hash', ['tokenHash'])
-    .index('by_workspace_name', ['workspaceId', 'name']),
+    .index('by_project_name', ['projectId', 'name']),
 
   ingestEvents: defineTable({
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     connectorId: v.id('connectors'),
     uuid: v.string(),
     type: v.string(),
@@ -74,10 +74,10 @@ export default defineSchema({
     .index('by_connector_uuid', ['connectorId', 'uuid'])
     .index('by_connector_ts', ['connectorId', 'ts'])
     .index('by_connector_queue_ts', ['connectorId', 'queueName', 'ts'])
-    .index('by_workspace_ts', ['workspaceId', 'ts']),
+    .index('by_project_ts', ['projectId', 'ts']),
 
   errorGroups: defineTable({
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     connectorId: v.id('connectors'),
     fingerprint: v.string(),
     queueName: v.string(),
@@ -93,18 +93,18 @@ export default defineSchema({
     .index('by_connector_fingerprint', ['connectorId', 'fingerprint'])
     .index('by_connector_last_seen', ['connectorId', 'lastSeenTs'])
     .index('by_connector_state', ['connectorId', 'state'])
-    .index('by_workspace_last_seen', ['workspaceId', 'lastSeenTs']),
+    .index('by_project_last_seen', ['projectId', 'lastSeenTs']),
 
   deployAnnotations: defineTable({
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     connectorId: v.id('connectors'),
     label: v.string(),
     ts: v.number(),
   }).index('by_connector_ts', ['connectorId', 'ts']),
 
   alertRules: defineTable({
-    workspaceId: v.id('workspaces'),
-    // undefined connectorId = every connector in this rule's workspace.
+    projectId: v.id('projects'),
+    // undefined connectorId = every connector in this rule's project.
     connectorId: v.optional(v.id('connectors')),
     type: v.union(
       v.literal('failed_threshold'),
@@ -119,7 +119,7 @@ export default defineSchema({
     isEnabled: v.boolean(),
   })
     .index('by_enabled', ['isEnabled'])
-    .index('by_workspace', ['workspaceId']),
+    .index('by_project', ['projectId']),
 
   alertStates: defineTable({
     ruleId: v.id('alertRules'),
@@ -129,13 +129,13 @@ export default defineSchema({
   }).index('by_rule', ['ruleId']),
 
   savedDashboards: defineTable({
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     name: v.string(),
     cards: v.array(v.any()),
-  }).index('by_workspace', ['workspaceId']),
+  }).index('by_project', ['projectId']),
 
   statusPageConfigs: defineTable({
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     connectorId: v.id('connectors'),
     slug: v.string(),
     isEnabled: v.boolean(),
@@ -145,5 +145,5 @@ export default defineSchema({
   })
     .index('by_slug', ['slug'])
     .index('by_connector', ['connectorId'])
-    .index('by_workspace', ['workspaceId']),
+    .index('by_project', ['projectId']),
 });

@@ -13,7 +13,7 @@ const tree = `superbull/
 │   ├── bun/
 │   └── nestjs/
 └── apps/
-    ├── web/       hosted app: workspaces, alerts, analytics, status pages
+    ├── web/       hosted app: projects, alerts, analytics, status pages
     └── gateway/   WebSocket termination for connectors`;
 
 export function RepoTreeCard(): React.ReactElement {

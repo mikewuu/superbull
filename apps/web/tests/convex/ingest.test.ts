@@ -7,7 +7,7 @@ import {
   assertDefined,
   makeTestClient,
   seedConnector,
-  seedWorkspace,
+  seedProject,
 } from './test-helpers';
 
 beforeEach(() => {
@@ -15,10 +15,10 @@ beforeEach(() => {
 });
 
 describe('ingest.recordBatch (gateway contract)', () => {
-  it('accepts snake_case protocol events and stores them camelCase, scoped to the workspace', async () => {
+  it('accepts snake_case protocol events and stores them camelCase, scoped to the project', async () => {
     const t = makeTestClient();
-    const { workspaceId } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
 
     const result = await t.mutation(api.ingest.recordBatch, {
       internalToken: INTERNAL_TOKEN,
@@ -47,7 +47,7 @@ describe('ingest.recordBatch (gateway contract)', () => {
     expect(events).toHaveLength(2);
     const completed = events.find((event) => event.uuid === 'evt-a');
     expect(completed).toMatchObject({
-      workspaceId,
+      projectId,
       connectorId,
       queueName: 'emails',
       durationMs: 42,
@@ -56,13 +56,13 @@ describe('ingest.recordBatch (gateway contract)', () => {
     // the job.failed event should have spawned an error group
     const groups = await t.run(async (ctx) => ctx.db.query('errorGroups').collect());
     expect(groups).toHaveLength(1);
-    expect(assertDefined(groups[0]).workspaceId).toBe(workspaceId);
+    expect(assertDefined(groups[0]).projectId).toBe(projectId);
   });
 
   it('dedupes by uuid across separate calls', async () => {
     const t = makeTestClient();
-    const { workspaceId } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
     const event = { uuid: 'evt-dup', type: 'job.completed', queue_name: 'q', ts: 1 };
 
     const first = await t.mutation(api.ingest.recordBatch, {
@@ -87,8 +87,8 @@ describe('ingest.recordBatch (gateway contract)', () => {
 
   it('dedupes by uuid within the same call', async () => {
     const t = makeTestClient();
-    const { workspaceId } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
     const event = { uuid: 'evt-same-call', type: 'job.completed', queue_name: 'q', ts: 1 };
 
     const result = await t.mutation(api.ingest.recordBatch, {
@@ -102,12 +102,12 @@ describe('ingest.recordBatch (gateway contract)', () => {
 
   it('throws for an unknown connector', async () => {
     const t = makeTestClient();
-    const { workspaceId } = await seedWorkspace(t);
+    const { projectId } = await seedProject(t);
 
     await expect(
       t.mutation(api.ingest.recordBatch, {
         internalToken: INTERNAL_TOKEN,
-        connectorId: workspaceId as unknown as Id<'connectors'>,
+        connectorId: projectId as unknown as Id<'connectors'>,
         events: [],
       }),
     ).rejects.toThrow();
@@ -115,8 +115,8 @@ describe('ingest.recordBatch (gateway contract)', () => {
 
   it('throws with the wrong internal token', async () => {
     const t = makeTestClient();
-    const { workspaceId } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
 
     await expect(
       t.mutation(api.ingest.recordBatch, {

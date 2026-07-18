@@ -48,7 +48,7 @@ export function SignInForm() {
           <img src="/logo-mark.webp" alt="" className="h-10 w-auto" />
           <div>
             <h1 className="text-lg font-semibold text-content-emphasis">SuperBull</h1>
-            <p className="mt-1 text-sm text-content-subtle">Sign in to your workspace</p>
+            <p className="mt-1 text-sm text-content-subtle">Sign in to your project</p>
           </div>
         </div>
         <div className="candy-card space-y-3 rounded-lg p-6">

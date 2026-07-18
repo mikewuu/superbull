@@ -18,8 +18,8 @@ function toAlertState(doc: {
   };
 }
 
-export async function listAlertStates(workspaceId: Id<'workspaces'>): Promise<AlertState[]> {
+export async function listAlertStates(projectId: Id<'projects'>): Promise<AlertState[]> {
   const token = await convexAuthNextjsToken();
-  const docs = await fetchQuery(api.alerts.listStates, { workspaceId }, { token });
+  const docs = await fetchQuery(api.alerts.listStates, { projectId }, { token });
   return docs.map(toAlertState);
 }

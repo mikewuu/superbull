@@ -1,6 +1,6 @@
 export interface Connector {
   id: string;
-  workspaceId: string;
+  projectId: string;
   name: string;
   version: string | null;
   queues: string[] | null;

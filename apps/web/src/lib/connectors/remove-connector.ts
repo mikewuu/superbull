@@ -4,9 +4,9 @@ import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
 
 export async function removeConnector(
-  workspaceId: Id<'workspaces'>,
+  projectId: Id<'projects'>,
   connectorId: Id<'connectors'>,
 ): Promise<void> {
   const token = await convexAuthNextjsToken();
-  await fetchMutation(api.connectors.removeConnector, { workspaceId, connectorId }, { token });
+  await fetchMutation(api.connectors.removeConnector, { projectId, connectorId }, { token });
 }

@@ -5,8 +5,8 @@ import type { Id } from '../../../convex/_generated/dataModel';
 import { toConnector } from './to-connector';
 import type { Connector } from './types';
 
-export async function listConnectors(workspaceId: Id<'workspaces'>): Promise<Connector[]> {
+export async function listConnectors(projectId: Id<'projects'>): Promise<Connector[]> {
   const token = await convexAuthNextjsToken();
-  const docs = await fetchQuery(api.connectors.listByWorkspace, { workspaceId }, { token });
+  const docs = await fetchQuery(api.connectors.listByProject, { projectId }, { token });
   return docs.map(toConnector);
 }

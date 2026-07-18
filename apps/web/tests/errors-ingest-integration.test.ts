@@ -6,7 +6,7 @@ import {
   assertDefined,
   makeTestClient,
   seedConnector,
-  seedWorkspace,
+  seedProject,
 } from './convex/test-helpers';
 
 beforeEach(() => {
@@ -16,8 +16,8 @@ beforeEach(() => {
 describe('ingest.recordBatch error group integration', () => {
   it('creates an error group when a job.failed event is recorded', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
 
     await t.mutation(api.ingest.recordBatch, {
       internalToken: INTERNAL_TOKEN,
@@ -34,7 +34,7 @@ describe('ingest.recordBatch error group integration', () => {
       ],
     });
 
-    const groups = await asMember.query(api.errors.listGroups, { workspaceId, connectorId });
+    const groups = await asMember.query(api.errors.listGroups, { projectId, connectorId });
     expect(groups).toHaveLength(1);
     expect(groups[0]).toMatchObject({
       queueName: 'emails',
@@ -46,8 +46,8 @@ describe('ingest.recordBatch error group integration', () => {
 
   it('does not create an error group for a non-failed event', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
 
     await t.mutation(api.ingest.recordBatch, {
       internalToken: INTERNAL_TOKEN,
@@ -55,14 +55,14 @@ describe('ingest.recordBatch error group integration', () => {
       events: [{ uuid: 'evt-1', type: 'job.completed', queue_name: 'emails', ts: 100 }],
     });
 
-    const groups = await asMember.query(api.errors.listGroups, { workspaceId, connectorId });
+    const groups = await asMember.query(api.errors.listGroups, { projectId, connectorId });
     expect(groups).toHaveLength(0);
   });
 
   it('does not double-increment the group count for a deduped uuid', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
     const event = {
       uuid: 'evt-dup',
       type: 'job.failed',
@@ -82,15 +82,15 @@ describe('ingest.recordBatch error group integration', () => {
       events: [event],
     });
 
-    const groups = await asMember.query(api.errors.listGroups, { workspaceId, connectorId });
+    const groups = await asMember.query(api.errors.listGroups, { projectId, connectorId });
     expect(groups).toHaveLength(1);
     expect(assertDefined(groups[0]).count).toBe(1);
   });
 
   it('increments the group count for two distinct failed events with the same fingerprint', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember } = await seedWorkspace(t);
-    const connectorId = await seedConnector(t, workspaceId);
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
 
     await t.mutation(api.ingest.recordBatch, {
       internalToken: INTERNAL_TOKEN,
@@ -113,7 +113,7 @@ describe('ingest.recordBatch error group integration', () => {
       ],
     });
 
-    const groups = await asMember.query(api.errors.listGroups, { workspaceId, connectorId });
+    const groups = await asMember.query(api.errors.listGroups, { projectId, connectorId });
     expect(groups).toHaveLength(1);
     expect(assertDefined(groups[0]).count).toBe(2);
   });

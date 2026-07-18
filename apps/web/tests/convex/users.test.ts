@@ -10,7 +10,7 @@ function makeTestClient() {
 
 // Round 2: signup is open (multi-tenant, Google auth) — the old
 // single-account `canSignUp` gate is gone. See convex/auth.ts's
-// afterUserCreatedOrUpdated for the personal-workspace bootstrap this
+// afterUserCreatedOrUpdated for the personal-project bootstrap this
 // replaced it with.
 
 describe('users.viewer', () => {

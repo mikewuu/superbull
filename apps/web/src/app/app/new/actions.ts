@@ -5,20 +5,20 @@ import { fetchMutation } from 'convex/nextjs';
 import { redirect } from 'next/navigation';
 import { api } from '../../../../convex/_generated/api';
 
-export interface CreateWorkspaceActionState {
+export interface CreateProjectActionState {
   error: string | null;
 }
 
-export async function createWorkspaceAction(
-  _prevState: CreateWorkspaceActionState,
+export async function createProjectAction(
+  _prevState: CreateProjectActionState,
   formData: FormData,
-): Promise<CreateWorkspaceActionState> {
+): Promise<CreateProjectActionState> {
   const name = String(formData.get('name') ?? '').trim();
   if (!name) {
-    return { error: 'Workspace name is required.' };
+    return { error: 'Project name is required.' };
   }
 
   const token = await convexAuthNextjsToken();
-  const workspace = await fetchMutation(api.workspaces.createWorkspace, { name }, { token });
-  redirect(`/app/${workspace.slug}`);
+  const project = await fetchMutation(api.projects.createProject, { name }, { token });
+  redirect(`/app/${project.slug}`);
 }

@@ -45,7 +45,7 @@ describe('registerAddJobTool', () => {
   it('POSTs the add route with a JSON body and returns the created job on 201', async () => {
     vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
-      workspaceId: 'ws_1',
+      projectId: 'ws_1',
       name: 'proxy-a',
       version: null,
       queues: null,
@@ -86,7 +86,7 @@ describe('registerAddJobTool', () => {
   it('returns an error result when the queue is read-only', async () => {
     vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
       id: 'src_1',
-      workspaceId: 'ws_1',
+      projectId: 'ws_1',
       name: 'proxy-a',
       version: null,
       queues: null,

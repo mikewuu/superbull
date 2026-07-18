@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
-import { requireRole, requireUser, requireWorkspaceMember } from './access';
+import { requireProjectMember, requireRole, requireUser } from './access';
 import { memberRole } from './schema';
 
 const inviteTtlMs = 7 * 24 * 60 * 60 * 1000;
@@ -16,13 +16,13 @@ function guardTokenHash(tokenHash: string): void {
 // how connector enrollment tokens are minted.
 export const create = mutation({
   args: {
-    workspaceId: v.id('workspaces'),
+    projectId: v.id('projects'),
     email: v.string(),
     role: memberRole,
     tokenHash: v.string(),
   },
   handler: async (ctx, args) => {
-    const { userId, member } = await requireWorkspaceMember(ctx, args.workspaceId);
+    const { userId, member } = await requireProjectMember(ctx, args.projectId);
     requireRole(member, ['owner', 'admin']);
     guardTokenHash(args.tokenHash);
 
@@ -32,7 +32,7 @@ export const create = mutation({
     }
 
     const inviteId = await ctx.db.insert('invites', {
-      workspaceId: args.workspaceId,
+      projectId: args.projectId,
       email,
       role: args.role,
       tokenHash: args.tokenHash,
@@ -47,13 +47,13 @@ export const create = mutation({
   },
 });
 
-export const listByWorkspace = query({
-  args: { workspaceId: v.id('workspaces') },
+export const listByProject = query({
+  args: { projectId: v.id('projects') },
   handler: async (ctx, args) => {
-    await requireWorkspaceMember(ctx, args.workspaceId);
+    await requireProjectMember(ctx, args.projectId);
     return await ctx.db
       .query('invites')
-      .withIndex('by_workspace', (q) => q.eq('workspaceId', args.workspaceId))
+      .withIndex('by_project', (q) => q.eq('projectId', args.projectId))
       .collect();
   },
 });
@@ -63,7 +63,7 @@ function isLive(invite: { acceptedAt?: number; expiresAt: number }): boolean {
 }
 
 // Unauthenticated by design: the accept page (/invite/[token]) needs to show
-// which workspace + role an invite grants before the visitor signs in.
+// which project + role an invite grants before the visitor signs in.
 export const findByTokenHash = query({
   args: { tokenHash: v.string() },
   handler: async (ctx, args) => {
@@ -74,11 +74,11 @@ export const findByTokenHash = query({
     if (!invite || !isLive(invite)) {
       return null;
     }
-    const workspace = await ctx.db.get(invite.workspaceId);
-    if (!workspace) {
+    const project = await ctx.db.get(invite.projectId);
+    if (!project) {
       return null;
     }
-    return { invite, workspace };
+    return { invite, project };
   },
 });
 
@@ -99,24 +99,22 @@ export const accept = mutation({
 
     const existing = await ctx.db
       .query('members')
-      .withIndex('by_workspace_user', (q) =>
-        q.eq('workspaceId', invite.workspaceId).eq('userId', userId),
-      )
+      .withIndex('by_project_user', (q) => q.eq('projectId', invite.projectId).eq('userId', userId))
       .first();
     if (!existing) {
       await ctx.db.insert('members', {
-        workspaceId: invite.workspaceId,
+        projectId: invite.projectId,
         userId,
         role: invite.role,
       });
     }
     await ctx.db.patch(invite._id, { acceptedAt: Date.now() });
 
-    const workspace = await ctx.db.get(invite.workspaceId);
-    if (!workspace) {
-      throw new Error('Workspace not found');
+    const project = await ctx.db.get(invite.projectId);
+    if (!project) {
+      throw new Error('Project not found');
     }
-    return { workspace };
+    return { project };
   },
 });
 
@@ -127,7 +125,7 @@ export const revoke = mutation({
     if (!invite) {
       return null;
     }
-    const { member } = await requireWorkspaceMember(ctx, invite.workspaceId);
+    const { member } = await requireProjectMember(ctx, invite.projectId);
     requireRole(member, ['owner', 'admin']);
     await ctx.db.delete(args.inviteId);
     return null;

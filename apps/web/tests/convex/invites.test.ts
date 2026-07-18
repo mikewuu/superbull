@@ -1,24 +1,24 @@
 /// <reference types="vite/client" />
 import { describe, expect, it } from 'vitest';
 import { api } from '../../convex/_generated/api';
-import { assertDefined, makeTestClient, seedWorkspace } from './test-helpers';
+import { assertDefined, makeTestClient, seedProject } from './test-helpers';
 
 const TOKEN_HASH = 'd'.repeat(64);
 
 describe('invites.create', () => {
   it('owner/admin can invite; a plain member cannot', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember: asOwner } = await seedWorkspace(t, { role: 'owner' });
+    const { projectId, asMember: asOwner } = await seedProject(t, { role: 'owner' });
     const { asMember: asPlainMember } = await (async () => {
       const userId = await t.run(async (ctx) =>
         ctx.db.insert('users', { email: 'member@example.com' }),
       );
-      await t.run(async (ctx) => ctx.db.insert('members', { workspaceId, userId, role: 'member' }));
+      await t.run(async (ctx) => ctx.db.insert('members', { projectId, userId, role: 'member' }));
       return { asMember: t.withIdentity({ subject: `${userId}|` }) };
     })();
 
     const invite = await asOwner.mutation(api.invites.create, {
-      workspaceId,
+      projectId,
       email: 'friend@example.com',
       role: 'member',
       tokenHash: TOKEN_HASH,
@@ -27,7 +27,7 @@ describe('invites.create', () => {
 
     await expect(
       asPlainMember.mutation(api.invites.create, {
-        workspaceId,
+        projectId,
         email: 'someone-else@example.com',
         role: 'member',
         tokenHash: 'e'.repeat(64),
@@ -39,9 +39,9 @@ describe('invites.create', () => {
 describe('invites.accept', () => {
   it('adds the accepting user as a member with the invite role', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember: asOwner } = await seedWorkspace(t, { role: 'owner' });
+    const { projectId, asMember: asOwner } = await seedProject(t, { role: 'owner' });
     await asOwner.mutation(api.invites.create, {
-      workspaceId,
+      projectId,
       email: 'newperson@example.com',
       role: 'admin',
       tokenHash: TOKEN_HASH,
@@ -53,14 +53,12 @@ describe('invites.accept', () => {
     const asNewUser = t.withIdentity({ subject: `${newUserId}|` });
 
     const result = await asNewUser.mutation(api.invites.accept, { tokenHash: TOKEN_HASH });
-    expect(result.workspace._id).toBe(workspaceId);
+    expect(result.project._id).toBe(projectId);
 
     const member = await t.run(async (ctx) =>
       ctx.db
         .query('members')
-        .withIndex('by_workspace_user', (q) =>
-          q.eq('workspaceId', workspaceId).eq('userId', newUserId),
-        )
+        .withIndex('by_project_user', (q) => q.eq('projectId', projectId).eq('userId', newUserId))
         .first(),
     );
     expect(member?.role).toBe('admin');
@@ -68,9 +66,9 @@ describe('invites.accept', () => {
 
   it('rejects an invite accepted by a different email', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember: asOwner } = await seedWorkspace(t, { role: 'owner' });
+    const { projectId, asMember: asOwner } = await seedProject(t, { role: 'owner' });
     await asOwner.mutation(api.invites.create, {
-      workspaceId,
+      projectId,
       email: 'expected@example.com',
       role: 'member',
       tokenHash: TOKEN_HASH,
@@ -88,9 +86,9 @@ describe('invites.accept', () => {
 
   it('rejects an expired invite', async () => {
     const t = makeTestClient();
-    const { workspaceId, asMember: asOwner } = await seedWorkspace(t, { role: 'owner' });
+    const { projectId, asMember: asOwner } = await seedProject(t, { role: 'owner' });
     await asOwner.mutation(api.invites.create, {
-      workspaceId,
+      projectId,
       email: 'late@example.com',
       role: 'member',
       tokenHash: TOKEN_HASH,

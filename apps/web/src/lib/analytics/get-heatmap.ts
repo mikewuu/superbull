@@ -5,7 +5,7 @@ import type { Id } from '../../../convex/_generated/dataModel';
 import type { HeatmapResult } from './types';
 
 export async function getHeatmap(args: {
-  workspaceId: Id<'workspaces'>;
+  projectId: Id<'projects'>;
   connectorId: Id<'connectors'>;
   fromTs: number;
   toTs: number;

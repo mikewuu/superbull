@@ -14,7 +14,7 @@ interface InvitePageProps {
 // proxy.ts requires auth for /invite/(.*), so by the time this server
 // renders the caller is already signed in — findByTokenHash itself is an
 // unauthenticated query (it has to be, so the accept page can render the
-// workspace/role preview before the redirect-to-signin round trip
+// project/role preview before the redirect-to-signin round trip
 // completes), but accept() below requires a session.
 export default async function InvitePage(props: InvitePageProps) {
   const { token } = await props.params;
@@ -26,15 +26,15 @@ export default async function InvitePage(props: InvitePageProps) {
     notFound();
   }
 
-  const { invite, workspace } = result;
+  const { invite, project } = result;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg-muted p-6">
       <div className="w-full max-w-sm">
         <div className="candy-card rounded-lg p-6 text-center">
-          <h1 className="text-lg font-semibold text-content-emphasis">Join {workspace.name}</h1>
+          <h1 className="text-lg font-semibold text-content-emphasis">Join {project.name}</h1>
           <p className="mt-2 text-sm text-content-subtle">
-            You&apos;ve been invited to join <strong>{workspace.name}</strong> as{' '}
+            You&apos;ve been invited to join <strong>{project.name}</strong> as{' '}
             <strong>{invite.role}</strong>.
           </p>
           <div className="mt-5">

@@ -22,7 +22,7 @@ interface NormalizedEvent {
 
 async function insertEvents(
   ctx: MutationCtx,
-  workspaceId: Id<'workspaces'>,
+  projectId: Id<'projects'>,
   connectorId: Id<'connectors'>,
   events: NormalizedEvent[],
 ): Promise<{ accepted: number; deduped: number }> {
@@ -42,12 +42,12 @@ async function insertEvents(
       deduped++;
       continue;
     }
-    await ctx.db.insert('ingestEvents', { workspaceId, connectorId, ...event });
+    await ctx.db.insert('ingestEvents', { projectId, connectorId, ...event });
     accepted++;
 
     if (event.type === 'job.failed' && event.failedReason) {
       await upsertErrorGroup(ctx, {
-        workspaceId,
+        projectId,
         connectorId,
         queueName: event.queueName,
         jobName: event.jobName,
@@ -107,7 +107,7 @@ export const recordBatch = mutation({
       oldestWaitingMs: event.oldest_waiting_ms ?? undefined,
     }));
 
-    return await insertEvents(ctx, connector.workspaceId, args.connectorId, events);
+    return await insertEvents(ctx, connector.projectId, args.connectorId, events);
   },
 });
 

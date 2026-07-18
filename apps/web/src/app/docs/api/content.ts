@@ -271,12 +271,12 @@ export const hostedIntro = `
 ## Hosted management API
 
 The hosted app (superbull.com) additionally exposes a small management surface
-under \`/api/...\` on the web app itself. It predates workspaces: every route
+under \`/api/...\` on the web app itself. It predates projects: every route
 below authenticates with a single deployment-wide bearer token
 (\`Authorization: Bearer <SUPERBULL_API_TOKEN>\`, timing-safe compared), except
 \`/api/health\`, which is public. This surface is transitional: it still speaks
 in terms of "sources" (the pre-rewrite name for connectors) on the wire, and
-per-workspace API keys are planned to replace the global token. Authenticated
+per-project API keys are planned to replace the global token. Authenticated
 calls are rate limited to 120 requests/minute (one window shared with MCP,
 keyed by the token's principal); over it you get \`429 rate_limited\` with a
 \`retry-after\` header in seconds. Connector
