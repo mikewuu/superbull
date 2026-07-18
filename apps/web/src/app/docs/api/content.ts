@@ -272,9 +272,10 @@ export const hostedIntro = `
 
 The hosted app (superbull.com) additionally exposes a small management surface
 under \`/api/...\` on the web app itself. Send \`Authorization: Bearer\` with a
-named per-user \`sbh_\` API key or an \`sbho_\` OAuth access token. Create and
-revoke API keys in user settings. OAuth clients use PKCE S256, choose a project
-on the consent screen, and rotate refresh tokens when they exchange them.
+named per-account \`sbh_\` API key or an \`sbho_\` OAuth access token. Create and
+revoke account keys under **Settings → API keys** on any project's Settings
+page. OAuth clients use PKCE S256, choose a project on the consent screen, and
+rotate refresh tokens when they exchange them.
 
 Authenticated calls are limited to 120 requests/minute per user. REST and MCP
 share that window. Over the limit, the server returns \`429 rate_limited\` with

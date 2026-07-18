@@ -82,7 +82,7 @@ async function verifyToken(req: Request, bearerToken?: string): Promise<AuthInfo
   return {
     token: bearerToken,
     clientId: String(caller.userId),
-    scopes: ['user'],
+    scopes: caller.scopes,
     extra: {
       userId: String(caller.userId),
       projectId: caller.projectId ? String(caller.projectId) : null,

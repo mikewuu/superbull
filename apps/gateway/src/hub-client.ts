@@ -2,7 +2,7 @@ import type { IngestEvent } from '@superbull/protocol';
 
 export interface ConnectorLookup {
   connectorId: string;
-  workspaceId: string;
+  projectId: string;
   name: string;
 }
 

@@ -1,5 +1,8 @@
 # SuperBull hosted-SaaS rewrite — plan & contracts
 
+> Historical plan. The shipped app uses projects, `/app/[projectSlug]`, per-user `sbh_`
+> API keys, and project-bound `sbho_` OAuth access tokens. See `README.md` for current behavior.
+
 Owner-approved 2026-07-16. Branch: `rewrite/hosted-saas`. Fresh rewrite: no
 production data, no published compatibility contract. This document is the
 single source of truth for cross-territory contracts. If you need to deviate,

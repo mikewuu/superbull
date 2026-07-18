@@ -4,7 +4,15 @@ import type { MutationCtx, QueryCtx } from './_generated/server';
 
 export function hasValidInternalToken(internalToken?: string): boolean {
   const expected = process.env.CONVEX_INTERNAL_TOKEN;
-  return Boolean(expected && internalToken && internalToken === expected);
+  if (!expected || !internalToken || expected.length !== internalToken.length) {
+    return false;
+  }
+
+  let difference = 0;
+  for (let index = 0; index < expected.length; index += 1) {
+    difference |= expected.charCodeAt(index) ^ internalToken.charCodeAt(index);
+  }
+  return difference === 0;
 }
 
 // Guard for the internalToken-gated functions the gateway / Next server call

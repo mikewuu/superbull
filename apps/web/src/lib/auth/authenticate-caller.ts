@@ -1,4 +1,3 @@
-import { UnauthorizedException } from '@nextastic/http';
 import { NextResponse } from 'next/server';
 import { isWithinRateLimit } from '../api/is-within-rate-limit';
 import { secondsUntilRateLimitReset } from '../api/seconds-until-rate-limit-reset';
@@ -12,7 +11,7 @@ export async function authenticateCaller<TRequest extends { headers: Headers }>(
   const rawToken = authorization.startsWith('Bearer ') ? authorization.slice('Bearer '.length) : '';
   const caller = await findCaller(rawToken);
   if (!caller) {
-    throw new UnauthorizedException();
+    return NextResponse.json({ type: 'unauthorized', message: 'Unauthorized.' }, { status: 401 });
   }
 
   if (!(await isWithinRateLimit(caller.userId))) {

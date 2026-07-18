@@ -1,10 +1,11 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { api } from '../../../../../convex/_generated/api';
-import { rateLimitByIp } from '../../../../lib/api/is-within-rate-limit';
+import { isWithinRateLimitForIp } from '../../../../lib/api/is-within-rate-limit-for-ip';
 import { secondsUntilRateLimitReset } from '../../../../lib/api/seconds-until-rate-limit-reset';
 import { hashToken } from '../../../../lib/auth/hash-token';
 import { createServerConvexClient } from '../../../../lib/convex/create-server-convex-client';
+import { getClientIp } from '../../../oauth/get-client-ip';
 
 export const runtime = 'nodejs';
 
@@ -15,8 +16,8 @@ const oauthCorsHeaders = {
 };
 
 export async function POST(request: Request) {
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'anonymous';
-  if (!(await rateLimitByIp(ip))) {
+  const ip = getClientIp(request.headers);
+  if (!(await isWithinRateLimitForIp(ip))) {
     return NextResponse.json(
       { error: 'slow_down' },
       {

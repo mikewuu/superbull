@@ -8,7 +8,7 @@ export interface PendingRpc {
 
 export interface ConnectorSession {
   connectorId: string;
-  workspaceId: string;
+  projectId: string;
   name: string;
   version: string;
   queues: string[];

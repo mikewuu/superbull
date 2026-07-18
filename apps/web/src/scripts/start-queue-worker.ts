@@ -5,6 +5,7 @@ process.env.REDIS_HOST = env.REDIS_URL;
 
 async function main() {
   const { scheduleJobs, work } = await import('@nextastic/queue');
+  const { cleanupExpiredOAuth } = await import('../jobs/cleanup-expired-oauth');
   const { evaluateAlerts } = await import('../jobs/evaluate-alerts');
   const { sendDailyDigest } = await import('../jobs/send-daily-digest');
   const { queues } = await import('../lib/queue/config');
@@ -12,6 +13,7 @@ async function main() {
   await scheduleJobs({
     queues,
     schedule: async () => {
+      await cleanupExpiredOAuth.dispatch({}, { repeat: { pattern: '0 * * * *' } });
       await evaluateAlerts.dispatch({}, { repeat: { pattern: '*/5 * * * *' } });
       await sendDailyDigest.dispatch({}, { repeat: { pattern: '0 9 * * *' } });
     },

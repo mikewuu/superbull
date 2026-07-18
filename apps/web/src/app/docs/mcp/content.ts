@@ -18,8 +18,9 @@ claude mcp add --transport http superbull https://superbull.com/api/mcp \\
   --header "Authorization: Bearer $SUPERBULL_API_KEY"
 \`\`\`
 
-Create a named API key in your user settings, copy the \`sbh_\` value when it
-is shown, and save it as \`SUPERBULL_API_KEY\` on your machine. The raw key is
+Open a project's **Settings → API keys** section and create a named key. Keys
+belong to your account, not that project. Copy the \`sbh_\` value when it is
+shown, then save it as \`SUPERBULL_API_KEY\` on your machine. The raw key is
 shown once.
 
 Cursor (\`~/.cursor/mcp.json\`) and Claude Desktop
@@ -63,9 +64,9 @@ exposes.)
 
 SuperBull accepts two bearer credentials:
 
-- A named \`sbh_\` API key belongs to one user. It can reach connectors in
-  projects that user belongs to. You can create more than one key and revoke
-  each one separately in user settings.
+- A named \`sbh_\` API key belongs to your account. It can reach connectors in
+  projects you belong to. You can create more than one key and revoke each one
+  separately in **Settings → API keys** on any project's Settings page.
 - An \`sbho_\` OAuth access token comes from the PKCE S256 authorization flow.
   The consent screen asks which project to grant. Refresh tokens rotate when
   used, and you can disconnect the app from settings.
@@ -81,10 +82,9 @@ with a \`retry-after\` header in seconds.
 
 ## Diagnose and retry a failed job
 
-The server's own instructions group the tools as **discover** (what's
-registered), **inspect** (read queue and job state), and **act** (mutate a
-queue or job). An agent is expected to discover and inspect before acting. A
-typical run:
+The server's own instructions group the tools as **connectors** (list and
+remove), **inspect** (read queue and job state), and **act** (mutate a queue or
+job). An agent is expected to inspect before acting. A typical run:
 
 \`\`\`
 > get_queue_stats({ connector_id: "cnn_9f2a", queue_name: "email" })
@@ -112,7 +112,7 @@ typical run:
 
 ## Tools
 
-SuperBull exposes 14 tools: 2 to discover connectors, 5 to inspect queues and
+SuperBull exposes 14 tools: 2 to manage connectors, 5 to inspect queues and
 jobs, and 7 to act on them.
 `;
 
@@ -120,8 +120,8 @@ export const toolHeaders = ['Tool', 'Input', 'Description'];
 
 export const toolGroups = [
   {
-    title: 'Discover',
-    blurb: 'What the signed-in user can reach.',
+    title: 'Connectors',
+    blurb: "List and remove the connectors in the caller's projects.",
     rows: [
       [
         'list_connectors',

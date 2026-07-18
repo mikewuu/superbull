@@ -1,6 +1,6 @@
 # @superbull/dev
 
-Private workspace app (not published). The local development harness for the [superbull monorepo](https://github.com/mikewuu/superbull): an Express server that mounts the dashboard via `@superbull/express`, plus seed data and the standalone-adapter e2e suite.
+Private monorepo app (not published). The local development harness for the [superbull monorepo](https://github.com/mikewuu/superbull): an Express server that mounts the dashboard via `@superbull/express`, plus seed data and the standalone-adapter e2e suite.
 
 ## Commands (from the repo root)
 

@@ -4,8 +4,9 @@ import { fetchQuery } from 'convex/nextjs';
 import { headers } from 'next/headers';
 import Link from 'next/link';
 import { api } from '../../../../convex/_generated/api';
-import { rateLimitByIp } from '../../../lib/api/is-within-rate-limit';
+import { isWithinRateLimitForIp } from '../../../lib/api/is-within-rate-limit-for-ip';
 import { createServerConvexClient } from '../../../lib/convex/create-server-convex-client';
+import { getClientIp } from '../get-client-ip';
 import { isAllowedRedirectUri } from '../is-allowed-redirect-uri';
 import { isRedirectUriRegistered } from '../is-redirect-uri-registered';
 import { ConsentShell } from './_components/consent-shell';
@@ -28,12 +29,16 @@ const codeChallengePattern = /^[A-Za-z0-9._~-]{43,128}$/;
 
 export default async function OAuthAuthorizePage(props: OAuthAuthorizePageProps) {
   const requestHeaders = await headers();
-  const ip = requestHeaders.get('x-forwarded-for')?.split(',')[0]?.trim() || 'anonymous';
-  const withinRateLimit = await rateLimitByIp(ip);
+  const ip = getClientIp(requestHeaders);
+  const withinRateLimit = await isWithinRateLimitForIp(ip);
   if (!withinRateLimit) {
     return (
       <ConsentShell>
-        <p className="text-sm text-content-subtle">
+        <img src="/logo-mark.webp" alt="" className="mx-auto h-10 w-auto" />
+        <h1 className="mt-3 text-center text-lg font-semibold text-content-emphasis">
+          Too many attempts
+        </h1>
+        <p className="mt-1 text-center text-sm text-content-subtle">
           Too many connection attempts. Wait a minute, then try again.
         </p>
       </ConsentShell>
@@ -57,7 +62,11 @@ export default async function OAuthAuthorizePage(props: OAuthAuthorizePageProps)
   ) {
     return (
       <ConsentShell>
-        <p className="text-sm text-content-subtle">
+        <img src="/logo-mark.webp" alt="" className="mx-auto h-10 w-auto" />
+        <h1 className="mt-3 text-center text-lg font-semibold text-content-emphasis">
+          Invalid connection request
+        </h1>
+        <p className="mt-1 text-center text-sm text-content-subtle">
           This connection request is invalid or incomplete. Close this tab and try again.
         </p>
       </ConsentShell>
@@ -73,7 +82,11 @@ export default async function OAuthAuthorizePage(props: OAuthAuthorizePageProps)
   ) {
     return (
       <ConsentShell>
-        <p className="text-sm text-content-subtle">
+        <img src="/logo-mark.webp" alt="" className="mx-auto h-10 w-auto" />
+        <h1 className="mt-3 text-center text-lg font-semibold text-content-emphasis">
+          Unknown app
+        </h1>
+        <p className="mt-1 text-center text-sm text-content-subtle">
           Unknown client or redirect URL. Close this tab and try again.
         </p>
       </ConsentShell>
@@ -115,7 +128,11 @@ export default async function OAuthAuthorizePage(props: OAuthAuthorizePageProps)
   if (memberships.length === 0) {
     return (
       <ConsentShell>
-        <p className="text-sm text-content-subtle">
+        <img src="/logo-mark.webp" alt="" className="mx-auto h-10 w-auto" />
+        <h1 className="mt-3 text-center text-lg font-semibold text-content-emphasis">
+          Create a project first
+        </h1>
+        <p className="mt-1 text-center text-sm text-content-subtle">
           You need a project before connecting an app.{' '}
           <Link href="/app/new" className="font-medium text-content-emphasis underline">
             Create one first
@@ -128,7 +145,10 @@ export default async function OAuthAuthorizePage(props: OAuthAuthorizePageProps)
 
   return (
     <ConsentShell>
-      <h1 className="text-center text-lg font-semibold text-content-emphasis">{client.name}</h1>
+      <img src="/logo-mark.webp" alt="" className="mx-auto h-10 w-auto" />
+      <h1 className="mt-3 text-center text-lg font-semibold text-content-emphasis">
+        {client.name}
+      </h1>
       <p className="mt-1 text-center text-sm text-content-subtle">
         wants to access SuperBull for {user.email ?? 'your account'}
       </p>
@@ -157,7 +177,7 @@ export default async function OAuthAuthorizePage(props: OAuthAuthorizePageProps)
           id="project_id"
           name="project_id"
           defaultValue={memberships[0]?.project._id}
-          className="mb-6 h-10 w-full rounded-lg border border-border-default bg-white px-3 text-sm text-content-emphasis outline-none focus:ring-2 focus:ring-blue-500/40"
+          className="mb-6 h-9 w-full rounded-lg border border-border-subtle bg-bg-default px-2.5 text-sm text-content-emphasis outline-none focus:border-border-emphasis focus:ring-0"
         >
           {memberships.map(({ project }) => (
             <option key={project._id} value={project._id}>

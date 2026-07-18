@@ -9,6 +9,7 @@ interface FakeAnnotation {
 }
 
 const apiKey = 'sbh_test-token';
+const revokedApiKey = 'sbh_revoked-token';
 
 const { annotations } = vi.hoisted(() => {
   return { annotations: [] as FakeAnnotation[] };
@@ -145,6 +146,23 @@ describe('annotations REST routes', () => {
       new NextRequest('http://localhost/api/annotations', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ source_id: 'source-1', label: 'v1', ts: null }),
+      }),
+      { params: Promise.resolve({}) },
+    );
+
+    expect(response.status).toBe(401);
+  });
+
+  it('POST rejects a revoked API key', async () => {
+    const route = await import('../src/app/api/annotations/route');
+    const response = await route.POST(
+      new NextRequest('http://localhost/api/annotations', {
+        method: 'POST',
+        headers: {
+          authorization: `Bearer ${revokedApiKey}`,
+          'content-type': 'application/json',
+        },
         body: JSON.stringify({ source_id: 'source-1', label: 'v1', ts: null }),
       }),
       { params: Promise.resolve({}) },

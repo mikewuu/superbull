@@ -29,7 +29,7 @@ describe('internal http api', () => {
   }> {
     const hubClient = createFakeHubClient({
       lookups: {
-        [sha256Hex('good-token')]: { connectorId: 'conn_1', workspaceId: 'ws_1', name: 'Acme' },
+        [sha256Hex('good-token')]: { connectorId: 'conn_1', projectId: 'project_1', name: 'Acme' },
       },
     });
     gateway = await startGateway({

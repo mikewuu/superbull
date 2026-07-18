@@ -48,7 +48,7 @@ describe('api keys', () => {
       internalToken: INTERNAL_TOKEN,
       keyHash,
     });
-    expect(caller).toEqual({ userId, projectId: null });
+    expect(caller).toEqual({ userId, projectId: null, scopes: ['mcp'] });
 
     await asMember.mutation(api.apiKeys.revokeApiKey, { apiKeyId });
     const revokedCaller = await t.mutation(api.apiKeys.findApiKeyCaller, {

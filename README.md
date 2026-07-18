@@ -75,12 +75,12 @@ serve({ fetch: app.fetch, port: 3000 });
 
 - **standalone**: mount an adapter directly in your app. Serves the UI and the REST API in
   the same process. No sign-in, no outbound connection anywhere.
-- **hosted**: sign in with Google, create a connector in your workspace, and run
+- **hosted**: sign in with Google, create a connector in your project, and run
   `npx @superbull/connector` next to your workers. It opens one outbound WebSocket to
   `connect.superbull.com`: no inbound port, no public URL, nothing to expose. Ingest-driven
   history, analytics, error tracking, email alerts, dashboards, and public status pages go
-  live for every connector in the workspace, and the embedded live dashboard at
-  `/app/[workspaceSlug]/connectors/[connectorId]` relays queue reads and actions to the
+  live for every connector in the project, and the embedded live dashboard at
+  `/app/[projectSlug]/connectors/[connectorId]` relays queue reads and actions to the
   connector over that same WebSocket (via the gateway's RPC bridge).
 
 ## Connector usage
@@ -89,9 +89,9 @@ serve({ fetch: app.fetch, port: 3000 });
 npx @superbull/connector --token <one-time-token>
 ```
 
-The bin is `superbull-connector`. Create a connector from your workspace (**Connectors →
+The bin is `superbull-connector`. Create a connector from your project (**Connectors →
 New connector**) to get that token, plus this exact command with everything filled in. The
-token is shown exactly once, and the workspace only ever stores a hash of it.
+token is shown exactly once, and the project only ever stores a hash of it.
 
 ```
 Flag                    Env var           Default
@@ -110,7 +110,7 @@ Flag                    Env var           Default
 Once connected, the connector streams `job.completed`/`job.failed` events (via BullMQ
 `QueueEvents`, not polling) plus a `queue.snapshot` every 60s: counts, worker count, oldest
 waiting job age, over that same WebSocket. Delivery is at-least-once: events are only
-considered sent once the gateway acknowledges the batch, and the workspace dedupes by event
+considered sent once the gateway acknowledges the batch, and the project dedupes by event
 `uuid` per connector. If the connection drops, the connector reconnects with jittered exponential backoff
 (base 1s, cap 60s); an unauthorized token exits instead of retrying. While a connector is
 disconnected, live dashboard actions against it fail immediately instead of queuing.
@@ -125,7 +125,7 @@ not Postgres.
 
 Architecture:
 
-- **apps/web** (Vercel): marketing, docs, the product under `/app/[workspaceSlug]/...`, and
+- **apps/web** (Vercel): marketing, docs, the product under `/app/[projectSlug]/...`, and
   public status pages at `/status/[slug]`.
 - **apps/gateway** (`connect.superbull.com`): the always-on WebSocket service every
   connector opens its one outbound connection to. It authenticates connectors by token

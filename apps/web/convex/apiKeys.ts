@@ -91,7 +91,7 @@ export const findApiKeyCaller = mutation({
     if (!apiKey.lastUsedAt || now - apiKey.lastUsedAt > lastUsedTouchIntervalMs) {
       await ctx.db.patch(apiKey._id, { lastUsedAt: now });
     }
-    return { userId: apiKey.userId, projectId: null };
+    return { userId: apiKey.userId, projectId: null, scopes: ['mcp'] };
   },
 });
 

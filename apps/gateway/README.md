@@ -1,6 +1,6 @@
 # @superbull/gateway
 
-Private workspace app (not published). The always-on WebSocket service at `connect.superbull.com` that every [@superbull/connector](https://www.npmjs.com/package/@superbull/connector) opens its single outbound connection to. It authenticates connectors, forwards connector events into Convex, and exposes the RPC bridge the hosted web app relays dashboard and MCP requests through.
+Private monorepo app (not published). The always-on WebSocket service at `connect.superbull.com` that every [@superbull/connector](https://www.npmjs.com/package/@superbull/connector) opens its single outbound connection to. It authenticates connectors, forwards connector events into Convex, and exposes the RPC bridge the hosted web app relays dashboard and MCP requests through.
 
 ## Surface
 

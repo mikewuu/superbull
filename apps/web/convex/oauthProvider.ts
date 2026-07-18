@@ -103,6 +103,10 @@ export const exchangeCode = mutation({
       .query('oauthAuthCodes')
       .withIndex('by_code_hash', (queryBuilder) => queryBuilder.eq('codeHash', args.codeHash))
       .unique();
+    if (code?.usedAt) {
+      await revokeGrantFamily(ctx, code);
+      return null;
+    }
     if (!isValidAuthCode(code, args)) {
       return null;
     }
@@ -136,6 +140,10 @@ export const refreshTokens = mutation({
         queryBuilder.eq('refreshTokenHash', args.refreshTokenHash),
       )
       .unique();
+    if (token?.revokedAt) {
+      await revokeGrantFamily(ctx, token);
+      return null;
+    }
     if (!isValidRefreshToken(token, args.clientId)) {
       return null;
     }
@@ -224,6 +232,29 @@ export const disconnectApp = mutation({
     );
     const revokedAt = Date.now();
     await Promise.all(matchingTokens.map((token) => ctx.db.patch(token._id, { revokedAt })));
+  },
+});
+
+export const cleanupExpiredOAuth = mutation({
+  args: { internalToken: v.string() },
+  handler: async (ctx, args) => {
+    requireInternalToken(args.internalToken);
+    const now = Date.now();
+    const [authCodes, tokens] = await Promise.all([
+      ctx.db.query('oauthAuthCodes').collect(),
+      ctx.db.query('oauthTokens').collect(),
+    ]);
+    const expiredAuthCodes = authCodes.filter((authCode) => authCode.expiresAt <= now);
+    const expiredTokens = tokens.filter(
+      (token) => Boolean(token.revokedAt) || token.refreshExpiresAt <= now,
+    );
+    await Promise.all(
+      [...expiredAuthCodes, ...expiredTokens].map((record) => ctx.db.delete(record._id)),
+    );
+    return {
+      deletedAuthCodeCount: expiredAuthCodes.length,
+      deletedTokenCount: expiredTokens.length,
+    };
   },
 });
 
@@ -326,6 +357,22 @@ async function insertTokens(
     expiresAt: now + accessTokenTtlMs,
     refreshExpiresAt: now + refreshTokenTtlMs,
   });
+}
+
+async function revokeGrantFamily(
+  ctx: MutationCtx,
+  grant: { clientId: string; userId: Id<'users'>; projectId: Id<'projects'> },
+): Promise<void> {
+  const userTokens = await ctx.db
+    .query('oauthTokens')
+    .withIndex('by_user', (queryBuilder) => queryBuilder.eq('userId', grant.userId))
+    .collect();
+  const activeGrantTokens = userTokens.filter(
+    (token) =>
+      token.clientId === grant.clientId && token.projectId === grant.projectId && !token.revokedAt,
+  );
+  const revokedAt = Date.now();
+  await Promise.all(activeGrantTokens.map((token) => ctx.db.patch(token._id, { revokedAt })));
 }
 
 function getConnectedGrants(

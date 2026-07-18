@@ -2,22 +2,22 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   mutation: vi.fn(),
-  rateLimitByIp: vi.fn(),
+  isWithinRateLimitForIp: vi.fn(),
 }));
 
 vi.mock('../src/lib/convex/create-server-convex-client', () => ({
   createServerConvexClient: () => ({ mutation: mocks.mutation }),
 }));
 
-vi.mock('../src/lib/api/is-within-rate-limit', () => ({
-  rateLimitByIp: mocks.rateLimitByIp,
+vi.mock('../src/lib/api/is-within-rate-limit-for-ip', () => ({
+  isWithinRateLimitForIp: mocks.isWithinRateLimitForIp,
 }));
 
 import { POST } from '../src/app/api/oauth/token/route';
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.rateLimitByIp.mockResolvedValue(true);
+  mocks.isWithinRateLimitForIp.mockResolvedValue(true);
   mocks.mutation.mockResolvedValue({ expiresInSeconds: 3600 });
 });
 

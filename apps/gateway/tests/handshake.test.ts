@@ -33,7 +33,7 @@ describe('connector handshake', () => {
   it('completes the handshake and acks with the connector id', async () => {
     const hubClient = createFakeHubClient({
       lookups: {
-        [sha256Hex('good-token')]: { connectorId: 'conn_1', workspaceId: 'ws_1', name: 'Acme' },
+        [sha256Hex('good-token')]: { connectorId: 'conn_1', projectId: 'project_1', name: 'Acme' },
       },
     });
     gateway = await startGateway({
@@ -87,7 +87,7 @@ describe('connector handshake', () => {
   it('replaces the previous session when the same connector reconnects', async () => {
     const hubClient = createFakeHubClient({
       lookups: {
-        [sha256Hex('good-token')]: { connectorId: 'conn_1', workspaceId: 'ws_1', name: 'Acme' },
+        [sha256Hex('good-token')]: { connectorId: 'conn_1', projectId: 'project_1', name: 'Acme' },
       },
     });
     gateway = await startGateway({

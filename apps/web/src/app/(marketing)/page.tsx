@@ -19,7 +19,7 @@ const githubUrl = 'https://github.com/mikewu/superbull';
 const faqs = [
   {
     q: 'Can an agent operate my queues directly?',
-    a: "Yes. An agent with an MCP token can watch your queues, open a failed job, and read the stack trace. It can retry that job itself, or pause a queue that's failing fast. SuperBull exposes 14 MCP tools for the work you'd otherwise do through the board.",
+    a: "Yes. An agent with a SuperBull API key can watch your queues, open a failed job, and read the stack trace. It can retry that job itself, or pause a queue that's failing fast. SuperBull exposes 14 MCP tools for the work you'd otherwise do through the board.",
   },
   {
     q: 'Do I need the hosted app to use SuperBull?',

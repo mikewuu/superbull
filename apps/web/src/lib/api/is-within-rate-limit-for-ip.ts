@@ -3,17 +3,9 @@ import { connectRedis } from '../redis/connect-redis';
 
 let reportedUnreachable = false;
 
-/**
- * Fails open when redis is unreachable — rate limiting is overload
- * protection, not auth.
- */
-export async function isWithinRateLimit(userId: string): Promise<boolean> {
-  return await isWithinRateLimitForKey(`api-rate:${userId}`);
-}
-
-async function isWithinRateLimitForKey(principalKey: string): Promise<boolean> {
+export async function isWithinRateLimitForIp(ip: string): Promise<boolean> {
   const window = Math.floor(Date.now() / 60_000);
-  const key = `${principalKey}:${window}`;
+  const key = `oauth-rate:${ip}:${window}`;
 
   try {
     const redis = await connectRedis();

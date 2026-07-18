@@ -79,7 +79,7 @@ export function handleConnectorConnection(args: HandleConnectorConnectionArgs): 
 
     const session: ConnectorSession = {
       connectorId: lookup.connectorId,
-      workspaceId: lookup.workspaceId,
+      projectId: lookup.projectId,
       name: frame.name,
       version: frame.version,
       queues: frame.queues,

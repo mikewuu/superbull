@@ -1,5 +1,6 @@
 'use client';
 
+import { EmptyState } from '@superbull/ui';
 import { useMutation, useQuery } from 'convex/react';
 import { Blocks } from 'lucide-react';
 import { useState } from 'react';
@@ -31,12 +32,11 @@ export function ConnectedApps() {
 
   if (apps.length === 0) {
     return (
-      <div className="candy-card flex items-center gap-3 rounded-lg p-5">
-        <Blocks className="size-4 shrink-0 text-content-muted" aria-hidden />
-        <p className="text-sm text-content-subtle">
-          No connected apps. Approve an OAuth connection to see it here.
-        </p>
-      </div>
+      <EmptyState
+        icon={<Blocks className="size-5 text-content-muted" />}
+        title="No connected apps"
+        description="Approve an OAuth connection to see it here."
+      />
     );
   }
 
