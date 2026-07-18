@@ -122,3 +122,38 @@ export async function requireConnectorMember(
   const { userId, user, member, project } = await requireProjectMember(ctx, connector.projectId);
   return { userId, user, member, project, connector };
 }
+
+export async function requireConnectorMemberForUser(
+  ctx: QueryCtx | MutationCtx,
+  userId: Id<'users'>,
+  connectorId: Id<'connectors'>,
+  requiredProjectId?: Id<'projects'>,
+): Promise<{
+  userId: Id<'users'>;
+  user: Doc<'users'>;
+  member: Doc<'members'>;
+  project: Doc<'projects'>;
+  connector: Doc<'connectors'>;
+}> {
+  const connector = await ctx.db.get(connectorId);
+  if (!connector) {
+    throw new Error('Connector not found');
+  }
+  if (requiredProjectId && connector.projectId !== requiredProjectId) {
+    throw new Error('Connector not found');
+  }
+
+  const member = await ctx.db
+    .query('members')
+    .withIndex('by_project_user', (q) =>
+      q.eq('projectId', connector.projectId).eq('userId', userId),
+    )
+    .first();
+  const project = await ctx.db.get(connector.projectId);
+  const user = await ctx.db.get(userId);
+  if (!member || !project || !user) {
+    throw new Error('Connector not found');
+  }
+
+  return { userId, user, member, project, connector };
+}

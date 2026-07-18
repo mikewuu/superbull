@@ -1,47 +1,24 @@
 'use node';
 
-// Renders and sends the alert/digest emails that used to be dispatched by
-// the @nextastic/queue worker (apps/web/src/scripts/start-queue-worker.ts,
-// deleted). Scheduled by apps/web/convex/crons.ts. Needs the Node.js runtime
-// because @react-email/render and resend both rely on Node built-ins.
-//
-// FOLLOW-UP (owned by convex/alerts.ts's maintainer, not this file): `evaluate`,
-// `digestSummary`, and `listAllRulesForDigest` in convex/alerts.ts are PUBLIC
-// functions gated by an `internalToken` string arg rather than
-// `internalMutation`/`internalQuery`. We call them here via `api.alerts.*` +
-// `ctx.runMutation`/`ctx.runQuery`, passing `process.env.CONVEX_INTERNAL_TOKEN`
-// the same way the old app-side job runner (and the gateway) do. Once true
-// `internal.alerts.*` variants exist, drop the token plumbing below.
-
+import { v } from 'convex/values';
 import { api } from './_generated/api';
-import { internalAction } from './_generated/server';
+import { action } from './_generated/server';
+import { requireInternalToken } from './access';
 import { groupRecipientsByProject } from './emails/digestRecipients';
 import { sendAlertEmail } from './emails/sendAlertEmail';
 import { sendDigestEmail } from './emails/sendDigestEmail';
 
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const oneDayMs = 86_400_000;
 
-function getInternalTokenOrThrow(): string {
-  const token = process.env.CONVEX_INTERNAL_TOKEN;
-  if (!token) {
-    throw new Error('CONVEX_INTERNAL_TOKEN is not configured on this Convex deployment');
-  }
-  return token;
-}
-
-/**
- * Runs every 5 minutes (see crons.ts). Evaluates all alert rules and emails
- * a notification for each rule that started or stopped firing.
- */
-export const evaluateAndNotify = internalAction({
-  args: {},
-  handler: async (ctx) => {
-    const internalToken = getInternalTokenOrThrow();
-    const { evaluated, to_notify: toNotify } = await ctx.runMutation(api.alerts.evaluate, {
-      internalToken,
+export const evaluateAndNotify = action({
+  args: { internalToken: v.string() },
+  handler: async (ctx, args) => {
+    requireInternalToken(args.internalToken);
+    const { evaluated, to_notify: notifications } = await ctx.runMutation(api.alerts.evaluate, {
+      internalToken: args.internalToken,
     });
 
-    for (const notification of toNotify) {
+    for (const notification of notifications) {
       await sendAlertEmail({
         to: notification.email,
         kind: notification.kind,
@@ -52,39 +29,35 @@ export const evaluateAndNotify = internalAction({
     }
 
     console.log(
-      `[alertNotifications.evaluateAndNotify] evaluated ${evaluated} rule(s), notified ${toNotify.length}`,
+      `[alertNotifications.evaluateAndNotify] evaluated ${evaluated} rule(s), notified ${notifications.length}`,
     );
   },
 });
 
-/**
- * Runs daily at 09:00 UTC (see crons.ts). Sends one digest email per
- * (project, distinct alert-rule email) pair, summarizing that project's
- * connectors over the last 24h. Scoped per-project so a recipient's inbox
- * never sees another project's connector stats.
- */
-export const sendDailyDigest = internalAction({
-  args: {},
-  handler: async (ctx) => {
-    const internalToken = getInternalTokenOrThrow();
-    const rules = await ctx.runQuery(api.alerts.listAllRulesForDigest, { internalToken });
-    const groups = groupRecipientsByProject(rules);
-    if (groups.length === 0) {
+export const sendDailyDigest = action({
+  args: { internalToken: v.string() },
+  handler: async (ctx, args) => {
+    requireInternalToken(args.internalToken);
+    const rules = await ctx.runQuery(api.alerts.listAllRulesForDigest, {
+      internalToken: args.internalToken,
+    });
+    const recipientsByProject = groupRecipientsByProject(rules);
+    if (recipientsByProject.length === 0) {
       console.log('[alertNotifications.sendDailyDigest] no alert rule emails; skipping');
       return;
     }
 
     const { perConnector } = await ctx.runQuery(api.alerts.digestSummary, {
-      internalToken,
-      sinceTs: Date.now() - ONE_DAY_MS,
+      internalToken: args.internalToken,
+      sinceTs: Date.now() - oneDayMs,
     });
-
     let sentCount = 0;
-    for (const group of groups) {
+
+    for (const recipients of recipientsByProject) {
       const projectConnectors = perConnector.filter(
-        (connector) => connector.projectId === group.projectId,
+        (connector) => connector.projectId === recipients.projectId,
       );
-      for (const to of group.emails) {
+      for (const to of recipients.emails) {
         await sendDigestEmail({ to, perConnector: projectConnectors });
         sentCount += 1;
       }

@@ -12,17 +12,21 @@ description: >
 # SuperBull MCP
 
 Server `https://superbull.com/api/mcp` (streamable HTTP), every call
-authenticated with `Authorization: Bearer $SUPERBULL_API_TOKEN`. Connect from
+authenticated with `Authorization: Bearer $SUPERBULL_API_KEY`. Connect from
 Claude Code in one line:
 
 ```sh
 claude mcp add --transport http superbull https://superbull.com/api/mcp \
-  --header "Authorization: Bearer $SUPERBULL_API_TOKEN"
+  --header "Authorization: Bearer $SUPERBULL_API_KEY"
 ```
 
-If the token is missing, ask the user for it; it is the deployment's
-`SUPERBULL_API_TOKEN`. It is deployment-wide (not per workspace), so treat
-every mutation as production and say what you changed.
+If the key is missing, ask the user for a named `sbh_` key from their SuperBull
+user settings. The key reaches connectors in projects that user belongs to.
+Clients with remote MCP OAuth support can use the browser consent flow instead;
+the resulting `sbho_` access token is bound to the project chosen at consent.
+
+The server exposes 14 tools. Treat every mutation as production and say what
+you changed.
 
 ## The operating loop
 

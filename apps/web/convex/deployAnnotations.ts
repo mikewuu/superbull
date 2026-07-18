@@ -2,10 +2,6 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { requireInternalToken, requireProjectMember } from './access';
 
-// TRANSITIONAL — internalToken-gated, used by /api/annotations (the global
-// SUPERBULL_API_TOKEN-authenticated route). Round 3 gives it real per-
-// project API keys; for now it trusts the connector lookup the route does
-// before calling in.
 export const list = query({
   args: {
     internalToken: v.string(),

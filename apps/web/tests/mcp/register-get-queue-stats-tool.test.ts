@@ -1,12 +1,12 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { findConnectorByIdLegacy } from '../../src/lib/connectors/find-connector-by-id-legacy';
+import { findConnectorByIdForUser } from '../../src/lib/connectors/find-connector-by-id-for-user';
 import { callGatewayRpc } from '../../src/lib/gateway/call-gateway-rpc';
 import { registerGetQueueStatsTool } from '../../src/lib/mcp/register-get-queue-stats-tool';
 
 vi.mock('../../src/lib/gateway/call-gateway-rpc', () => ({ callGatewayRpc: vi.fn() }));
-vi.mock('../../src/lib/connectors/find-connector-by-id-legacy', () => ({
-  findConnectorByIdLegacy: vi.fn(),
+vi.mock('../../src/lib/connectors/find-connector-by-id-for-user', () => ({
+  findConnectorByIdForUser: vi.fn(),
 }));
 
 beforeEach(() => {
@@ -17,6 +17,7 @@ interface CapturedTool {
   config: { annotations?: Record<string, unknown> };
   handler: (
     args: Record<string, unknown>,
+    extra?: { authInfo?: { extra?: { userId?: string } } },
   ) => Promise<{ content: Array<{ type: string; text: string }>; isError?: boolean }>;
 }
 
@@ -28,7 +29,10 @@ function createFakeServer() {
       config: CapturedTool['config'],
       handler: CapturedTool['handler'],
     ) => {
-      tools.set(name, { config, handler });
+      tools.set(name, {
+        config,
+        handler: (args) => handler(args, { authInfo: { extra: { userId: 'user-1' } } }),
+      });
     },
   } as unknown as McpServer;
   return { server, tools };
@@ -43,7 +47,7 @@ describe('registerGetQueueStatsTool', () => {
   });
 
   it('GETs the stats route and returns the stats payload', async () => {
-    vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
+    vi.mocked(findConnectorByIdForUser).mockResolvedValue({
       id: 'src_1',
       projectId: 'ws_1',
       name: 'proxy-a',
@@ -83,7 +87,7 @@ describe('registerGetQueueStatsTool', () => {
   });
 
   it('returns an error result when the connector rejects the request', async () => {
-    vi.mocked(findConnectorByIdLegacy).mockResolvedValue({
+    vi.mocked(findConnectorByIdForUser).mockResolvedValue({
       id: 'src_1',
       projectId: 'ws_1',
       name: 'proxy-a',

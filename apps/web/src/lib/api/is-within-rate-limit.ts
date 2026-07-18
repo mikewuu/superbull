@@ -3,17 +3,21 @@ import { connectRedis } from '../redis/connect-redis';
 
 let reportedUnreachable = false;
 
-// The whole deployment authenticates as the single SUPERBULL_API_TOKEN
-// principal, so there is exactly one window to meter.
-const principalId = 'hub';
-
 /**
  * Fails open when redis is unreachable — rate limiting is overload
  * protection, not auth.
  */
-export async function isWithinRateLimit(): Promise<boolean> {
+export async function isWithinRateLimit(userId: string): Promise<boolean> {
+  return await isWithinRateLimitForKey(`api-rate:${userId}`);
+}
+
+export async function rateLimitByIp(ip: string): Promise<boolean> {
+  return await isWithinRateLimitForKey(`oauth-rate:${ip}`);
+}
+
+async function isWithinRateLimitForKey(principalKey: string): Promise<boolean> {
   const window = Math.floor(Date.now() / 60_000);
-  const key = `api-rate:${principalId}:${window}`;
+  const key = `${principalKey}:${window}`;
 
   try {
     const redis = await connectRedis();

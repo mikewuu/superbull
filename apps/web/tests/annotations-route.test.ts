@@ -8,7 +8,7 @@ interface FakeAnnotation {
   ts: number;
 }
 
-const SUPERBULL_API_TOKEN = 'test-token';
+const apiKey = 'sbh_test-token';
 
 const { annotations } = vi.hoisted(() => {
   return { annotations: [] as FakeAnnotation[] };
@@ -27,6 +27,15 @@ vi.mock('../src/lib/redis/connect-redis', () => ({
     },
     expire: async () => 1,
   }),
+}));
+
+vi.mock('../src/lib/auth/find-caller', () => ({
+  findCaller: async (rawToken: string) =>
+    rawToken === apiKey ? { userId: 'user-1', projectId: null } : null,
+}));
+
+vi.mock('../src/lib/connectors/find-connector-by-id-for-user', () => ({
+  findConnectorByIdForUser: async (args: { connectorId: string }) => ({ id: args.connectorId }),
 }));
 
 vi.mock('../src/lib/deploy-annotations/create-deploy-annotation', () => {
@@ -62,7 +71,6 @@ beforeEach(() => {
   vi.resetModules();
   annotations.length = 0;
   rateLimitCounters.clear();
-  vi.stubEnv('SUPERBULL_API_TOKEN', SUPERBULL_API_TOKEN);
 });
 
 afterEach(() => {
@@ -74,7 +82,7 @@ function authedRequest(
   init: { method?: string; headers?: HeadersInit; body?: string } = {},
 ): NextRequest {
   const headers = new Headers(init.headers);
-  headers.set('authorization', `Bearer ${SUPERBULL_API_TOKEN}`);
+  headers.set('authorization', `Bearer ${apiKey}`);
   return new NextRequest(url, { method: init.method, headers, body: init.body });
 }
 

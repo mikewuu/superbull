@@ -73,7 +73,6 @@ export default defineConfig({
       env: {
         NEXT_PUBLIC_CONVEX_URL: convexUrl,
         CONVEX_INTERNAL_TOKEN: 'e2e-internal',
-        SUPERBULL_API_TOKEN: 'e2e-hub-token',
         // NEXT_PUBLIC_* vars are inlined into the client bundle at `next
         // dev` boot time, so this must live here rather than being set on
         // the Convex deployment (that's AUTH_TEST_LOGIN, no NEXT_PUBLIC_

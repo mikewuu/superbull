@@ -4,7 +4,6 @@ import { z } from 'zod';
 export const env = createEnv({
   server: {
     CONVEX_INTERNAL_TOKEN: z.string().min(1).optional(),
-    SUPERBULL_API_TOKEN: z.string().min(1).optional(),
     GATEWAY_URL: z.string().min(1).optional(),
     GATEWAY_INTERNAL_TOKEN: z.string().min(1).optional(),
     REDIS_URL: z.string().default('redis://localhost:6379'),
@@ -15,7 +14,6 @@ export const env = createEnv({
   },
   runtimeEnv: {
     CONVEX_INTERNAL_TOKEN: process.env.CONVEX_INTERNAL_TOKEN,
-    SUPERBULL_API_TOKEN: process.env.SUPERBULL_API_TOKEN,
     GATEWAY_URL: process.env.GATEWAY_URL,
     GATEWAY_INTERNAL_TOKEN: process.env.GATEWAY_INTERNAL_TOKEN,
     REDIS_URL: process.env.REDIS_URL,

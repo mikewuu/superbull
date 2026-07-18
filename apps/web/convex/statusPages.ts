@@ -4,7 +4,8 @@ import { type QueryCtx, mutation, query } from './_generated/server';
 import { requireProjectMember } from './access';
 
 const dayMs = 86_400_000;
-const maxEventsPerQuery = 20_000;
+const defaultEventsPerQuery = 250;
+const maxEventsPerQuery = 500;
 
 function dayStart(ts: number): number {
   return Math.floor(ts / dayMs) * dayMs;
@@ -64,11 +65,13 @@ async function bucketConnectorEvents(
   connectorId: Id<'connectors'>,
   cutoffTs: number,
   todayStart: number,
+  eventLimit: number,
 ) {
   const events = await ctx.db
     .query('ingestEvents')
     .withIndex('by_connector_ts', (q) => q.eq('connectorId', connectorId).gte('ts', cutoffTs))
-    .take(maxEventsPerQuery);
+    .order('desc')
+    .take(eventLimit);
   return bucketEventsByDay(events, cutoffTs, todayStart);
 }
 
@@ -77,14 +80,26 @@ async function bucketQueueEvents(
   connectorId: Id<'connectors'>,
   queueName: string,
   cutoffTs: number,
+  eventLimit: number,
 ) {
   const events = await ctx.db
     .query('ingestEvents')
     .withIndex('by_connector_queue_ts', (q) =>
       q.eq('connectorId', connectorId).eq('queueName', queueName).gte('ts', cutoffTs),
     )
-    .take(maxEventsPerQuery);
+    .order('desc')
+    .take(eventLimit);
   return { name: queueName, events };
+}
+
+function getEventLimit(eventLimit: number | undefined): number {
+  if (eventLimit === undefined) {
+    return defaultEventsPerQuery;
+  }
+  if (!Number.isInteger(eventLimit) || eventLimit < 1 || eventLimit > maxEventsPerQuery) {
+    throw new Error(`eventLimit must be between 1 and ${maxEventsPerQuery}`);
+  }
+  return eventLimit;
 }
 
 export const getByConnector = query({
@@ -216,7 +231,7 @@ export const getPublicPage = query({
 });
 
 export const getPublicUptime = query({
-  args: { slug: v.string() },
+  args: { slug: v.string(), eventLimit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const config = await ctx.db
       .query('statusPageConfigs')
@@ -229,6 +244,7 @@ export const getPublicUptime = query({
     const todayStart = dayStart(Date.now());
     const cutoffTs = todayStart - 89 * dayMs;
     const queueNames = config.queueNames ?? [];
+    const eventLimit = getEventLimit(args.eventLimit);
 
     if (queueNames.length === 0) {
       const { days, rate90d } = await bucketConnectorEvents(
@@ -236,12 +252,15 @@ export const getPublicUptime = query({
         config.connectorId,
         cutoffTs,
         todayStart,
+        eventLimit,
       );
       return { overall_rate_90d: rate90d, overall: days, queues: [] };
     }
 
     const perQueue = await Promise.all(
-      queueNames.map((name) => bucketQueueEvents(ctx, config.connectorId, name, cutoffTs)),
+      queueNames.map((name) =>
+        bucketQueueEvents(ctx, config.connectorId, name, cutoffTs, eventLimit),
+      ),
     );
     const queues = perQueue.map(({ name, events }) => {
       const { days, rate90d } = bucketEventsByDay(events, cutoffTs, todayStart);

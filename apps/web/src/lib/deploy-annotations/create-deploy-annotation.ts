@@ -9,8 +9,6 @@ interface DeployAnnotationDoc {
   ts: number;
 }
 
-// TRANSITIONAL — backs POST /api/annotations (the global SUPERBULL_API_TOKEN
-// hub API). Round 3 gives this per-project API keys.
 export async function createDeployAnnotation(args: {
   connectorId: string;
   label: string;

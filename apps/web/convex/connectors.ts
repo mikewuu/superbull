@@ -2,7 +2,12 @@ import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
-import { requireInternalToken, requireProjectMember, requireRole } from './access';
+import {
+  requireConnectorMemberForUser,
+  requireInternalToken,
+  requireProjectMember,
+  requireRole,
+} from './access';
 
 async function deleteConnectorChildren(ctx: MutationCtx, connectorId: Id<'connectors'>) {
   const [events, errorGroups, annotations, statusPages] = await Promise.all([
@@ -99,43 +104,106 @@ export const removeConnector = mutation({
   },
 });
 
-// ---------------------------------------------------------------------------
-// TRANSITIONAL — internalToken-gated, unscoped-by-user surface backing ONLY
-// the MCP tools that still run under the global SUPERBULL_API_TOKEN (the
-// old HTTP proxy flow — /api/sources*, /api/ingest, url/token connectors —
-// is gone). Deleted once the per-project-API-keys-vs-global-token decision
-// lands (REWRITE_PLAN Round 3e, open with the owner).
-// ---------------------------------------------------------------------------
-
-export const list = query({
-  args: { internalToken: v.string() },
+export const listConnectorsForUser = query({
+  args: {
+    internalToken: v.string(),
+    userId: v.string(),
+    requiredProjectId: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
     requireInternalToken(args.internalToken);
-    return await ctx.db.query('connectors').collect();
+    const userId = ctx.db.normalizeId('users', args.userId);
+    if (!userId) {
+      throw new Error('User not found');
+    }
+    if (args.requiredProjectId) {
+      const requiredProjectId = ctx.db.normalizeId('projects', args.requiredProjectId);
+      if (!requiredProjectId) {
+        return [];
+      }
+      const membership = await ctx.db
+        .query('members')
+        .withIndex('by_project_user', (q) =>
+          q.eq('projectId', requiredProjectId).eq('userId', userId),
+        )
+        .first();
+      if (!membership) {
+        return [];
+      }
+      return await ctx.db
+        .query('connectors')
+        .withIndex('by_project', (q) => q.eq('projectId', requiredProjectId))
+        .collect();
+    }
+    const memberships = await ctx.db
+      .query('members')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .collect();
+    const connectorsByProject = await Promise.all(
+      memberships.map((membership) =>
+        ctx.db
+          .query('connectors')
+          .withIndex('by_project', (q) => q.eq('projectId', membership.projectId))
+          .collect(),
+      ),
+    );
+    return connectorsByProject.flat();
   },
 });
 
-export const findById = query({
-  args: { internalToken: v.string(), id: v.string() },
+export const findConnectorByIdForUser = query({
+  args: {
+    internalToken: v.string(),
+    userId: v.string(),
+    connectorId: v.string(),
+    requiredProjectId: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
     requireInternalToken(args.internalToken);
-    const id = ctx.db.normalizeId('connectors', args.id);
-    if (!id) {
+    const userId = ctx.db.normalizeId('users', args.userId);
+    const connectorId = ctx.db.normalizeId('connectors', args.connectorId);
+    const requiredProjectId = args.requiredProjectId
+      ? ctx.db.normalizeId('projects', args.requiredProjectId)
+      : undefined;
+    if (!userId || !connectorId || (args.requiredProjectId && !requiredProjectId)) {
       return null;
     }
-    return await ctx.db.get(id);
+    try {
+      const { connector } = await requireConnectorMemberForUser(
+        ctx,
+        userId,
+        connectorId,
+        requiredProjectId ?? undefined,
+      );
+      return connector;
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Connector not found') {
+        return null;
+      }
+      throw error;
+    }
   },
 });
 
-export const remove = mutation({
-  args: { internalToken: v.string(), id: v.string() },
+export const removeConnectorForUser = mutation({
+  args: {
+    internalToken: v.string(),
+    userId: v.string(),
+    connectorId: v.string(),
+    requiredProjectId: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
     requireInternalToken(args.internalToken);
-    const id = ctx.db.normalizeId('connectors', args.id);
-    if (!id) {
-      return null;
+    const userId = ctx.db.normalizeId('users', args.userId);
+    const connectorId = ctx.db.normalizeId('connectors', args.connectorId);
+    const requiredProjectId = args.requiredProjectId
+      ? ctx.db.normalizeId('projects', args.requiredProjectId)
+      : undefined;
+    if (!userId || !connectorId || (args.requiredProjectId && !requiredProjectId)) {
+      throw new Error('Connector not found');
     }
-    await deleteConnectorChildren(ctx, id);
+    await requireConnectorMemberForUser(ctx, userId, connectorId, requiredProjectId ?? undefined);
+    await deleteConnectorChildren(ctx, connectorId);
     return null;
   },
 });

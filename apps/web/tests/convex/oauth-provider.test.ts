@@ -40,9 +40,39 @@ describe('OAuth provider', () => {
       internalToken,
     });
 
+    const caller = await t.query(api.apiKeys.findOAuthCaller, {
+      rawToken: 'sbho_first',
+      internalToken,
+    });
+    expect(caller).toEqual({ userId: expect.any(String), projectId, scopes: ['mcp'] });
+    if (!caller) {
+      throw new Error('Expected OAuth caller');
+    }
+
+    const outsideProjectConnectorId = await t.run(async (ctx) => {
+      const outsideProjectId = await ctx.db.insert('projects', {
+        name: 'Outside project',
+        slug: 'outside-project',
+        createdAt: Date.now(),
+      });
+      await ctx.db.insert('members', {
+        userId: caller.userId,
+        projectId: outsideProjectId,
+        role: 'owner',
+      });
+      return await ctx.db.insert('connectors', {
+        projectId: outsideProjectId,
+        name: 'outside-connector',
+      });
+    });
     await expect(
-      t.query(api.apiKeys.findOAuthCaller, { rawToken: 'sbho_first', internalToken }),
-    ).resolves.toEqual({ userId: expect.any(String), projectId, scopes: ['mcp'] });
+      t.query(api.connectors.findConnectorByIdForUser, {
+        internalToken,
+        userId: caller.userId,
+        connectorId: outsideProjectConnectorId,
+        requiredProjectId: caller.projectId,
+      }),
+    ).resolves.toBeNull();
 
     await t.mutation(api.oauthProvider.refreshTokens, {
       refreshTokenHash: hashToken('sbhr_first'),

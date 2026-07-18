@@ -3,6 +3,7 @@ import { PageHeader } from '@superbull/ui';
 import { fetchQuery } from 'convex/nextjs';
 import { api } from '../../../../../convex/_generated/api';
 import { requireProjectForSlug } from '../../../../lib/projects/require-project-for-slug';
+import { ApiKeysSection } from './_components/api-keys-section';
 import { DangerZone } from './_components/danger-zone';
 import { InviteForm } from './_components/invite-form';
 import { InvitesTable } from './_components/invites-table';
@@ -20,9 +21,10 @@ export default async function SettingsPage(props: SettingsPageProps) {
   const canManage = member.role === 'owner' || member.role === 'admin';
 
   const token = await convexAuthNextjsToken();
-  const [members, invites] = await Promise.all([
+  const [members, invites, apiKeys] = await Promise.all([
     fetchQuery(api.projects.listMembers, { projectId: project._id }, { token }),
     fetchQuery(api.invites.listByProject, { projectId: project._id }, { token }),
+    fetchQuery(api.apiKeys.listApiKeys, {}, { token }),
   ]);
 
   return (
@@ -46,6 +48,8 @@ export default async function SettingsPage(props: SettingsPageProps) {
             {invites.length > 0 && <InvitesTable projectSlug={projectSlug} invites={invites} />}
           </section>
         )}
+
+        <ApiKeysSection projectSlug={projectSlug} apiKeys={apiKeys} />
 
         {member.role === 'owner' && (
           <section className="flex flex-col gap-3">

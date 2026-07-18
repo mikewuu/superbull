@@ -16,9 +16,11 @@ Three pieces make it up:
   connector's connection and forwards their event batches into the datastore.
 - **Convex**: the datastore for everything: projects, members, connectors,
   ingested events, error groups, alert rules, dashboards, status page configs.
+- **Queue worker**: schedules alert evaluation and daily digests through Redis
+  and BullMQ.
 
-There's no separate server-side Redis and no long-lived worker process to run
-yourself; the pieces above are all that's needed.
+Run the queue worker alongside the web and gateway processes with
+\`pnpm --filter @superbull/web queue:work\`.
 
 ## Projects
 
@@ -85,8 +87,7 @@ is no queuing: a connector with no live session answers
 
 ## Background jobs
 
-Alert evaluation and digests run as Convex crons, not a separate worker
-process:
+The Redis + BullMQ worker schedules two jobs whose work runs against Convex:
 
 - **evaluate alerts**: every 5 minutes. Evaluates every enabled alert rule
   against recent ingest data and sends an email for each rule that starts or

@@ -15,8 +15,12 @@ Claude Code, one line:
 
 \`\`\`bash
 claude mcp add --transport http superbull https://superbull.com/api/mcp \\
-  --header "Authorization: Bearer $SUPERBULL_API_TOKEN"
+  --header "Authorization: Bearer $SUPERBULL_API_KEY"
 \`\`\`
+
+Create a named API key in your user settings, copy the \`sbh_\` value when it
+is shown, and save it as \`SUPERBULL_API_KEY\` on your machine. The raw key is
+shown once.
 
 Cursor (\`~/.cursor/mcp.json\`) and Claude Desktop
 (\`claude_desktop_config.json\`):
@@ -28,7 +32,7 @@ Cursor (\`~/.cursor/mcp.json\`) and Claude Desktop
       "type": "streamable-http",
       "url": "https://superbull.com/api/mcp",
       "headers": {
-        "Authorization": "Bearer YOUR_SUPERBULL_API_TOKEN"
+        "Authorization": "Bearer YOUR_SBH_API_KEY"
       }
     }
   }
@@ -44,7 +48,7 @@ VS Code (\`.vscode/mcp.json\`):
       "type": "http",
       "url": "https://superbull.com/api/mcp",
       "headers": {
-        "Authorization": "Bearer YOUR_SUPERBULL_API_TOKEN"
+        "Authorization": "Bearer YOUR_SBH_API_KEY"
       }
     }
   }
@@ -57,17 +61,23 @@ exposes.)
 
 ## Auth
 
-Every call must carry \`Authorization: Bearer\` with the deployment's
-\`SUPERBULL_API_TOKEN\`, the same token the management REST API uses. The
-server compares it with a timing-safe check and rejects a missing or wrong
-token with 401 before any tool runs. Authenticated calls are rate limited to
-120 requests/minute in one window shared with the management REST API; over
-it you get a \`429\` with a \`retry-after\` header in seconds.
+SuperBull accepts two bearer credentials:
 
-One caveat, stated plainly: this token is deployment-wide, not per project
-or per user. Anyone holding it can list and act on every connector on the
-deployment. Per-project API keys are planned; until they land, treat
-\`SUPERBULL_API_TOKEN\` like a production credential.
+- A named \`sbh_\` API key belongs to one user. It can reach connectors in
+  projects that user belongs to. You can create more than one key and revoke
+  each one separately in user settings.
+- An \`sbho_\` OAuth access token comes from the PKCE S256 authorization flow.
+  The consent screen asks which project to grant. Refresh tokens rotate when
+  used, and you can disconnect the app from settings.
+
+Clients with remote MCP OAuth support can connect to the server URL directly
+and complete the browser consent flow instead of storing an API key. The OAuth
+grant stays pinned to the project chosen on that screen.
+
+Missing, expired, revoked, or unknown credentials return 401 before a tool
+runs. Authenticated calls are limited to 120 requests/minute per user in one
+window shared with the hosted REST API. Over the limit, the server returns 429
+with a \`retry-after\` header in seconds.
 
 ## Diagnose and retry a failed job
 
@@ -101,6 +111,9 @@ typical run:
 \`pagination\`, and permission flags, trimmed above for readability.)
 
 ## Tools
+
+SuperBull exposes 14 tools: 2 to discover connectors, 5 to inspect queues and
+jobs, and 7 to act on them.
 `;
 
 export const toolHeaders = ['Tool', 'Input', 'Description'];
@@ -108,12 +121,12 @@ export const toolHeaders = ['Tool', 'Input', 'Description'];
 export const toolGroups = [
   {
     title: 'Discover',
-    blurb: 'What is registered with this deployment.',
+    blurb: 'What the signed-in user can reach.',
     rows: [
       [
         'list_connectors',
         '{}',
-        'List every connector in the deployment (id, name, is_connected, created_at); enrollment tokens are never returned',
+        "List connectors across the caller's projects (id, name, is_connected, created_at); enrollment tokens are never returned",
       ],
       [
         'remove_connector',

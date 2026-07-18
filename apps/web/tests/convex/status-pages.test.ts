@@ -219,6 +219,48 @@ describe('statusPages public queries (unauthenticated, interface unchanged)', ()
     });
   });
 
+  it('keeps the newest 250 events by default and rejects limits over 500', async () => {
+    const t = makeTestClient();
+    const { projectId, asMember } = await seedProject(t);
+    const connectorId = await seedConnector(t, projectId);
+    await asMember.mutation(api.statusPages.upsert, {
+      projectId,
+      connectorId,
+      slug: 'uptime-limit',
+      isEnabled: true,
+      title: 'x',
+    });
+
+    for (let index = 0; index < 251; index++) {
+      await insertEvent(t, {
+        projectId,
+        connectorId,
+        uuid: `older-completed-${index}`,
+        type: 'job.completed',
+        queueName: 'q1',
+        ts: tsForDaysAgo(1) + index,
+      });
+    }
+    await insertEvent(t, {
+      projectId,
+      connectorId,
+      uuid: 'newest-failed',
+      type: 'job.failed',
+      queueName: 'q1',
+      ts: tsForDaysAgo(0),
+    });
+
+    const uptime = assertDefined(
+      await t.query(api.statusPages.getPublicUptime, { slug: 'uptime-limit' }),
+    );
+    expect(uptime.overall[indexForDaysAgo(0)]).toMatchObject({ total: 1, rate: 0 });
+    expect(uptime.overall[indexForDaysAgo(1)]).toMatchObject({ total: 249, rate: 1 });
+
+    await expect(
+      t.query(api.statusPages.getPublicUptime, { slug: 'uptime-limit', eventLimit: 501 }),
+    ).rejects.toThrow(/eventLimit must be between 1 and 500/);
+  });
+
   it('scopes overall to configured queues, aggregating them while excluding other queues on the connector', async () => {
     const t = makeTestClient();
     const { projectId, asMember } = await seedProject(t);

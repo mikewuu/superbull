@@ -271,22 +271,25 @@ export const hostedIntro = `
 ## Hosted management API
 
 The hosted app (superbull.com) additionally exposes a small management surface
-under \`/api/...\` on the web app itself. It predates projects: every route
-below authenticates with a single deployment-wide bearer token
-(\`Authorization: Bearer <SUPERBULL_API_TOKEN>\`, timing-safe compared), except
-\`/api/health\`, which is public. This surface is transitional: it still speaks
-in terms of "sources" (the pre-rewrite name for connectors) on the wire, and
-per-project API keys are planned to replace the global token. Authenticated
-calls are rate limited to 120 requests/minute (one window shared with MCP,
-keyed by the token's principal); over it you get \`429 rate_limited\` with a
-\`retry-after\` header in seconds. Connector
-enrollment and event ingest are not part of it: connectors are created in the
-web UI and stream events to the gateway over their WebSocket.
+under \`/api/...\` on the web app itself. Send \`Authorization: Bearer\` with a
+named per-user \`sbh_\` API key or an \`sbho_\` OAuth access token. Create and
+revoke API keys in user settings. OAuth clients use PKCE S256, choose a project
+on the consent screen, and rotate refresh tokens when they exchange them.
+
+Authenticated calls are limited to 120 requests/minute per user. REST and MCP
+share that window. Over the limit, the server returns \`429 rate_limited\` with
+a \`retry-after\` header in seconds. \`/api/health\`, \`/api/openapi.json\`, and
+the OAuth registration and token endpoints are public. Public OAuth endpoints
+use a separate per-IP window.
+
+Connector enrollment and event ingest are not part of this API. Create
+connectors in the web UI; they stream events to the gateway over WebSocket.
 `;
 
 export const hostedHeaders = ['Method', 'Path', 'Query / body', 'Response'];
 export const hostedRows = [
   ['GET', '/api/health', '-', '{ ok: true }, no auth'],
+  ['GET', '/api/openapi.json', '-', 'OpenAPI 3.1 document, no auth'],
   [
     'GET',
     '/api/annotations',
@@ -299,10 +302,30 @@ export const hostedRows = [
     '{ source_id, label, ts | null } (null ts = now)',
     '201, the created annotation',
   ],
+  [
+    'POST',
+    '/api/oauth/register',
+    '{ client_name?, redirect_uris: string[] }',
+    '201, a public OAuth client; no client secret',
+  ],
+  [
+    'POST',
+    '/api/oauth/token',
+    'form or JSON: authorization_code + code_verifier, or refresh_token',
+    '{ access_token, token_type, expires_in, refresh_token, scope }',
+  ],
+  ['POST', '/api/oauth/revoke', 'form: token, client_id', '200 with an empty body'],
 ];
 
 export const hostedOutro = `
 Deploy annotations (\`/api/annotations\`) are the one piece here you may want to
 call from CI: post a label like \`deploy 42\` and it renders as a marker on the
-analytics charts.
+analytics charts. The \`source_id\` field is a connector id. SuperBull returns
+the same not-found response for a missing connector and one outside the
+caller's projects.
+
+OAuth clients start the browser flow at \`/oauth/authorize\`. The user signs
+in, chooses a project, and approves the grant. Access tokens begin with
+\`sbho_\`; refresh tokens begin with \`sbhr_\`. See \`/api/openapi.json\` for
+the machine-readable hosted API contract.
 `;

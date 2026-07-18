@@ -64,7 +64,7 @@ serve({ fetch: app.fetch, port: 3000 });
                                            │
                               ┌────────────▼────────────┐
                               │  apps/web (Vercel)       │
-                              │  workspaces, dashboards, │
+                              │  projects, dashboards,   │
                               │  alerts, MCP  (Convex)   │
                               └───────────┬──────────────┘
                                           │
@@ -118,8 +118,8 @@ disconnected, live dashboard actions against it fail immediately instead of queu
 ## The hosted app
 
 The hosted app (`apps/web`) is a Next.js app deployed to Vercel. Sign in with Google; a
-personal workspace is created for you automatically, and owners/admins can invite teammates
-by email (roles: owner/admin/member). Everything it stores, from workspaces and connectors
+personal project is created for you automatically, and owners/admins can invite teammates
+by email (roles: owner/admin/member). Everything it stores, from projects and connectors
 to ingested events, alert rules, dashboards, and status page configs, lives in **Convex**,
 not Postgres.
 
@@ -131,9 +131,9 @@ Architecture:
   connector opens its one outbound connection to. It authenticates connectors by token
   hash, forwards their event batches into Convex, and exposes an internal RPC API
   (`POST /internal/rpc`) for relaying dashboard requests to a live connector.
-- **Convex**: the datastore, plus the `evaluate alerts` (every 5 minutes) and
-  `send daily digest` (daily 09:00 UTC) crons for alert emails. No separate worker process
-  to run.
+- **Convex**: the datastore and the alert/digest actions.
+- **Queue worker**: schedules alert evaluation every 5 minutes and the daily digest at
+  09:00 UTC through Redis and BullMQ (`pnpm --filter @superbull/web queue:work`).
 
 Env vars (names only):
 
@@ -141,22 +141,22 @@ Env vars (names only):
 | --- | --- | --- |
 | `NEXT_PUBLIC_CONVEX_URL` | web | The Convex deployment the web app reads/writes against |
 | `CONVEX_INTERNAL_TOKEN` | web, gateway, Convex | Shared secret sent with internal Convex calls |
-| `SUPERBULL_API_TOKEN` | web | Bearer token guarding the management REST API and the MCP endpoint |
 | `CONVEX_URL` | gateway | The Convex deployment the gateway records events into |
 | `GATEWAY_URL` | web | Where the web app reaches the gateway's internal RPC API |
 | `GATEWAY_INTERNAL_TOKEN` | web, gateway | Bearer token guarding the gateway's internal RPC API |
+| `REDIS_URL` | web, queue worker | Redis for per-user rate windows and BullMQ jobs |
 | `PORT` | gateway | Listen port (default 4650) |
 | `RESEND_API_KEY`, `EMAIL_FROM` | Convex | Alert/digest email delivery (emails are skipped when unset) |
 
 ## MCP
 
 The hosted app exposes an MCP server at `POST /api/mcp` (streamable HTTP, SSE disabled).
-Auth: `Authorization: Bearer <SUPERBULL_API_TOKEN>`, timing-safe compared and required on
-every call; an unset `SUPERBULL_API_TOKEN` rejects all requests.
+Auth: `Authorization: Bearer <credential>`, using a named per-user `sbh_` API key or a
+project-bound `sbho_` OAuth access token.
 
 ```bash
 claude mcp add --transport http superbull https://superbull.com/api/mcp \
-  --header "Authorization: Bearer $SUPERBULL_API_TOKEN"
+  --header "Authorization: Bearer $SUPERBULL_API_KEY"
 ```
 
 14 tools, all relayed to the connector named by `connector_id`:
@@ -203,7 +203,7 @@ pnpm --filter @superbull/web e2e    # hosted two-hop e2e: convex + gateway + con
 | `@superbull/bun` | Bun server adapter |
 | `@superbull/nestjs` | NestJS module |
 | `@superbull/test-utils` | Shared test helpers (private) |
-| `apps/web` | The hosted app: workspaces, per-connector dashboards, REST + MCP (private) |
+| `apps/web` | The hosted app: projects, per-connector dashboards, REST + MCP (private) |
 | `apps/gateway` | Always-on WebSocket service connectors connect out to (private) |
 | `apps/dev` | Local demo/e2e harness for the standalone adapters (private) |
 

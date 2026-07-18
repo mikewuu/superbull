@@ -105,43 +105,73 @@ describe('connectors (user-facing, project-scoped)', () => {
   });
 });
 
-describe('connectors (TRANSITIONAL internalToken MCP surface)', () => {
-  it('list returns every connector and findById resolves one', async () => {
+describe('connectors (internal user-scoped API surface)', () => {
+  it('lists and resolves connectors only across the caller projects', async () => {
     const t = makeTestClient();
-    const { projectId } = await seedProject(t);
-    const connectorId = await seedConnector(t, projectId, { name: 'mcp-connector' });
+    const caller = await seedProject(t);
+    const foreign = await seedProject(t);
+    const connectorId = await seedConnector(t, caller.projectId, { name: 'mcp-connector' });
+    const foreignConnectorId = await seedConnector(t, foreign.projectId);
 
-    const all = await t.query(api.connectors.list, { internalToken: INTERNAL_TOKEN });
+    const all = await t.query(api.connectors.listConnectorsForUser, {
+      internalToken: INTERNAL_TOKEN,
+      userId: caller.userId,
+    });
     expect(all).toHaveLength(1);
 
-    const found = await t.query(api.connectors.findById, {
+    const found = await t.query(api.connectors.findConnectorByIdForUser, {
       internalToken: INTERNAL_TOKEN,
-      id: connectorId,
+      userId: caller.userId,
+      connectorId,
     });
     expect(found?.name).toBe('mcp-connector');
+
+    const hidden = await t.query(api.connectors.findConnectorByIdForUser, {
+      internalToken: INTERNAL_TOKEN,
+      userId: caller.userId,
+      connectorId: foreignConnectorId,
+    });
+    expect(hidden).toBeNull();
   });
 
-  it('list/findById/remove reject the wrong internal token', async () => {
+  it('listForUser, findByIdForUser, and removeForUser reject the wrong internal token', async () => {
     const t = makeTestClient();
-    await seedProject(t);
+    const { userId } = await seedProject(t);
 
-    await expect(t.query(api.connectors.list, { internalToken: 'wrong' })).rejects.toThrow();
     await expect(
-      t.query(api.connectors.findById, { internalToken: 'wrong', id: 'not-a-real-id' }),
+      t.query(api.connectors.listConnectorsForUser, { internalToken: 'wrong', userId }),
     ).rejects.toThrow();
     await expect(
-      t.mutation(api.connectors.remove, { internalToken: 'wrong', id: 'not-a-real-id' }),
+      t.query(api.connectors.findConnectorByIdForUser, {
+        internalToken: 'wrong',
+        userId,
+        connectorId: 'not-a-real-id',
+      }),
+    ).rejects.toThrow();
+    await expect(
+      t.mutation(api.connectors.removeConnectorForUser, {
+        internalToken: 'wrong',
+        userId,
+        connectorId: 'not-a-real-id',
+      }),
     ).rejects.toThrow();
   });
 
-  it('remove deletes the connector', async () => {
+  it('removeForUser deletes a connector the caller can access', async () => {
     const t = makeTestClient();
-    const { projectId } = await seedProject(t);
+    const { userId, projectId } = await seedProject(t);
     const connectorId = await seedConnector(t, projectId);
 
-    await t.mutation(api.connectors.remove, { internalToken: INTERNAL_TOKEN, id: connectorId });
+    await t.mutation(api.connectors.removeConnectorForUser, {
+      internalToken: INTERNAL_TOKEN,
+      userId,
+      connectorId,
+    });
 
-    const all = await t.query(api.connectors.list, { internalToken: INTERNAL_TOKEN });
+    const all = await t.query(api.connectors.listConnectorsForUser, {
+      internalToken: INTERNAL_TOKEN,
+      userId,
+    });
     expect(all).toHaveLength(0);
   });
 });

@@ -12,9 +12,9 @@ import type * as access from "../access.js";
 import type * as alertNotifications from "../alertNotifications.js";
 import type * as alerts from "../alerts.js";
 import type * as analytics from "../analytics.js";
+import type * as apiKeys from "../apiKeys.js";
 import type * as auth from "../auth.js";
 import type * as connectors from "../connectors.js";
-import type * as crons from "../crons.js";
 import type * as dashboards from "../dashboards.js";
 import type * as deployAnnotations from "../deployAnnotations.js";
 import type * as emails_alertEmail from "../emails/alertEmail.js";
@@ -27,9 +27,10 @@ import type * as errors from "../errors.js";
 import type * as http from "../http.js";
 import type * as ingest from "../ingest.js";
 import type * as invites from "../invites.js";
+import type * as oauthProvider from "../oauthProvider.js";
+import type * as projects from "../projects.js";
 import type * as statusPages from "../statusPages.js";
 import type * as users from "../users.js";
-import type * as projects from "../projects.js";
 
 import type {
   ApiFromModules,
@@ -42,9 +43,9 @@ declare const fullApi: ApiFromModules<{
   alertNotifications: typeof alertNotifications;
   alerts: typeof alerts;
   analytics: typeof analytics;
+  apiKeys: typeof apiKeys;
   auth: typeof auth;
   connectors: typeof connectors;
-  crons: typeof crons;
   dashboards: typeof dashboards;
   deployAnnotations: typeof deployAnnotations;
   "emails/alertEmail": typeof emails_alertEmail;
@@ -57,9 +58,10 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   ingest: typeof ingest;
   invites: typeof invites;
+  oauthProvider: typeof oauthProvider;
+  projects: typeof projects;
   statusPages: typeof statusPages;
   users: typeof users;
-  projects: typeof projects;
 }>;
 
 /**

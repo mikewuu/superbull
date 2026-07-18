@@ -13,6 +13,54 @@ export default defineSchema({
     createdAt: v.number(),
   }).index('by_slug', ['slug']),
 
+  apiKeys: defineTable({
+    userId: v.id('users'),
+    name: v.string(),
+    keyHash: v.string(),
+    keyPrefix: v.string(),
+    lastUsedAt: v.optional(v.number()),
+    revokedAt: v.optional(v.number()),
+  })
+    .index('by_key_hash', ['keyHash'])
+    .index('by_user', ['userId']),
+
+  oauthClients: defineTable({
+    clientId: v.string(),
+    name: v.string(),
+    redirectUris: v.array(v.string()),
+  }).index('by_client_id', ['clientId']),
+
+  oauthAuthCodes: defineTable({
+    codeHash: v.string(),
+    clientId: v.string(),
+    userId: v.id('users'),
+    projectId: v.id('projects'),
+    redirectUri: v.string(),
+    codeChallenge: v.string(),
+    scopes: v.array(v.string()),
+    expiresAt: v.number(),
+    usedAt: v.optional(v.number()),
+  })
+    .index('by_code_hash', ['codeHash'])
+    .index('by_user', ['userId'])
+    .index('by_project', ['projectId']),
+
+  oauthTokens: defineTable({
+    accessTokenHash: v.string(),
+    refreshTokenHash: v.string(),
+    userId: v.id('users'),
+    projectId: v.id('projects'),
+    clientId: v.string(),
+    scopes: v.array(v.string()),
+    expiresAt: v.number(),
+    refreshExpiresAt: v.number(),
+    revokedAt: v.optional(v.number()),
+  })
+    .index('by_access_token_hash', ['accessTokenHash'])
+    .index('by_refresh_token_hash', ['refreshTokenHash'])
+    .index('by_user', ['userId'])
+    .index('by_project', ['projectId']),
+
   members: defineTable({
     projectId: v.id('projects'),
     userId: v.id('users'),

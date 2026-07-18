@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const SUPERBULL_API_TOKEN = 'rate-limit-test-token';
+const apiKey = 'sbh_rate-limit-test-token';
+const userId = 'user-1';
 
 // Deterministic in-memory redis: the suite runs without infra, and the test
 // drives the limit by seeding counters directly.
@@ -24,10 +25,18 @@ vi.mock('../src/lib/deploy-annotations/list-deploy-annotations', () => ({
   },
 }));
 
+vi.mock('../src/lib/auth/find-caller', () => ({
+  findCaller: async (rawToken: string) =>
+    rawToken === apiKey ? { userId, projectId: null } : null,
+}));
+
+vi.mock('../src/lib/connectors/find-connector-by-id-for-user', () => ({
+  findConnectorByIdForUser: async (args: { connectorId: string }) => ({ id: args.connectorId }),
+}));
+
 beforeEach(() => {
   vi.resetModules();
   counters.clear();
-  vi.stubEnv('SUPERBULL_API_TOKEN', SUPERBULL_API_TOKEN);
 });
 
 afterEach(() => {
@@ -36,7 +45,7 @@ afterEach(() => {
 
 function listAnnotationsRequest(): NextRequest {
   return new NextRequest('http://localhost/api/annotations?source_id=source-1', {
-    headers: { authorization: `Bearer ${SUPERBULL_API_TOKEN}` },
+    headers: { authorization: `Bearer ${apiKey}` },
   });
 }
 
@@ -44,7 +53,7 @@ function mcpRequest(): Request {
   return new Request('http://localhost/api/mcp', {
     method: 'POST',
     headers: {
-      authorization: `Bearer ${SUPERBULL_API_TOKEN}`,
+      authorization: `Bearer ${apiKey}`,
       accept: 'application/json, text/event-stream',
       'content-type': 'application/json',
     },
@@ -54,11 +63,11 @@ function mcpRequest(): Request {
 
 function exhaustRateLimit() {
   const window = Math.floor(Date.now() / 60_000);
-  counters.set(`api-rate:hub:${window}`, 120);
-  counters.set(`api-rate:hub:${window + 1}`, 120);
+  counters.set(`api-rate:${userId}:${window}`, 120);
+  counters.set(`api-rate:${userId}:${window + 1}`, 120);
 }
 
-describe('shared hub rate limit', () => {
+describe('shared per-user rate limit', () => {
   it('lets an authenticated request through under the limit', async () => {
     const route = await import('../src/app/api/annotations/route');
 

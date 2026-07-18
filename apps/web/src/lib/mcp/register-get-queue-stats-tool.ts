@@ -1,9 +1,10 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { findConnectorByIdLegacy } from '../connectors/find-connector-by-id-legacy';
+import { findConnectorByIdForUser } from '../connectors/find-connector-by-id-for-user';
 import { callGatewayRpc } from '../gateway/call-gateway-rpc';
 import { describeForwardFailure } from './describe-forward-failure';
 import { errorResult } from './error-result';
+import { getCaller } from './get-caller';
 import { jsonResult } from './json-result';
 
 export function registerGetQueueStatsTool(server: McpServer): void {
@@ -16,9 +17,14 @@ export function registerGetQueueStatsTool(server: McpServer): void {
       inputSchema: { connector_id: z.string(), queue_name: z.string() },
       annotations: { readOnlyHint: true },
     },
-    async (args) => {
+    async (args, extra) => {
       try {
-        const connector = await findConnectorByIdLegacy(args.connector_id);
+        const caller = getCaller(extra.authInfo);
+        const connector = await findConnectorByIdForUser({
+          userId: caller.userId,
+          connectorId: args.connector_id,
+          requiredProjectId: caller.projectId,
+        });
         if (!connector) {
           return errorResult('connector not found');
         }

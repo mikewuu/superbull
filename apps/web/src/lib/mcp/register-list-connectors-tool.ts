@@ -1,26 +1,24 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { listConnectorsLegacy } from '../connectors/list-connectors-legacy';
+import { listConnectorsForUser } from '../connectors/list-connectors-for-user';
 import type { Connector } from '../connectors/types';
 import { getConnectorStatusFromGateway } from '../gateway/get-connector-status';
 import { errorResult } from './error-result';
+import { getCaller } from './get-caller';
 import { jsonResult } from './json-result';
 
-// TODO(7.2e): the global SUPERBULL_API_TOKEN currently lists connectors
-// across every project on the deployment (matching the pre-multi-tenant
-// hub API). Pending the owner's auth-model decision, MCP auth should move to
-// per-project API keys and scope this listing accordingly.
 export function registerListConnectorsTool(server: McpServer): void {
   server.registerTool(
     'list_connectors',
     {
       title: 'List connectors',
-      description: 'List every registered connector, without their bearer tokens.',
+      description: 'List every connector in your projects, without their bearer tokens.',
       inputSchema: {},
       annotations: { readOnlyHint: true },
     },
-    async () => {
+    async (_args, extra) => {
       try {
-        const connectors = await listConnectorsLegacy();
+        const caller = getCaller(extra.authInfo);
+        const connectors = await listConnectorsForUser(caller.userId, caller.projectId);
         return jsonResult({
           connectors: await Promise.all(
             connectors.map(async (connector) => ({

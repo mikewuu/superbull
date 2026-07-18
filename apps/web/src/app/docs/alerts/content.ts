@@ -2,7 +2,7 @@ export const intro = `
 # Alerts
 
 Alert rules live in your project and are evaluated against ingested events
-every 5 minutes by a Convex cron. Create rules from the project's **Alerts**
+every 5 minutes by the BullMQ worker. Create rules from the project's **Alerts**
 page; there's no REST/MCP route for rule management yet.
 
 A rule is scoped to one connector or to every connector in the project, and

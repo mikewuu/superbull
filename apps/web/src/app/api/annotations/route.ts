@@ -1,31 +1,48 @@
-import { buildRoute } from '@nextastic/http';
+import { NotFoundException, buildRoute } from '@nextastic/http';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { authenticateHubToken } from '../../../lib/auth/authenticate-hub-token';
+import { authenticateCaller } from '../../../lib/auth/authenticate-caller';
+import { findConnectorByIdForUser } from '../../../lib/connectors/find-connector-by-id-for-user';
 import { createDeployAnnotation } from '../../../lib/deploy-annotations/create-deploy-annotation';
 import { listDeployAnnotations } from '../../../lib/deploy-annotations/list-deploy-annotations';
 
-const annotationSchema = z.object({
+export const annotationSchema = z.object({
   id: z.string(),
   source_id: z.string(),
   label: z.string(),
   ts: z.number(),
 });
 
-// TRANSITIONAL — global SUPERBULL_API_TOKEN hub API. Round 3 gives this
-// per-project API keys. `source_id` on the wire is a connector id.
+export const getQuerySchema = z.object({
+  source_id: z.string(),
+  from_ts: z.string().nullable().optional(),
+  to_ts: z.string().nullable().optional(),
+});
+
+export const getResponseSchema = z.object({ annotations: z.array(annotationSchema) });
+
+export const postBodySchema = z.object({
+  source_id: z.string(),
+  label: z.string().min(1),
+  ts: z.number().nullable(),
+});
+
 export const GET = buildRoute({
-  query: z.object({
-    source_id: z.string(),
-    from_ts: z.string().nullable().optional(),
-    to_ts: z.string().nullable().optional(),
-  }),
-  response: z.object({ annotations: z.array(annotationSchema) }),
+  query: getQuerySchema,
+  response: getResponseSchema,
 })
-  .use(authenticateHubToken)
+  .use(authenticateCaller)
   .handle(async (req) => {
-    const annotations = await listDeployAnnotations({
+    const connector = await findConnectorByIdForUser({
+      userId: req.userId,
       connectorId: req.query.source_id,
+      requiredProjectId: req.projectId,
+    });
+    if (!connector) {
+      throw new NotFoundException({ type: 'not_found', message: 'Connector not found' });
+    }
+    const annotations = await listDeployAnnotations({
+      connectorId: connector.id,
       fromTs: req.query.from_ts ? Number(req.query.from_ts) : undefined,
       toTs: req.query.to_ts ? Number(req.query.to_ts) : undefined,
     });
@@ -40,17 +57,21 @@ export const GET = buildRoute({
   });
 
 export const POST = buildRoute({
-  body: z.object({
-    source_id: z.string(),
-    label: z.string().min(1),
-    ts: z.number().nullable(),
-  }),
+  body: postBodySchema,
   response: annotationSchema,
 })
-  .use(authenticateHubToken)
+  .use(authenticateCaller)
   .handle(async (req) => {
-    const annotation = await createDeployAnnotation({
+    const connector = await findConnectorByIdForUser({
+      userId: req.userId,
       connectorId: req.body.source_id,
+      requiredProjectId: req.projectId,
+    });
+    if (!connector) {
+      throw new NotFoundException({ type: 'not_found', message: 'Connector not found' });
+    }
+    const annotation = await createDeployAnnotation({
+      connectorId: connector.id,
       label: req.body.label,
       ts: req.body.ts ?? Date.now(),
     });

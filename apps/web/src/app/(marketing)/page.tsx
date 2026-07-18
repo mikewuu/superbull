@@ -19,7 +19,7 @@ const githubUrl = 'https://github.com/mikewu/superbull';
 const faqs = [
   {
     q: 'Can an agent operate my queues directly?',
-    a: "Yes. An agent with an MCP token can watch your queues, open a failed job, and read the stack trace. It can retry that job itself, or pause a queue that's failing fast: the same 7 tools you'd otherwise click through the board for.",
+    a: "Yes. An agent with an MCP token can watch your queues, open a failed job, and read the stack trace. It can retry that job itself, or pause a queue that's failing fast. SuperBull exposes 14 MCP tools for the work you'd otherwise do through the board.",
   },
   {
     q: 'Do I need the hosted app to use SuperBull?',
@@ -218,7 +218,7 @@ export default function LandingPage(): React.ReactElement {
                     <span className="text-content-muted">the board too.</span>
                   </h2>
                   <p className="mt-5 max-w-md text-lg leading-8 text-content-default">
-                    The hub exposes 7 MCP tools over one authenticated endpoint: list connectors,
+                    The hub exposes 14 MCP tools over one authenticated endpoint: list connectors,
                     watch queues, open a failed job, read its stack trace, retry it, or pause a
                     queue that&apos;s failing fast. Same actions as the board, reachable by anything
                     that speaks MCP.

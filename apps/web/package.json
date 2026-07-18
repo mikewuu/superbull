@@ -10,13 +10,15 @@
     "test": "vitest run",
     "e2e": "playwright test",
     "convex:dev": "convex dev",
-    "convex:codegen": "convex codegen"
+    "convex:codegen": "convex codegen",
+    "queue:work": "tsx --env-file-if-exists=.env.local src/scripts/start-queue-worker.ts"
   },
   "dependencies": {
     "@auth/core": "^0.41.2",
     "@convex-dev/auth": "^0.0.94",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "@nextastic/http": "^7.0.0",
+    "@nextastic/queue": "^2.3.3",
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.0.10",
     "@superbull/protocol": "workspace:*",
