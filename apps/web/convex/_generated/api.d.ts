@@ -15,6 +15,7 @@ import type * as analytics from "../analytics.js";
 import type * as apiKeys from "../apiKeys.js";
 import type * as auth from "../auth.js";
 import type * as connectors from "../connectors.js";
+import type * as crons from "../crons.js";
 import type * as dashboards from "../dashboards.js";
 import type * as deployAnnotations from "../deployAnnotations.js";
 import type * as emails_alertEmail from "../emails/alertEmail.js";
@@ -46,6 +47,7 @@ declare const fullApi: ApiFromModules<{
   apiKeys: typeof apiKeys;
   auth: typeof auth;
   connectors: typeof connectors;
+  crons: typeof crons;
   dashboards: typeof dashboards;
   deployAnnotations: typeof deployAnnotations;
   "emails/alertEmail": typeof emails_alertEmail;

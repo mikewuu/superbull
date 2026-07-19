@@ -1,9 +1,20 @@
 import { v } from 'convex/values';
+import { internal } from './_generated/api';
 import type { Id } from './_generated/dataModel';
-import { mutation, query } from './_generated/server';
+import { internalMutation, mutation, query } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
 import { requireInternalToken } from './access';
 import { upsertErrorGroup } from './errors';
+
+// Raw ingest events are dropped after this window — no rollups, we just lose
+// the per-job detail past 7 days. Retention is measured on `_creationTime`
+// (when the row landed in Convex), not the connector-supplied `ts`, so clock
+// skew on a customer's box can neither keep rows alive nor evict them early.
+const INGEST_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+
+// Rows deleted per purge transaction. Well under Convex's 16k-writes /
+// 16 MiB-per-mutation limit; purgeExpired reschedules itself until drained.
+const PURGE_BATCH_SIZE = 4000;
 
 interface NormalizedEvent {
   uuid: string;
@@ -108,6 +119,33 @@ export const recordBatch = mutation({
     }));
 
     return await insertEvents(ctx, connector.projectId, args.connectorId, events);
+  },
+});
+
+// Deletes one bounded batch of events older than the retention window, then
+// reschedules itself when a full batch came back (i.e. more remain) so a single
+// trigger drains the whole backlog regardless of the cron interval. Ordered by
+// `_creationTime` via the built-in `by_creation_time` index, oldest first.
+// internalMutation: reachable only from Convex itself (the cron in crons.ts and
+// this self-schedule), never from a client — so no internalToken gate needed.
+export const purgeExpired = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const cutoff = Date.now() - INGEST_RETENTION_MS;
+    const expired = await ctx.db
+      .query('ingestEvents')
+      .withIndex('by_creation_time', (q) => q.lt('_creationTime', cutoff))
+      .take(PURGE_BATCH_SIZE);
+
+    for (const doc of expired) {
+      await ctx.db.delete(doc._id);
+    }
+
+    if (expired.length === PURGE_BATCH_SIZE) {
+      await ctx.scheduler.runAfter(0, internal.ingest.purgeExpired, {});
+    }
+
+    return { deleted: expired.length };
   },
 });
 
