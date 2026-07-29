@@ -14,3 +14,6 @@ test-results/
 
 # generated landing-asset intermediates (fal outputs; finals live in mascot/ video/ logos/)
 apps/web/public/landing/raw/
+
+# lane worktrees live inside the repo, on its disk (chief order 2026-07-29)
+.worktrees/
